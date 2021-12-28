@@ -2,10 +2,10 @@ import os
 import sys
 
 import pygame
+from copy import deepcopy
 
 all_sprites = pygame.sprite.Group()
 tiles_group = pygame.sprite.Group()
-player_group = pygame.sprite.Group()
 images_group = pygame.sprite.Group()
 base_group = pygame.sprite.Group()
 current = False
@@ -50,6 +50,8 @@ tile_width = tile_height = 18
 class Tile(pygame.sprite.Sprite):
     def __init__(self, tile_type, pos_x, pos_y, groups=(tiles_group, all_sprites)):
         super().__init__(*groups)
+        self.cords = [pos_x, pos_y]
+        #print(self.cords)
         self.image = tile_images[tile_type]
         self.rect = self.image.get_rect().move(
             tile_width * pos_x + 50, tile_height * pos_y + 50)
@@ -112,6 +114,8 @@ class Board:
             return None
         if mouse_pos[1] > self.cell_size * self.height + self.top:
             return None
+        if mouse_pos[0] < self.left or mouse_pos[1] < self.top:
+            return None
         return (mouse_pos[0] - self.left) // self.cell_size, (mouse_pos[1] - self.top) // self.cell_size
 
     def on_click(self, cell_coords, arr):
@@ -126,25 +130,18 @@ class Board:
                 b, a = self.height // 2 + i, self.width // 2 + j
                 if i == -2 and j == -4:
                     Tile(values['1'], a, b, (base_group,))
-                    # self.board[self.height // 2 + i][self.width // 2 + j] = '1'
                 elif i == -2 and j == 3:
                     Tile(values['2'], a, b, (base_group,))
-                    # self.board[self.height // 2 + i][self.width // 2 + j] = '2'
                 elif i == 1 and j == 3:
                     Tile(values['4'], a, b, (base_group,))
-                    # self.board[self.height // 2 + i][self.width // 2 + j] = '4'
                 elif i == 1 and j == -4:
                     Tile(values['3'], a, b, (base_group,))
-                    # self.board[self.height // 2 + i][self.width // 2 + j] = '3'
                 elif i in [-2, 1]:
                     Tile(values['-'], a, b, (base_group,))
-                    # self.board[self.height // 2 + i][self.width // 2 + j] = '-'
                 elif j in [-4, 3]:
                     Tile(values['|'], a, b, (base_group,))
-                    # self.board[self.height // 2 + i][self.width // 2 + j] = '|'
                 else:
                     Tile(values['.'], a, b, (base_group,))
-                    # self.board[self.height // 2 + i][self.width // 2 + j] = '.'
 
     def size_event(self, event_num):
         if event_num == 0:
@@ -154,6 +151,8 @@ class Board:
             self.width += 1
             self.board = [elem + [' '] for elem in self.board]
         elif event_num == 2:
+            for elem in tiles_group:
+                print(elem.cords)
             self.width -= 1
             self.board = [elem[:-1] for elem in self.board]
 
@@ -164,6 +163,33 @@ class Board:
             self.height -= 1
             self.board = self.board[:-1]
         self.center()
+
+    def save_file(self, filename):
+        if filename + 'txt' not in os.listdir('levels'):
+            file = open(f'levels/{filename}.txt', mode='w', encoding='utf-8')
+            board = deepcopy(self.board)
+
+            for i in [-2, -1, 0, 1]:
+                for j in [-4, -3, -2, -1, 0, 1, 2, 3]:
+                    b, a = self.height // 2 + i, self.width // 2 + j
+                    if i == -2 and j == -4:
+                        board[b][a] = '1'
+                    elif i == -2 and j == 3:
+                        board[b][a] = '2'
+                    elif i == 1 and j == 3:
+                        board[b][a] = '4'
+                    elif i == 1 and j == -4:
+                        board[b][a] = '3'
+                    elif i in [-2, 1]:
+                        board[b][a] = '-'
+                    elif j in [-4, 3]:
+                        board[b][a] = '|'
+                    else:
+                        board[b][a] = '.'
+
+            for elem in board:
+                print(''.join(list(map(lambda x: '.' if x == ' ' else x, elem))), file=file)
+            file.close()
 
 
 class Images(pygame.sprite.Sprite):
@@ -215,6 +241,32 @@ Arrows('down.png', 560, 90)
 Arrows('up.png', 725, 55)
 Arrows('down.png', 725, 90)
 
+input_box = pygame.Rect(560, 250, 200, 50)
+button = pygame.Rect(600, 330, 120, 40)
+
+
+def save_file(text):
+    pygame.draw.rect(screen, (50, 50, 50), input_box, width=0)
+    pygame.draw.rect(screen, (25, 25, 25), button, width=0)
+
+    font = pygame.font.Font(None, 30)
+
+    text1 = font.render('Назовите карту', True, (255, 255, 0))
+    text_x = 580
+    text_y = 220
+    screen.blit(text1, (text_x, text_y))
+
+    font = pygame.font.Font(None, 25)
+    text = font.render(text, True, (255, 255, 0))
+    text_x = 570
+    text_y = 265
+    screen.blit(text, (text_x, text_y))
+
+    text = font.render('Сохранить', True, (255, 255, 0))
+    text_x = 615
+    text_y = 340
+    screen.blit(text, (text_x, text_y))
+
 
 def arrows(pos_x, pos_y):
     a = 0 if pos_x in range(560, 595) else 1 if pos_x in range(725, 760) else -1
@@ -236,11 +288,17 @@ if __name__ == '__main__':
     for elem in tile_images:
         Images(elem, a // 2, a % 2)
         a += 1
+    click, text, position = False, '', -1
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
             if event.type == pygame.MOUSEBUTTONDOWN:
+                click = input_box.collidepoint(event.pos)
+
+                if button.collidepoint(event.pos):
+                    board.save_file(text)
+
                 if cords(event.pos) is not None:
                     current = dct[list(tile_images.keys())[cords(event.pos)]]
                 if current:
@@ -248,25 +306,37 @@ if __name__ == '__main__':
 
                 if arrows(event.pos[0], event.pos[1]) is not None:
                     a = arrows(event.pos[0], event.pos[1])
-                    board.size_event(a)
-                    number1 = number1 + 1 if a == 0 else number1 - 1 if a == 2 else number1
-                    number2 = number2 + 1 if a == 1 else number2 - 1 if a == 3 else number2
+                    bool1 = a == 0 and number1 == 27
+                    bool2 = a == 1 and number2 == 31
+                    bool3 = a == 2 and number1 == 10
+                    bool4 = a == 3 and number2 == 6
+                    if not bool1 and not bool2 and not bool3 and not bool4:
+                        board.size_event(a)
+
+                        number1 = number1 + 1 if a == 0 else number1 - 1 if a == 2 else number1
+                        number2 = number2 + 1 if a == 1 else number2 - 1 if a == 3 else number2
 
                 player, level_x, level_y = generate_level([''.join(elem) for elem in board.board])
                 a = 0
                 for elem in tile_images:
                     Images(elem, a // 2, a % 2)
                     a += 1
+            if event.type == pygame.KEYDOWN:
+                if click:
+                    if event.key == pygame.K_RETURN:
+                        text = ''
+                    elif event.key == pygame.K_BACKSPACE:
+                        text = text[:-1]
+                    else:
+                        text += event.unicode if len(text) <= 15 else ''
         screen.fill((0, 0, 0))
         board.render(screen)
         pygame.draw.rect(screen, (50, 50, 50), (800, 20, 180, 610))
-        all_sprites.draw(screen)
         tiles_group.draw(screen)
-        player_group.draw(screen)
         images_group.draw(screen)
         draw(screen, number1, number2)
         arrows_group.draw(screen)
         base_group.draw(screen)
-
+        save_file(text + '|' if click else text)
         pygame.display.flip()
     pygame.quit()
