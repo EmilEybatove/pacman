@@ -9,6 +9,7 @@ tiles_group = pygame.sprite.Group()
 images_group = pygame.sprite.Group()
 base_group = pygame.sprite.Group()
 current = False
+saved = False
 
 
 def load_image(name, colorkey=None):
@@ -32,7 +33,9 @@ tile_images = {
     '2': load_image('2.png'),
     '3': load_image('4.png'),
     '4': load_image('3.png'),
-    'empty': load_image('empty.png')}
+    'empty': load_image('empty.png'),
+    'pacman': load_image('pacman.png'),
+    'energo': load_image('energo.png')}
 
 dct = {
     'vertical': '|',
@@ -41,7 +44,9 @@ dct = {
     '2': '2',
     '3': '3',
     '4': '4',
-    'empty': '.'
+    'empty': '.',
+    'pacman': '@',
+    'energo': '*'
 }
 
 tile_width = tile_height = 18
@@ -51,20 +56,22 @@ class Tile(pygame.sprite.Sprite):
     def __init__(self, tile_type, pos_x, pos_y, groups=(tiles_group, all_sprites)):
         super().__init__(*groups)
         self.cords = [pos_x, pos_y]
-        #print(self.cords)
         self.image = tile_images[tile_type]
         self.rect = self.image.get_rect().move(
             tile_width * pos_x + 50, tile_height * pos_y + 50)
 
 
 values = {
-    '.': 'empty',
     '|': 'vertical',
     '-': 'horisontal',
     '1': '1',
     '2': '2',
     '3': '3',
     '4': '4',
+    '.': 'empty',
+    '@': 'pacman',
+    '*': 'energo'
+
 }
 
 
@@ -106,15 +113,27 @@ class Board:
                 pygame.draw.rect(screen, (255, 255, 255), (a, b, self.cell_size, self.cell_size), width=1)
 
     def get_click(self, mouse_pos, arr):
+        global saved
+        if arr == '@' and sum(map(lambda x: x.count('@'), self.board)) == 1:
+            return None
+        if arr == '*' and sum(map(lambda x: x.count('*'), self.board)) == 4:
+            return None
         cell = self.get_cell(mouse_pos)
+        if cell is not None:
+            if self.width // 2 - 4 <= cell[0] <= self.width // 2 + 3:
+                if self.height // 2 - 2 <= cell[1] <= self.height // 2 + 1:
+                    return None
+        if cell is None:
+            return None
         self.on_click(cell, arr)
+        saved = False
 
     def get_cell(self, mouse_pos):
-        if mouse_pos[0] > self.cell_size * self.width + self.left:
+        if mouse_pos[0] >= self.cell_size * self.width + self.left:
             return None
-        if mouse_pos[1] > self.cell_size * self.height + self.top:
+        if mouse_pos[1] >= self.cell_size * self.height + self.top:
             return None
-        if mouse_pos[0] < self.left or mouse_pos[1] < self.top:
+        if mouse_pos[0] <= self.left or mouse_pos[1] <= self.top:
             return None
         return (mouse_pos[0] - self.left) // self.cell_size, (mouse_pos[1] - self.top) // self.cell_size
 
@@ -151,9 +170,10 @@ class Board:
             self.width += 1
             self.board = [elem + [' '] for elem in self.board]
         elif event_num == 2:
-            for elem in tiles_group:
-                print(elem.cords)
             self.width -= 1
+            for elem in tiles_group:
+                if elem.cords[0] == self.width:
+                    tiles_group.remove(elem)
             self.board = [elem[:-1] for elem in self.board]
 
         elif event_num == 1:
@@ -161,11 +181,14 @@ class Board:
             self.board.append([' '] * self.width)
         elif event_num == 3:
             self.height -= 1
+            for elem in tiles_group:
+                if elem.cords[1] == self.height:
+                    tiles_group.remove(elem)
             self.board = self.board[:-1]
         self.center()
 
     def save_file(self, filename):
-        if filename + 'txt' not in os.listdir('levels'):
+        if filename + '.txt' not in os.listdir('levels'):
             file = open(f'levels/{filename}.txt', mode='w', encoding='utf-8')
             board = deepcopy(self.board)
 
@@ -190,6 +213,9 @@ class Board:
             for elem in board:
                 print(''.join(list(map(lambda x: '.' if x == ' ' else x, elem))), file=file)
             file.close()
+            return True
+        else:
+            return False
 
 
 class Images(pygame.sprite.Sprite):
@@ -200,6 +226,18 @@ class Images(pygame.sprite.Sprite):
         self.rect = self.image.get_rect().move(835 if a == 0 else 895, number * 80 + 50)
 
 
+def complate(result):
+    color = (0, 150, 00) if result else (150, 0, 00)
+    pygame.draw.rect(screen, color, (600, 400, 120, 40), width=0)
+    font = pygame.font.Font(None, 20)
+    font.bold = True
+    text = "Сохранено" if result else "Не сохранено"
+    text = font.render(text, True, (255, 255, 255))
+    text_x = 620 if result else 610
+    text_y = 413
+    screen.blit(text, (text_x, text_y))
+
+
 def cords(mouse_pos):
     a, b = -1, -1
     if mouse_pos[0] in range(835, 885):
@@ -207,12 +245,12 @@ def cords(mouse_pos):
     elif mouse_pos[0] in range(895, 945):
         a = 1
 
-    for i in range(4):
+    for i in range(5):
         if mouse_pos[1] in range(50 + i * 80, 100 + i * 80):
             b = i
             break
 
-    if a >= 0 and b >= 0 and not (a == 1 and b == 3):
+    if a >= 0 and b >= 0 and not (a == 1 and b == 4):
         return b * 2 + a
     return None
 
@@ -289,15 +327,17 @@ if __name__ == '__main__':
         Images(elem, a // 2, a % 2)
         a += 1
     click, text, position = False, '', -1
+
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
             if event.type == pygame.MOUSEBUTTONDOWN:
+
                 click = input_box.collidepoint(event.pos)
 
                 if button.collidepoint(event.pos):
-                    board.save_file(text)
+                    saved = board.save_file(text)
 
                 if cords(event.pos) is not None:
                     current = dct[list(tile_images.keys())[cords(event.pos)]]
@@ -312,6 +352,7 @@ if __name__ == '__main__':
                     bool4 = a == 3 and number2 == 6
                     if not bool1 and not bool2 and not bool3 and not bool4:
                         board.size_event(a)
+                        saved = False
 
                         number1 = number1 + 1 if a == 0 else number1 - 1 if a == 2 else number1
                         number2 = number2 + 1 if a == 1 else number2 - 1 if a == 3 else number2
@@ -329,6 +370,7 @@ if __name__ == '__main__':
                         text = text[:-1]
                     else:
                         text += event.unicode if len(text) <= 15 else ''
+        event_loop = asyncio.get_event_loop()
         screen.fill((0, 0, 0))
         board.render(screen)
         pygame.draw.rect(screen, (50, 50, 50), (800, 20, 180, 610))
@@ -337,6 +379,12 @@ if __name__ == '__main__':
         draw(screen, number1, number2)
         arrows_group.draw(screen)
         base_group.draw(screen)
+        current_image = list(values.keys()).index(current) if current else -1
+        if current_image >= 0:
+            a = 833 if current_image % 2 == 0 else 893
+            b = current_image // 2 * 80 + 50 - 2
+            pygame.draw.rect(screen, (255, 255, 0), (a, b, 54, 54), width=2)
         save_file(text + '|' if click else text)
+        complate(saved)
         pygame.display.flip()
     pygame.quit()
