@@ -1,8 +1,8 @@
 import os
 import sys
-
 import pygame
 from copy import deepcopy
+
 
 all_sprites = pygame.sprite.Group()
 tiles_group = pygame.sprite.Group()
@@ -79,19 +79,32 @@ values = {
     '.': 'empty',
     '@': 'pacman',
     '*': 'energo'
-
 }
 
 
 def generate_level(level):
-    global base_group
-
     new_player, x, y = None, None, None
     for y in range(len(level)):
         for x in range(len(level[y])):
-            if level[y][x] in list(values.keys()):
-                Tile(values[level[y][x]], x, y)
-
+            if level[y][x] == '.':
+                Tile('empty', x, y)
+            elif level[y][x] == '|':
+                Tile('vertical', x, y)
+            elif level[y][x] == '-':
+                Tile('horizontal', x, y)
+            elif level[y][x] == '1':
+                Tile('1', x, y)
+            elif level[y][x] == '2':
+                Tile('2', x, y)
+            elif level[y][x] == '3':
+                Tile('3', x, y)
+            elif level[y][x] == '4':
+                Tile('4', x, y)
+            elif level[y][x] == '*':
+                Tile('energo', x, y)
+            elif level[y][x] == '@':
+                Tile('pacman', x, y)
+                new_player = Player(x, y)
     return new_player, x, y
 
 
@@ -328,7 +341,7 @@ if __name__ == '__main__':
     number1, number2 = 25, 25
     board = Board(number1, number2)
     running = True
-    player, level_x, level_y = generate_level([''.join(elem) for elem in board.board])
+    player, level_x, level_y = generate_level(load_level('map.txt'))
     a = 0
 
     for elem in tile_images:
