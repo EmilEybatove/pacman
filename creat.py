@@ -26,6 +26,14 @@ def load_image(name, colorkey=None):
     return image
 
 
+def load_level(filename):
+    filename = "levels/" + filename
+    with open(filename, 'r') as mapFile:
+        level_map = [line.strip() for line in mapFile]
+    max_width = max(map(len, level_map))
+    return list(map(lambda x: x.ljust(max_width, '.'), level_map))
+
+
 tile_images = {
     'vertical': load_image('vertical.png'),
     'horisontal': load_image('horisontal.png'),
