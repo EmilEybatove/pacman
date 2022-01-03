@@ -83,28 +83,14 @@ values = {
 
 
 def generate_level(level):
+    global base_group
     new_player, x, y = None, None, None
     for y in range(len(level)):
         for x in range(len(level[y])):
-            if level[y][x] == '.':
-                Tile('empty', x, y)
-            elif level[y][x] == '|':
-                Tile('vertical', x, y)
-            elif level[y][x] == '-':
-                Tile('horizontal', x, y)
-            elif level[y][x] == '1':
-                Tile('1', x, y)
-            elif level[y][x] == '2':
-                Tile('2', x, y)
-            elif level[y][x] == '3':
-                Tile('3', x, y)
-            elif level[y][x] == '4':
-                Tile('4', x, y)
-            elif level[y][x] == '*':
-                Tile('energo', x, y)
-            elif level[y][x] == '@':
-                Tile('pacman', x, y)
-                new_player = Player(x, y)
+            if level[y][x] in list(values.keys()):
+                Tile(values[level[y][x]], x, y)
+#           if level[y][x] == '@':
+#                new_player = Player(x, y)
     return new_player, x, y
 
 
@@ -341,9 +327,7 @@ if __name__ == '__main__':
     number1, number2 = 25, 25
     board = Board(number1, number2)
     running = True
-    player, level_x, level_y = generate_level(load_level('map.txt'))
     a = 0
-
     for elem in tile_images:
         Images(elem, a // 2, a % 2)
         a += 1
@@ -391,7 +375,7 @@ if __name__ == '__main__':
                         text = text[:-1]
                     else:
                         text += event.unicode if len(text) <= 15 else ''
-        event_loop = asyncio.get_event_loop()
+#        event_loop = asyncio.get_event_loop()
         screen.fill((0, 0, 0))
         board.render(screen)
         pygame.draw.rect(screen, (50, 50, 50), (800, 20, 180, 610))
