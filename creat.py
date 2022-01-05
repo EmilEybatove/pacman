@@ -8,6 +8,7 @@ all_sprites = pygame.sprite.Group()
 tiles_group = pygame.sprite.Group()
 images_group = pygame.sprite.Group()
 base_group = pygame.sprite.Group()
+player_group = pygame.sprite.Group()
 current = False
 saved = False
 
@@ -69,6 +70,37 @@ class Tile(pygame.sprite.Sprite):
             tile_width * pos_x + 50, tile_height * pos_y + 50)
 
 
+class Player(pygame.sprite.Sprite):
+    def __init__(self, pos_x, pos_y):
+        super().__init__(player_group, all_sprites)
+        self.image = tile_images['pacman']
+        self.rect = self.image.get_rect().move(
+            tile_width * pos_x + 50, tile_height * pos_y + 50)
+
+    def update(self, event):
+        lst = ['vertical', 'horisontal', '1', '2', '3', '4']
+        if event.key == pygame.K_LEFT:
+            self.rect = self.rect.move(-18, 0)
+            if pygame.sprite.spritecollideany(self, tiles_group) is None or \
+                    pygame.sprite.spritecollideany(self, tiles_group).image in [tile_images[_] for _ in lst]:
+                self.rect = self.rect.move(18, 0)
+        elif event.key == pygame.K_RIGHT:
+            self.rect = self.rect.move(18, 0)
+            if pygame.sprite.spritecollideany(self, tiles_group) is None or \
+                    pygame.sprite.spritecollideany(self, tiles_group).image in [tile_images[_] for _ in lst]:
+                self.rect = self.rect.move(-18, 0)
+        elif event.key == pygame.K_UP:
+            self.rect = self.rect.move(0, -18)
+            if pygame.sprite.spritecollideany(self, tiles_group) is None or \
+                    pygame.sprite.spritecollideany(self, tiles_group).image in [tile_images[_] for _ in lst]:
+                self.rect = self.rect.move(0, 18)
+        elif event.key == pygame.K_DOWN:
+            self.rect = self.rect.move(0, 18)
+            if pygame.sprite.spritecollideany(self, tiles_group) is None or \
+                    pygame.sprite.spritecollideany(self, tiles_group).image in [tile_images[_] for _ in lst]:
+                self.rect = self.rect.move(0, -18)
+
+
 values = {
     '|': 'vertical',
     '-': 'horisontal',
@@ -87,10 +119,11 @@ def generate_level(level):
     new_player, x, y = None, None, None
     for y in range(len(level)):
         for x in range(len(level[y])):
-            if level[y][x] in list(values.keys()):
+            if level[y][x] == '@':
+                Tile('empty', x, y)
+                new_player = Player(x, y)
+            elif level[y][x] in list(values.keys()):
                 Tile(values[level[y][x]], x, y)
-#           if level[y][x] == '@':
-#                new_player = Player(x, y)
     return new_player, x, y
 
 
