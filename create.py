@@ -1,6 +1,5 @@
 import os
 import sys
-import asyncio
 import pygame
 from copy import deepcopy
 
