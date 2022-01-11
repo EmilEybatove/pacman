@@ -1,6 +1,5 @@
 import os
 import sys
-import asyncio
 import pygame
 from copy import deepcopy
 
@@ -125,8 +124,15 @@ class Board:
                     return None
         if cell is None:
             return None
+        if arr == '.':
+            for elem in tiles_group:
+                if elem.cords == list(cell):
+                    tiles_group.remove(elem)
+                self.board[cell[1]][cell[0]] = ' '
+            return True
         self.on_click(cell, arr)
         saved = False
+        return True
 
     def get_cell(self, mouse_pos):
         if mouse_pos[0] >= self.cell_size * self.width + self.left:
@@ -322,6 +328,7 @@ if __name__ == '__main__':
     running = True
     player, level_x, level_y = generate_level([''.join(elem) for elem in board.board])
     a = 0
+    down = 0
 
     for elem in tile_images:
         Images(elem, a // 2, a % 2)
@@ -333,7 +340,8 @@ if __name__ == '__main__':
             if event.type == pygame.QUIT:
                 running = False
             if event.type == pygame.MOUSEBUTTONDOWN:
-
+                if current and board.get_click(event.pos, current):
+                    down = 1
                 click = input_box.collidepoint(event.pos)
 
                 if button.collidepoint(event.pos):
@@ -370,7 +378,15 @@ if __name__ == '__main__':
                         text = text[:-1]
                     else:
                         text += event.unicode if len(text) <= 15 else ''
-        event_loop = asyncio.get_event_loop()
+
+            if event.type == pygame.MOUSEMOTION:
+                if down:
+                    board.get_click(event.pos, current)
+                    generate_level([''.join(elem) for elem in board.board])
+
+            if event.type == pygame.MOUSEBUTTONUP:
+                down = 0
+
         screen.fill((0, 0, 0))
         board.render(screen)
         pygame.draw.rect(screen, (50, 50, 50), (800, 20, 180, 610))
