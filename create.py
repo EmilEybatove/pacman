@@ -3,10 +3,12 @@ import sys
 import pygame
 from copy import deepcopy
 
+
 all_sprites = pygame.sprite.Group()
 tiles_group = pygame.sprite.Group()
 images_group = pygame.sprite.Group()
 base_group = pygame.sprite.Group()
+player_group = pygame.sprite.Group()
 current = False
 saved = False
 
@@ -23,6 +25,14 @@ def load_image(name, colorkey=None):
             colorkey = image.get_at((0, 0))
         image.set_colorkey(colorkey)
     return image
+
+
+def load_level(filename):
+    filename = "levels/" + filename
+    with open(filename, 'r') as mapFile:
+        level_map = [line.strip() for line in mapFile]
+    max_width = max(map(len, level_map))
+    return list(map(lambda x: x.ljust(max_width, '.'), level_map))
 
 
 tile_images = {
@@ -60,6 +70,37 @@ class Tile(pygame.sprite.Sprite):
             tile_width * pos_x + 50, tile_height * pos_y + 50)
 
 
+class Player(pygame.sprite.Sprite):
+    def __init__(self, pos_x, pos_y):
+        super().__init__(player_group, all_sprites)
+        self.image = tile_images['pacman']
+        self.rect = self.image.get_rect().move(
+            tile_width * pos_x + 50, tile_height * pos_y + 50)
+
+    def update(self, event):
+        lst = ['vertical', 'horisontal', '1', '2', '3', '4']
+        if event.key == pygame.K_LEFT:
+            self.rect = self.rect.move(-18, 0)
+            if pygame.sprite.spritecollideany(self, tiles_group) is None or \
+                    pygame.sprite.spritecollideany(self, tiles_group).image in [tile_images[_] for _ in lst]:
+                self.rect = self.rect.move(18, 0)
+        elif event.key == pygame.K_RIGHT:
+            self.rect = self.rect.move(18, 0)
+            if pygame.sprite.spritecollideany(self, tiles_group) is None or \
+                    pygame.sprite.spritecollideany(self, tiles_group).image in [tile_images[_] for _ in lst]:
+                self.rect = self.rect.move(-18, 0)
+        elif event.key == pygame.K_UP:
+            self.rect = self.rect.move(0, -18)
+            if pygame.sprite.spritecollideany(self, tiles_group) is None or \
+                    pygame.sprite.spritecollideany(self, tiles_group).image in [tile_images[_] for _ in lst]:
+                self.rect = self.rect.move(0, 18)
+        elif event.key == pygame.K_DOWN:
+            self.rect = self.rect.move(0, 18)
+            if pygame.sprite.spritecollideany(self, tiles_group) is None or \
+                    pygame.sprite.spritecollideany(self, tiles_group).image in [tile_images[_] for _ in lst]:
+                self.rect = self.rect.move(0, -18)
+
+
 values = {
     '|': 'vertical',
     '-': 'horisontal',
@@ -70,19 +111,19 @@ values = {
     '.': 'empty',
     '@': 'pacman',
     '*': 'energo'
-
 }
 
 
 def generate_level(level):
     global base_group
-
     new_player, x, y = None, None, None
     for y in range(len(level)):
         for x in range(len(level[y])):
-            if level[y][x] in list(values.keys()):
+            if level[y][x] == '@':
+                Tile('empty', x, y)
+                new_player = Player(x, y)
+            elif level[y][x] in list(values.keys()):
                 Tile(values[level[y][x]], x, y)
-
     return new_player, x, y
 
 
@@ -124,15 +165,8 @@ class Board:
                     return None
         if cell is None:
             return None
-        if arr == '.':
-            for elem in tiles_group:
-                if elem.cords == list(cell):
-                    tiles_group.remove(elem)
-                self.board[cell[1]][cell[0]] = ' '
-            return True
         self.on_click(cell, arr)
         saved = False
-        return True
 
     def get_cell(self, mouse_pos):
         if mouse_pos[0] >= self.cell_size * self.width + self.left:
@@ -326,10 +360,7 @@ if __name__ == '__main__':
     number1, number2 = 25, 25
     board = Board(number1, number2)
     running = True
-    player, level_x, level_y = generate_level([''.join(elem) for elem in board.board])
     a = 0
-    down = 0
-
     for elem in tile_images:
         Images(elem, a // 2, a % 2)
         a += 1
@@ -340,8 +371,7 @@ if __name__ == '__main__':
             if event.type == pygame.QUIT:
                 running = False
             if event.type == pygame.MOUSEBUTTONDOWN:
-                if current and board.get_click(event.pos, current):
-                    down = 1
+
                 click = input_box.collidepoint(event.pos)
 
                 if button.collidepoint(event.pos):
@@ -378,15 +408,7 @@ if __name__ == '__main__':
                         text = text[:-1]
                     else:
                         text += event.unicode if len(text) <= 15 else ''
-
-            if event.type == pygame.MOUSEMOTION:
-                if down:
-                    board.get_click(event.pos, current)
-                    generate_level([''.join(elem) for elem in board.board])
-
-            if event.type == pygame.MOUSEBUTTONUP:
-                down = 0
-
+#        event_loop = asyncio.get_event_loop()
         screen.fill((0, 0, 0))
         board.render(screen)
         pygame.draw.rect(screen, (50, 50, 50), (800, 20, 180, 610))
