@@ -13,7 +13,6 @@ def get_rect(x, y):
 def get_click_mouse_pos():
     x, y = pg.mouse.get_pos()
     grid_x, grid_y = x // TILE, y // TILE
-    pg.draw.rect(sc, pg.Color('red'), get_rect(grid_x, grid_y))
     click = pg.mouse.get_pressed()
     return (grid_x, grid_y) if click[0] else False
 
@@ -44,52 +43,54 @@ class Hunter(pg.sprite.Sprite):
             self.image = pg.Surface((TILE, TILE))
             self.image.fill(pg.Color("green"))
             self.rect = self.image.get_rect()
+            self.rect.x, self.rect.y, *_ = get_rect(*start_pos)
         # Usual code
-        self.rect.x, self.rect.y = start_pos
+        self.restricted = ["|", "-", "1", "2", "3", "4", 1, 2, 3, 4]
+        self.allowed = ["0", 0, "."]
+
         self.graph = {}
         for y, row in enumerate(grid):
             for x, col in enumerate(row):
-                if not col:
+                if col in self.allowed:
                     self.graph[(x, y)] = self.graph.get((x, y), []) + self.get_next_nodes(x, y)
-        self.graph[(0, 0)] = (0, 1)
-        self.queue = deque([(self.rect.x, self.rect.y)])
-        self.visited = {(self.rect.x, self.rect.y): None}
-        print(self.graph.keys(), flush=True)
 
     def move(self, mouse_pos):
-        if not grid[mouse_pos[1]][mouse_pos[0]]:
-            self.bfs(mouse_pos)
-        # К этому моменту у нас есть self.queue и self.visited, оформленные правильно
-        print(f"\nself.visited: {self.visited}", flush=True)
-        print(f"\nself.queue: {self.queue}", flush=True)
-        # Она же измениться должна
-        path_head, path_segment = mouse_pos, mouse_pos
-        while path_segment and path_segment in self.visited:
-            self.rect.x, self.rect.y = get_rect(*path_segment)[:2]
-            sleep(0.1)
-            path_segment = self.visited[path_segment]
-        pg.draw.rect(sc, pg.Color("magenta"), get_rect(*path_head), border_radius=TILE // 3)
+        if grid[mouse_pos[1]][mouse_pos[0]] in self.allowed:
+            path = self.bfs(mouse_pos)
+            if not path:
+                return None
+            self.rect.x, self.rect.y, *_ = get_rect(*path[-1])
+            return path
+
 
     def get_next_nodes(self, x, y):
-        check_next_node = lambda x, y: True if 0 <= x < cols and 0 <= y < rows and not grid[y][x] else False
+        check_next_node = lambda x, y: True if (0 <= x < cols) and (0 <= y < rows) and \
+                                               (grid[y][x] in self.allowed) else False
         ways = [0, -1], [0, 1], [1, 0], [-1, 0]
         return [(x + dx, y + dy) for dx, dy in ways if check_next_node(x + dx, y + dy)]
 
-    def bfs(self, goal):
-        self.queue = deque([(self.rect.x, self.rect.y)])
-        self.visited = {(self.rect.x, self.rect.y): None}
+    def bfs(self, end_point):
+        start_point = self.rect.x // TILE, self.rect.y // TILE
+        self.parent, self.queue = {start_point: None}, deque([start_point])
 
-        while len(self.queue) >= 2:
-            cur_node = self.queue.popleft()
-            print(cur_node, flush=True)
-            if cur_node == goal:
-                break
-            next_nodes = self.graph[cur_node]
-            for next_node in next_nodes:
-                if next_node not in self.visited:
-                    self.queue.append(next_node)
-                    self.visited[next_node] = cur_node
-            print("The end!", len(self.queue))
+        if start_point not in self.graph:
+            raise ValueError("Start point is not in graph")
+        if end_point not in self.graph:
+            raise ValueError("End point is not in graph")
+        while self.queue:
+            node = self.queue.popleft()
+            for neighbour in self.graph[node]:
+                if node == end_point:
+                    path = [node]
+                    n = self.parent.get(node)
+                    while n is not None:
+                        path.append(n)
+                        n = self.parent.get(n)
+                    return path[::-1]
+                if neighbour not in self.parent:
+                    self.queue.append(neighbour)
+                    self.parent[neighbour] = node
+        return None
 
 
 if __name__ == '__main__':
@@ -102,8 +103,8 @@ if __name__ == '__main__':
 
     grid = [[1 if random() < 0.2 else 0 for col in range(cols)] for row in range(rows)]
 
-    real_start_pos = (0, 0)
-    hunter = Hunter(all_sprites, real_start_pos, grid)
+    start_pos = (24, 14)
+    hunter = Hunter(all_sprites, start_pos, grid)
     all_sprites.add(hunter)
     sc.fill(pg.Color('black'))
 
@@ -114,7 +115,11 @@ if __name__ == '__main__':
         # Where did we click - path to mouse position
         mouse_pos = get_click_mouse_pos()
         if mouse_pos:
-            hunter.move(mouse_pos)
+            path = hunter.move(mouse_pos)
+            if path:
+                print("PATH!")
+                for path_segment in path:
+                    pg.draw.rect(sc, pg.Color("magenta"), get_rect(*path_segment), border_radius=TILE // 3)
 
         # Just some pygame stuff
         [sys.exit() for event in pg.event.get() if event.type == pg.QUIT]
@@ -122,3 +127,4 @@ if __name__ == '__main__':
         all_sprites.update()
         pg.display.flip()
         pg.display.set_caption(str(clock.get_fps()))
+        sc.fill(pg.Color('black'))
