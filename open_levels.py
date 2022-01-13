@@ -1,6 +1,3 @@
-import pygame
-import os
-import sys
 from create import *
 
 
@@ -39,7 +36,7 @@ def print_intro():
     pygame.draw.rect(screen, 'yellow', (100, 300, 300, 50), 1)
     pygame.display.flip()
     intro_text = ["Welcome to", "PACMAN",
-                  "Введите название своего уровня",  "или",  "сразу нажмите Enter для начала игры"]
+                  "Введите название своего уровня", "или", "сразу нажмите Enter для начала игры"]
     font = pygame.font.Font(None, 40)
     string_rendered = font.render(intro_text[0], 1, pygame.Color('yellow'))
     intro_rect = string_rendered.get_rect()
@@ -98,7 +95,7 @@ def start_screen():
                         input_text += event.unicode
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 if event.pos[0] > 100 and event.pos[0] < 400 and \
-                    event.pos[1] > 300 and event.pos[1] < 350:
+                        event.pos[1] > 300 and event.pos[1] < 350:
                     need_input = True
         print_text(input_text)
         pygame.display.flip()
