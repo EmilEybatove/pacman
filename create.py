@@ -1,8 +1,8 @@
 import os
 import sys
-import pygame
 from copy import deepcopy
 
+import pygame
 
 all_sprites = pygame.sprite.Group()
 tiles_group = pygame.sprite.Group()
@@ -43,7 +43,7 @@ tile_images = {
     '3': load_image('4.png'),
     '4': load_image('3.png'),
     'empty': load_image('empty.png'),
-    'pacman': load_image('pacman.png'),
+    'pacman': load_image('pacman_sprites/pacman.png'),
     'energo': load_image('energo.png')}
 
 dct = {
@@ -314,10 +314,10 @@ class Arrows(pygame.sprite.Sprite):
         self.rect = self.image.get_rect().move(pos_x, pos_y)
 
 
-Arrows('up.png', 560, 55)
-Arrows('down.png', 560, 90)
-Arrows('up.png', 725, 55)
-Arrows('down.png', 725, 90)
+Arrows('arrow_up.png', 560, 55)
+Arrows('arrow_down.png', 560, 90)
+Arrows('arrow_up.png', 725, 55)
+Arrows('arrow_down.png', 725, 90)
 
 input_box = pygame.Rect(560, 250, 200, 50)
 button = pygame.Rect(600, 330, 120, 40)

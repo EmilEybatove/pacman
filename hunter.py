@@ -71,7 +71,7 @@ class Hunter(pg.sprite.Sprite):
             self.rect.x, self.rect.y, *_ = get_rect(*start_pos)
         # Usual code
         self.restricted = ["|", "-", "1", "2", "3", "4", 1, 2, 3, 4]
-        self.allowed = ["0", 0, "."]
+        self.allowed = ["0", 0, ".", "*"]
 
         self.graph = {}
         for y, row in enumerate(grid):
@@ -137,13 +137,13 @@ if __name__ == '__main__':
     all_sprites = pg.sprite.Group()
     grid = [[1 if random() < 0.01 else 0 for col in range(cols)] for row in range(rows)]
     restricted = ["|", "-", "1", "2", "3", "4", 1, 2, 3, 4]
-    allowed = ["0", 0, "."]
+    allowed = ["0", 0, ".", "*"]
 
     ghosts = {}
     for i in range(6):
         start_pos = (2 + i, 2 + i)
         # remember, ghost[4] is the blue, vulnerable ghost
-        hunter = Hunter(all_sprites, start_pos, grid, i, True)
+        hunter: Hunter = Hunter(all_sprites, start_pos, grid, i, True)
         ghosts[i] = hunter
         all_sprites.add(hunter)
 
