@@ -55,7 +55,7 @@ dct = {
     '4': '4',
     'empty': '.',
     'pacman': '@',
-    'point':'0,',
+    'point': '0',
     'energo': '*'
 }
 

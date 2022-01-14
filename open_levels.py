@@ -138,6 +138,7 @@ class Player(pygame.sprite.Sprite):
             tile_width * pos_x + 50, tile_height * pos_y + 50)
         self.x = pos_x
         self.y = pos_y
+        self.score = 0
 
     def check_walls(self):
         lst = ['vertical', 'horisontal', '1', '2', '3', '4']
@@ -145,6 +146,15 @@ class Player(pygame.sprite.Sprite):
             pygame.sprite.spritecollideany(self, tiles_group).image in [tile_images[_] for _ in lst]:
             return False
         else:
+            if pygame.sprite.spritecollideany(self, tiles_group).image is tile_images['point']:
+                self.score += 10
+                tile = pygame.sprite.spritecollideany(self, tiles_group)
+                tile.image = tile_images['empty']
+            elif pygame.sprite.spritecollideany(self, tiles_group).image is tile_images['energo']:
+                self.score += 50
+                tile = pygame.sprite.spritecollideany(self, tiles_group)
+                tile.image = tile_images['empty']
+            # СЮДА ДОПИСАТЬ ОБРАБОТКУ СТОЛКНОВЕНИЙ С ПРИЗРАКАМИ
             return True
 
     def update_left(self):
