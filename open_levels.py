@@ -117,6 +117,72 @@ def show_level(level, count1, count2):
     return player, level_x, level_y
 
 
+class Player(pygame.sprite.Sprite):
+    def __init__(self, pos_x, pos_y):
+        super().__init__(player_group, all_sprites)
+        self.image = tile_images['pacman']
+        self.rect = self.image.get_rect().move(
+            tile_width * pos_x + 50, tile_height * pos_y + 50)
+        self.x = pos_x
+        self.y = pos_y
+
+    def check_walls(self):
+        lst = ['vertical', 'horisontal', '1', '2', '3', '4']
+        if pygame.sprite.spritecollideany(self, tiles_group) is None or \
+            pygame.sprite.spritecollideany(self, tiles_group).image in [tile_images[_] for _ in lst]:
+            return False
+        else:
+            return True
+
+    def update_left(self):
+        self.rect = self.rect.move(-18, 0)
+        fl = self.check_walls()
+        self.rect = self.rect.move(18, 0)
+        if fl:
+            for _ in range(9):
+                self.rect = self.rect.move(-2, 0)
+                all_sprites.draw(screen)
+                player_group.draw(screen)
+                pygame.display.flip()
+                clock.tick(FPS)
+
+    def update_right(self):
+        self.rect = self.rect.move(18, 0)
+        fl = self.check_walls()
+        self.rect = self.rect.move(-18, 0)
+        if fl:
+            for _ in range(9):
+                self.rect = self.rect.move(2, 0)
+                all_sprites.draw(screen)
+                player_group.draw(screen)
+                pygame.display.flip()
+                clock.tick(FPS)
+
+    def update_up(self):
+        self.rect = self.rect.move(0, -18)
+        fl = self.check_walls()
+        self.rect = self.rect.move(0, 18)
+        if fl:
+            for _ in range(9):
+                self.rect = self.rect.move(0, -2)
+                all_sprites.draw(screen)
+                player_group.draw(screen)
+                pygame.display.flip()
+                clock.tick(FPS)
+
+    def update_down(self):
+        self.rect = self.rect.move(0, 18)
+        fl = self.check_walls()
+        self.rect = self.rect.move(0, -18)
+        if fl:
+            for _ in range(9):
+                self.rect = self.rect.move(0, 2)
+                all_sprites.draw(screen)
+                player_group.draw(screen)
+                pygame.display.flip()
+                clock.tick(FPS)
+
+
 if __name__ == '__main__':
     pygame.init()
     size = width, height = 500, 500
@@ -127,10 +193,38 @@ if __name__ == '__main__':
     level = start_screen()
     if '.txt' not in level:
         level += '.txt'
+    try:
+        load_level(level)
+    except FileNotFoundError:
+        level = 'default_level.txt'
     count2 = len(load_level(level))
     count1 = len(load_level(level)[0])
     player, level_x, level_y = show_level(level, count1, count2)
+    clock = pygame.time.Clock()
+    FPS = 30
     while running:
+        keys = pygame.key.get_pressed()
+        if keys[pygame.K_LEFT]:
+            player.update_left()
+        elif keys[pygame.K_RIGHT]:
+            player.update_right()
+        elif keys[pygame.K_UP]:
+            player.update_up()
+        elif keys[pygame.K_DOWN]:
+            player.update_down()
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_LEFT:
+                    player.update_left()
+                elif event.key == pygame.K_RIGHT:
+                    player.update_right()
+                elif event.key == pygame.K_UP:
+                    player.update_up()
+                elif event.key == pygame.K_DOWN:
+                    player.update_down()
+        all_sprites.draw(screen)
+        player_group.draw(screen)
+        pygame.display.flip()
+        clock.tick(FPS)
