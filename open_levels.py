@@ -1,6 +1,19 @@
 from create import *
 
 
+def load_image_pacman(name, colorkey=None):
+    fullname = os.path.join('data/pacman_sprites', name)
+    if not os.path.isfile(fullname):
+        print(f"Файл с изображением '{fullname}' не найден")
+        sys.exit()
+    image = pygame.image.load(fullname)
+    if colorkey is not None:
+        image = image.convert()
+        if colorkey == -1:
+            colorkey = image.get_at((0, 0))
+        image.set_colorkey(colorkey)
+    return image
+
 # преобразование текстового файла в список спрайтов
 def load_level(filename):
     filename = "levels/" + filename
@@ -120,7 +133,7 @@ def show_level(level, count1, count2):
 class Player(pygame.sprite.Sprite):
     def __init__(self, pos_x, pos_y):
         super().__init__(player_group, all_sprites)
-        self.image = tile_images['pacman']
+        self.image = load_image_pacman('pacman.gif')
         self.rect = self.image.get_rect().move(
             tile_width * pos_x + 50, tile_height * pos_y + 50)
         self.x = pos_x
@@ -135,12 +148,14 @@ class Player(pygame.sprite.Sprite):
             return True
 
     def update_left(self):
-        self.rect = self.rect.move(-18, 0)
+        self.rect = self.rect.move(-9, 0)
         fl = self.check_walls()
-        self.rect = self.rect.move(18, 0)
+        self.rect = self.rect.move(9, 0)
+        lst_picture = ['l_0', 'l_1', 'l_2', 'l_3', 'l_4', 'l_5', 'l_6', 'l_7', 'l_0']
         if fl:
             for _ in range(9):
-                self.rect = self.rect.move(-2, 0)
+                self.rect = self.rect.move(-1, 0)
+                self.image = load_image_pacman(lst_picture[_] + '.gif')
                 all_sprites.draw(screen)
                 player_group.draw(screen)
                 pygame.display.flip()
@@ -150,21 +165,25 @@ class Player(pygame.sprite.Sprite):
         self.rect = self.rect.move(18, 0)
         fl = self.check_walls()
         self.rect = self.rect.move(-18, 0)
+        lst_picture = ['r_0', 'r_1', 'r_2', 'r_3', 'r_4', 'r_5', 'r_6', 'r_7', 'r_0']
         if fl:
             for _ in range(9):
-                self.rect = self.rect.move(2, 0)
+                self.rect = self.rect.move(1, 0)
+                self.image = load_image_pacman(lst_picture[_] + '.gif')
                 all_sprites.draw(screen)
                 player_group.draw(screen)
                 pygame.display.flip()
                 clock.tick(FPS)
 
     def update_up(self):
-        self.rect = self.rect.move(0, -18)
+        self.rect = self.rect.move(0, -9)
         fl = self.check_walls()
-        self.rect = self.rect.move(0, 18)
+        self.rect = self.rect.move(0, 9)
+        lst_picture = ['u_0', 'u_1', 'u_2', 'u_3', 'u_4', 'u_5', 'u_6', 'u_7', 'u_0']
         if fl:
             for _ in range(9):
-                self.rect = self.rect.move(0, -2)
+                self.rect = self.rect.move(0, -1)
+                self.image = load_image_pacman(lst_picture[_] + '.gif')
                 all_sprites.draw(screen)
                 player_group.draw(screen)
                 pygame.display.flip()
@@ -174,9 +193,11 @@ class Player(pygame.sprite.Sprite):
         self.rect = self.rect.move(0, 18)
         fl = self.check_walls()
         self.rect = self.rect.move(0, -18)
+        lst_picture = ['d_0', 'd_1', 'd_2', 'd_3', 'd_4', 'd_5', 'd_6', 'd_7', 'd_0']
         if fl:
             for _ in range(9):
-                self.rect = self.rect.move(0, 2)
+                self.rect = self.rect.move(0, 1)
+                self.image = load_image_pacman(lst_picture[_] + '.gif')
                 all_sprites.draw(screen)
                 player_group.draw(screen)
                 pygame.display.flip()
@@ -201,7 +222,7 @@ if __name__ == '__main__':
     count1 = len(load_level(level)[0])
     player, level_x, level_y = show_level(level, count1, count2)
     clock = pygame.time.Clock()
-    FPS = 30
+    FPS = 60
     while running:
         keys = pygame.key.get_pressed()
         if keys[pygame.K_LEFT]:

@@ -43,7 +43,7 @@ tile_images = {
     '3': load_image('4.png'),
     '4': load_image('3.png'),
     'empty': load_image('empty.png'),
-    'pacman': load_image('pacman_sprites/pacman.png'),
+    'point': load_image('point.png'),
     'energo': load_image('energo.png')}
 
 dct = {
@@ -55,6 +55,7 @@ dct = {
     '4': '4',
     'empty': '.',
     'pacman': '@',
+    'point':'0,',
     'energo': '*'
 }
 
@@ -110,7 +111,8 @@ values = {
     '4': '4',
     '.': 'empty',
     '@': 'pacman',
-    '*': 'energo'
+    '*': 'energo',
+    '0': 'point'
 }
 
 
