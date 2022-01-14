@@ -130,6 +130,7 @@ def show_level(level, count1, count2):
     return player, level_x, level_y
 
 
+# класс пакмена
 class Player(pygame.sprite.Sprite):
     def __init__(self, pos_x, pos_y):
         super().__init__(player_group, all_sprites)
@@ -140,7 +141,8 @@ class Player(pygame.sprite.Sprite):
         self.y = pos_y
         self.score = 0
 
-    def check_walls(self):
+    # проверяет все столкновения
+    def collides(self):
         lst = ['vertical', 'horisontal', '1', '2', '3', '4']
         if pygame.sprite.spritecollideany(self, tiles_group) is None or \
             pygame.sprite.spritecollideany(self, tiles_group).image in [tile_images[_] for _ in lst]:
@@ -157,9 +159,10 @@ class Player(pygame.sprite.Sprite):
             # СЮДА ДОПИСАТЬ ОБРАБОТКУ СТОЛКНОВЕНИЙ С ПРИЗРАКАМИ
             return True
 
+    # обрабатывает движение пакмена влево
     def update_left(self):
         self.rect = self.rect.move(-9, 0)
-        fl = self.check_walls()
+        fl = self.collides()
         self.rect = self.rect.move(9, 0)
         lst_picture = ['l_0', 'l_1', 'l_2', 'l_3', 'l_4', 'l_5', 'l_6', 'l_7', 'l_0']
         if fl:
@@ -171,9 +174,10 @@ class Player(pygame.sprite.Sprite):
                 pygame.display.flip()
                 clock.tick(FPS)
 
+    # обрабатыает движения пакмена вправо
     def update_right(self):
         self.rect = self.rect.move(18, 0)
-        fl = self.check_walls()
+        fl = self.collides()
         self.rect = self.rect.move(-18, 0)
         lst_picture = ['r_0', 'r_1', 'r_2', 'r_3', 'r_4', 'r_5', 'r_6', 'r_7', 'r_0']
         if fl:
@@ -185,9 +189,10 @@ class Player(pygame.sprite.Sprite):
                 pygame.display.flip()
                 clock.tick(FPS)
 
+    # обрабатывает движения пакмена вверх
     def update_up(self):
         self.rect = self.rect.move(0, -9)
-        fl = self.check_walls()
+        fl = self.collides()
         self.rect = self.rect.move(0, 9)
         lst_picture = ['u_0', 'u_1', 'u_2', 'u_3', 'u_4', 'u_5', 'u_6', 'u_7', 'u_0']
         if fl:
@@ -199,9 +204,10 @@ class Player(pygame.sprite.Sprite):
                 pygame.display.flip()
                 clock.tick(FPS)
 
+    # обрабатывает движения пакмена вниз
     def update_down(self):
         self.rect = self.rect.move(0, 18)
-        fl = self.check_walls()
+        fl = self.collides()
         self.rect = self.rect.move(0, -18)
         lst_picture = ['d_0', 'd_1', 'd_2', 'd_3', 'd_4', 'd_5', 'd_6', 'd_7', 'd_0']
         if fl:
