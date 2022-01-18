@@ -1,20 +1,26 @@
 import os
 import sys
 from collections import deque
-from random import random
+from pprint import pprint
+from random import choice
 
-import pygame as pg
+import pygame
 
 
 def get_rect(x, y):
     return x * TILE + 1, y * TILE + 1, TILE - 2, TILE - 2
 
 
-def get_click_mouse_pos():
-    x, y = pg.mouse.get_pos()
-    grid_x, grid_y = x // TILE, y // TILE
-    click = pg.mouse.get_pressed()
-    return (grid_x, grid_y) if click[0] else False
+class Pacman:
+    def packman_location(self):
+        return (24, 24)
+        # return self.get_click_mouse_pos()
+
+    def get_click_mouse_pos(self):
+        x, y = pygame.mouse.get_pos()
+        grid_x, grid_y = x // TILE, y // TILE
+        click = pygame.mouse.get_pressed()
+        return (grid_x, grid_y) if click[0] else False
 
 
 def load_image(name, colorkey=None):
@@ -26,7 +32,7 @@ def load_image(name, colorkey=None):
     if not os.path.isfile(fullname):
         print(f"Файл с изображением '{fullname}' не найден")
         sys.exit()
-    image = pg.image.load(fullname)
+    image = pygame.image.load(fullname)
     if colorkey is not None:
         image = image.convert()
         if colorkey == -1:
@@ -37,71 +43,123 @@ def load_image(name, colorkey=None):
     return image
 
 
-class Hunter(pg.sprite.Sprite):
-    def __init__(self, sprite_group, start_pos, grid, ghostID, pic=None):
+class Hunter(pygame.sprite.Sprite):
+    def __init__(self, sprite_group, row, col, grid, color_ind):
         super().__init__(sprite_group)
-        self.id = ghostID
-        if pic:
-            ghost_color = {}
-            ghost_color[0] = (255, 0, 0, 255)
-            ghost_color[1] = (255, 128, 255, 255)
-            ghost_color[2] = (128, 255, 255, 255)
-            ghost_color[3] = (255, 128, 0, 255)
-            ghost_color[4] = (50, 50, 255, 255)  # blue, vulnerable ghost
-            ghost_color[5] = (255, 255, 255, 255)  # white, flashing ghost
-
+        self.row = row
+        self.col = col
+        self.attacked = False
+        self.color = color_ind
+        self.dead = False
+        self.target = [-1, -1]
+        self.ghostSpeed = 1 / 4
+        self.lastLoc = [-1, -1]
+        self.attackedTimer = 240
+        self.attackedCount = 0
+        self.deathTimer = 120
+        self.deathCount = 0
+        try:
             self.frame = 0
             self.anim = {}
             for i in range(6):
                 self.anim[i] = load_image(os.path.join("ghost_sprites", "ghost_" + str(i) + ".gif"))
-
                 # change the ghost color in this frame
-                for y in range(16):
-                    for x in range(16):
-                        if self.anim[i].get_at((x, y)) == (255, 0, 0, 255):
-                            # default, red ghost body color
-                            self.anim[i].set_at((x, y), ghost_color[self.id])
-            self.image = self.anim[1]
+            self.color_frames(ghost_color[0], ghost_color[self.color])
+            self.image = self.anim[0]
             self.rect = self.image.get_rect()
-            self.rect.x, self.rect.y, *_ = get_rect(*start_pos)
-        else:
-            self.image = pg.Surface((TILE, TILE))
-            self.image.fill(pg.Color("green"))
+            print(f"row, col: {row, col}")
+            print(f"get_rect returns: {get_rect(row, col)}")
+            print(f"size of field: {cols, rows}, REALLY: {cols * TILE, rows * TILE}")
+            self.rect.x, self.rect.y, *_ = get_rect(self.row, self.col)
+        except FileNotFoundError:
+            self.image = pygame.Surface((TILE, TILE))
+            self.image.fill(pygame.Color("green"))
             self.rect = self.image.get_rect()
-            self.rect.x, self.rect.y, *_ = get_rect(*start_pos)
+            self.rect.x, self.rect.y, *_ = get_rect(self.row, self.col)
         # Usual code
         self.restricted = ["|", "-", "1", "2", "3", "4", 1, 2, 3, 4]
         self.allowed = ["0", 0, ".", "*"]
-
+        print(f"self.allowed: {self.allowed}")
         self.graph = {}
         for y, row in enumerate(grid):
             for x, col in enumerate(row):
                 if col in self.allowed:
                     self.graph[(x, y)] = self.graph.get((x, y), []) + self.get_next_nodes(x, y)
+                else:
+                    self.graph[(x, y)] = []
 
-    def update(self):
-        self.frame += 1
-        if self.frame >= len(self.anim):
-            self.frame = 0
+        print("And here is our graph: ")
+        pprint(self.graph)
+
+    def update(self):  # Ghosts states: Alive, Attacked, Dead Attributes: Color, Direction, Location
+        if not self.attacked and not self.dead:
+            self.frame += 1
+            if self.frame >= len(self.anim):
+                self.frame = 0
+        elif self.attacked:
+            self.color_frames(ghost_color[self.color], ghost_color[4])
+            self.frame += 1
+            if self.frame >= len(self.anim):
+                self.frame = 0
+            # [Q timer works here than color sprite to blue/white and then recolor to define one]
+        else:
+            self.color_frames(ghost_color[self.color], (0, 0, 0, 0))
+            self.move(choice(ghostGate))
+
         self.image = self.anim[self.frame]
         self.rect = self.image.get_rect()
+        self.rect.x, self.rect.y, *_ = get_rect(self.row, self.col)
 
-    def move(self, mouse_pos):
-        if grid[mouse_pos[1]][mouse_pos[0]] in self.allowed:
-            path = self.bfs(mouse_pos)
-            if not path:
-                return None
-            self.rect.x, self.rect.y, *_ = get_rect(*path[-1])
-            return path
+    def color_frames(self, from_color, to_color):
+        for i in range(6):
+            for x in range(16):
+                for y in range(16):
+                    if self.anim[i].get_at((x, y)) == from_color:
+                        self.anim[i].set_at((x, y), to_color)
+                        # blue vulnerable
+
+    def move(self, goal):
+        if goal and self.graph[goal]:
+            if not self.attacked and not self.dead:
+                print(f"We are now at position {self.row, self.col} and gonna go to {goal}")
+                path = self.find_path((self.row, self.col), goal)
+                print(f"Our path is {path}")
+                if path and len(path) > 1:
+                    final = path[1]
+                    print(f"Finally go to {final}")
+                    self.row, self.col = final
+                return
+            elif self.attacked:
+                goal = choice([el for el in self.graph if self.graph[el]])
+                path = self.find_path((self.row, self.col), goal)
+                if path and len(path) > 1:
+                    final = path[1]
+                    self.row, self.col = final
+                return
+            else:
+                goal = choice(ghostGate)
+                path = self.find_path((self.row, self.col), goal)
+                if path and len(path) > 1:
+                    final = path[1]
+                    self.row, self.col = final
+                return
+        return None
 
     def get_next_nodes(self, x, y):
-        check_next_node = lambda x, y: True if (0 <= x < cols) and (0 <= y < rows) and \
+        check_node = lambda x, y: True if (0 <= x < cols) and (0 <= y < rows) and \
                                                (grid[y][x] in self.allowed) else False
         ways = [0, -1], [0, 1], [1, 0], [-1, 0]
-        return [(x + dx, y + dy) for dx, dy in ways if check_next_node(x + dx, y + dy)]
+        return [(x + dx, y + dy) for dx, dy in ways if check_node(x + dx, y + dy)]
 
-    def bfs(self, end_point):
-        start_point = self.rect.x // TILE, self.rect.y // TILE
+    def cleanup(self):
+        self.parent = dict()
+        self.queue = ""
+        self.node = ""
+        self.path = []
+
+
+    def find_path(self, start_point, end_point):
+        self.cleanup()
         self.parent, self.queue = {start_point: None}, deque([start_point])
 
         if start_point not in self.graph:
@@ -109,61 +167,93 @@ class Hunter(pg.sprite.Sprite):
         if end_point not in self.graph:
             raise ValueError("End point is not in graph")
         while self.queue:
-            node = self.queue.popleft()
-            for neighbour in self.graph[node]:
-                if node == end_point:
-                    path = [node]
-                    n = self.parent.get(node)
+            self.node = self.queue.popleft()
+            for neighbour in self.graph[self.node]:
+                if self.node == end_point:
+                    self.path = [self.node]
+                    n = self.parent.get(self.node)
                     while n is not None:
-                        path.append(n)
+                        self.path.append(n)
                         n = self.parent.get(n)
-                    return path[::-1]
+                    print(self.path[::-1])
+                    return self.path[::-1]
                 if neighbour not in self.parent:
                     self.queue.append(neighbour)
-                    self.parent[neighbour] = node
+                    self.parent[neighbour] = self.node
         return None
+
+    def setAttacked(self, isAttacked):
+        self.attacked = isAttacked
+
+    def isAttacked(self):
+        return self.attacked
+
+    def setDead(self, isDead):
+        self.dead = isDead
+
+    def isDead(self):
+        return self.dead
+
 
 
 if __name__ == '__main__':
-    pg.init()
-    SIZE = cols, rows = 25, 25
-    TILE = 20
-    sc = pg.display.set_mode([cols * TILE, rows * TILE])
-    clock = pg.time.Clock()
+    pygame.init()
+    SIZE = cols, rows = 26, 26
+    TILE = 18
+    sc = pygame.display.set_mode([cols * TILE, rows * TILE])
+    clock = pygame.time.Clock()
     if os.name == "nt":
         SCRIPT_PATH = os.getcwd()
     else:
         SCRIPT_PATH = sys.path[0]
-    all_sprites = pg.sprite.Group()
-    grid = [[1 if random() < 0.01 else 0 for col in range(cols)] for row in range(rows)]
+    all_sprites = pygame.sprite.Group()
+
+    with open("levels/default_level.txt", 'r') as mapFile:
+        level_map = [line.strip() for line in mapFile]
+    max_width = max(map(len, level_map))
+    grid = list(map(lambda x: x.ljust(max_width, '.'), level_map))
+    print("This is our grid: ")
+    pprint(grid)
+    # grid = [[1 if random() < 0.01 else 0 for col in range(cols)] for row in range(rows)]
     restricted = ["|", "-", "1", "2", "3", "4", 1, 2, 3, 4]
     allowed = ["0", 0, ".", "*"]
 
-    ghosts = {}
-    for i in range(6):
-        start_pos = (2 + i, 2 + i)
-        # remember, ghost[4] is the blue, vulnerable ghost
-        hunter: Hunter = Hunter(all_sprites, start_pos, grid, i, True)
-        ghosts[i] = hunter
+    # REDACT!!!!!
+    ghostGate = [(10, 12), (11, 12), (12, 12), (13, 12), (14, 12), (15, 12),
+                 (10, 13), (11, 13), (12, 13), (13, 13), (14, 13), (15, 13)]
+    # GONNA WORK ONLY FOR DEFAULT MAP!!
+    ghost_color = [(255, 0, 0, 255), (255, 128, 255, 255), (128, 255, 255, 255),
+                   (255, 128, 0, 255), (50, 50, 255, 255), (255, 255, 255, 255)]
+    # Red, pink, blue, orange
+    # blue vulnerable, white
+    ghosts = []
+    for col in range(4):
+        start_pos = x, y = choice(ghostGate)
+        print(f"Start position of ghost {col}: {start_pos}, x: {x}, y: {y}")
+        hunter: Hunter = Hunter(all_sprites, x, y, grid, col)
+        ghosts.append(hunter)
         all_sprites.add(hunter)
 
-    while True:
-        sc.fill(pg.Color('black'))
-        # draw cells
-        [[pg.draw.rect(sc, pg.Color("darkorange"), get_rect(x, y), border_radius=TILE // 5)
-          for x, col in enumerate(row) if col in restricted] for y, row in enumerate(grid)]
-        # Where did we click - path to mouse position
-        mouse_pos = get_click_mouse_pos()
-        if mouse_pos:
-            path = hunter.move(mouse_pos)
-            if path:
-                for path_segment in path:
-                    pg.draw.rect(sc, pg.Color("magenta"), get_rect(*path_segment), border_radius=TILE // 3)
+    pacman = Pacman()
 
+    while True:
+        sc.fill(pygame.Color('black'))
+        # draw cells
+        [[pygame.draw.rect(sc, pygame.Color("darkorange"), get_rect(x, y), border_radius=TILE // 5)
+          for x, col in enumerate(row) if col in restricted] for y, row in enumerate(grid)]
+        # Where do we go - path to mouse position
+        goal = pacman.get_click_mouse_pos()
+        # ghosts[0].setAttacked(True)
+        if goal and ghosts[0].graph[goal]:
+            for hunter in ghosts:
+                if (hunter.row, hunter.col) != goal:
+                    hunter.move(choice(hunter.get_next_nodes(goal[0], goal[1])))
+                    all_sprites.draw(sc)
+                    all_sprites.update()
         # Just some pygame stuff
-        [sys.exit() for event in pg.event.get() if event.type == pg.QUIT]
+        [sys.exit() for event in pygame.event.get() if event.type == pygame.QUIT]
         all_sprites.draw(sc)
         all_sprites.update()
-        pg.display.flip()
+        pygame.display.flip()
         clock.tick(20)
-        pg.display.set_caption("Packman")
+        pygame.display.set_caption("Pacman")
