@@ -67,9 +67,9 @@ class Hunter(pygame.sprite.Sprite):
             self.color_frames(ghost_color[0], ghost_color[self.color])
             self.image = self.anim[0]
             self.rect = self.image.get_rect()
-            print(f"row, col: {row, col}")
-            print(f"get_rect returns: {get_rect(row, col)}")
-            print(f"size of field: {cols, rows}, REALLY: {cols * TILE, rows * TILE}")
+            # print(f"row, col: {row, col}")
+            # print(f"get_rect returns: {get_rect(row, col)}")
+            # print(f"size of field: {cols, rows}, REALLY: {cols * TILE, rows * TILE}")
             self.rect.x, self.rect.y, *_ = get_rect(self.row, self.col)
         except FileNotFoundError:
             self.image = pygame.Surface((TILE, TILE))
@@ -79,7 +79,7 @@ class Hunter(pygame.sprite.Sprite):
         # Usual code
         self.restricted = ["|", "-", "1", "2", "3", "4", 1, 2, 3, 4]
         self.allowed = ["0", 0, ".", "*"]
-        print(f"self.allowed: {self.allowed}")
+        # print(f"self.allowed: {self.allowed}")
         self.graph = {}
         for y, row in enumerate(grid):
             for x, col in enumerate(row):
@@ -88,8 +88,8 @@ class Hunter(pygame.sprite.Sprite):
                 else:
                     self.graph[(x, y)] = []
 
-        print("And here is our graph: ")
-        pprint(self.graph)
+        # print("And here is our graph: ")
+        # pprint(self.graph)
 
     def update(self):  # Ghosts states: Alive, Attacked, Dead Attributes: Color, Direction, Location
         if not self.attacked and not self.dead:
@@ -121,12 +121,12 @@ class Hunter(pygame.sprite.Sprite):
     def move(self, goal):
         if goal and self.graph[goal]:
             if not self.attacked and not self.dead:
-                print(f"We are now at position {self.row, self.col} and gonna go to {goal}")
+                # print(f"We are now at position {self.row, self.col} and gonna go to {goal}")
                 path = self.find_path((self.row, self.col), goal)
-                print(f"Our path is {path}")
+                # print(f"Our path is {path}")
                 if path and len(path) > 1:
                     final = path[1]
-                    print(f"Finally go to {final}")
+                    # print(f"Finally go to {final}")
                     self.row, self.col = final
                 return
             elif self.attacked:
@@ -175,7 +175,7 @@ class Hunter(pygame.sprite.Sprite):
                     while n is not None:
                         self.path.append(n)
                         n = self.parent.get(n)
-                    print(self.path[::-1])
+                    # print(self.path[::-1])
                     return self.path[::-1]
                 if neighbour not in self.parent:
                     self.queue.append(neighbour)
@@ -212,8 +212,8 @@ if __name__ == '__main__':
         level_map = [line.strip() for line in mapFile]
     max_width = max(map(len, level_map))
     grid = list(map(lambda x: x.ljust(max_width, '.'), level_map))
-    print("This is our grid: ")
-    pprint(grid)
+    # print("This is our grid: ")
+    # pprint(grid)
     # grid = [[1 if random() < 0.01 else 0 for col in range(cols)] for row in range(rows)]
     restricted = ["|", "-", "1", "2", "3", "4", 1, 2, 3, 4]
     allowed = ["0", 0, ".", "*"]
@@ -229,7 +229,7 @@ if __name__ == '__main__':
     ghosts = []
     for col in range(4):
         start_pos = x, y = choice(ghostGate)
-        print(f"Start position of ghost {col}: {start_pos}, x: {x}, y: {y}")
+        # print(f"Start position of ghost {col}: {start_pos}, x: {x}, y: {y}")
         hunter: Hunter = Hunter(all_sprites, x, y, grid, col)
         ghosts.append(hunter)
         all_sprites.add(hunter)

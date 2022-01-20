@@ -1,710 +1,269 @@
-import math
-from random import random, randrange
-
-import pygame
-
-
-class Pacman:
-    pass
-
-
-class Game:
-    def __init__(self, level, score):
-        self.paused = True
-        self.ghostUpdateDelay = 1
-        self.ghostUpdateCount = 0
-        self.pacmanUpdateDelay = 1
-        self.pacmanUpdateCount = 0
-        self.tictakChangeDelay = 10
-        self.tictakChangeCount = 0
-        self.ghostsAttacked = False
-        self.highScore = self.getHighScore()
-        self.score = score
-        self.level = level
-        self.lives = 3
-        self.ghosts = [Ghost(14.0, 13.5, "red", 0), Ghost(17.0, 11.5, "blue", 1), Ghost(17.0, 13.5, "pink", 2), Ghost(17.0, 15.5, "orange", 3)]
-        self.pacman = Pacman(26.0, 13.5) # Center of Second Last Row
-        self.total = self.getCount()
-        self.ghostScore = 200
-        self.levels = [[350, 250], [150, 450], [150, 450], [0, 600]]
-        random.shuffle(self.levels)
-        # Level index and Level Progress
-        self.ghostStates = [[1, 0], [0, 0], [1, 0], [0, 0]]
-        index = 0
-        for state in self.ghostStates:
-            state[0] = randrange(2)
-            state[1] = randrange(self.levels[index][state[0]] + 1)
-            index += 1
-        self.collected = 0
-        self.started = False
-        self.gameOver = False
-        self.gameOverCounter = 0
-        self.points = []
-        self.pointsTimer = 10
-        # Berry Spawn Time, Berry Death Time, Berry Eaten
-        self.berryState = [200, 400, False]
-        self.berryLocation = [20.0, 13.5]
-        self.berries = ["tile080.png", "tile081.png", "tile082.png", "tile083.png", "tile084.png", "tile085.png", "tile086.png", "tile087.png"]
-        self.berriesCollected = []
-        self.levelTimer = 0
-        self.berryScore = 100
-        self.lockedInTimer = 100
-        self.lockedIn = True
-        self.extraLifeGiven = False
-        self.musicPlaying = 0
-
-    # Driver method: The games primary update method
-    def update(self):
-        # pygame.image.unload()
-        print(self.ghostStates)
-        if self.gameOver:
-            self.gameOverFunc()
-            return
-        if self.paused or not self.started:
-            self.drawTilesAround(21, 10)
-            self.drawTilesAround(21, 11)
-            self.drawTilesAround(21, 12)
-            self.drawTilesAround(21, 13)
-            self.drawTilesAround(21, 14)
-            self.drawReady()
-            pygame.display.update()
-            return
-
-        self.levelTimer += 1
-        self.ghostUpdateCount += 1
-        self.pacmanUpdateCount += 1
-        self.tictakChangeCount += 1
-        self.ghostsAttacked = False
-
-        if self.score >= 10000 and not self.extraLifeGiven:
-            self.lives += 1
-            self.extraLifeGiven = True
-            self.forcePlayMusic("pacman_extrapac.wav")
-
-        # Draw tiles around ghosts and pacman
-        self.clearBoard()
-        for ghost in self.ghosts:
-            if ghost.attacked:
-                self.ghostsAttacked = True
-
-        # Check if the ghost should case pacman
-        index = 0
-        for state in self.ghostStates:
-            state[1] += 1
-            if state[1] >= self.levels[index][state[0]]:
-                state[1] = 0
-                state[0] += 1
-                state[0] %= 2
-            index += 1
-
-        index = 0
-        for ghost in self.ghosts:
-            if not ghost.attacked and not ghost.dead and self.ghostStates[index][0] == 0:
-                ghost.target = [self.pacman.row, self.pacman.col]
-            index += 1
-
-        if self.levelTimer == self.lockedInTimer:
-            self.lockedIn = False
-
-        self.checkSurroundings
-        if self.ghostUpdateCount == self.ghostUpdateDelay:
-            for ghost in self.ghosts:
-                ghost.update()
-            self.ghostUpdateCount = 0
-
-        if self.tictakChangeCount == self.tictakChangeDelay:
-            #Changes the color of special Tic-Taks
-            self.flipColor()
-            self.tictakChangeCount = 0
-
-        if self.pacmanUpdateCount == self.pacmanUpdateDelay:
-            self.pacmanUpdateCount = 0
-            self.pacman.update()
-            self.pacman.col %= len(gameBoard[0])
-            if self.pacman.row % 1.0 == 0 and self.pacman.col % 1.0 == 0:
-                if gameBoard[int(self.pacman.row)][int(self.pacman.col)] == 2:
-                    self.playMusic("munch_1.wav")
-                    gameBoard[int(self.pacman.row)][int(self.pacman.col)] = 1
-                    self.score += 10
-                    self.collected += 1
-                    # Fill tile with black
-                    pygame.draw.rect(screen, (0, 0, 0), (self.pacman.col * square, self.pacman.row * square, square, square))
-                elif gameBoard[int(self.pacman.row)][int(self.pacman.col)] == 5 or gameBoard[int(self.pacman.row)][int(self.pacman.col)] == 6:
-                    self.forcePlayMusic("power_pellet.wav")
-                    gameBoard[int(self.pacman.row)][int(self.pacman.col)] = 1
-                    self.collected += 1
-                    # Fill tile with black
-                    pygame.draw.rect(screen, (0, 0, 0), (self.pacman.col * square, self.pacman.row * square, square, square))
-                    self.score += 50
-                    self.ghostScore = 200
-                    for ghost in self.ghosts:
-                        ghost.attackedCount = 0
-                        ghost.setAttacked(True)
-                        ghost.setTarget()
-                        self.ghostsAttacked = True
-        self.checkSurroundings()
-        self.highScore = max(self.score, self.highScore)
-
-        global running
-        if self.collected == self.total:
-            print("New Level")
-            self.forcePlayMusic("intermission.wav")
-            self.level += 1
-            self.newLevel()
-
-        if self.level - 1 == 8: #(self.levels[0][0] + self.levels[0][1]) // 50:
-            print("You win", self.level, len(self.levels))
-            running = False
-        self.softRender()
-
-    # Render method
-    def render(self):
-        screen.fill((0, 0, 0)) # Flushes the screen
-        # Draws game elements
-        currentTile = 0
-        self.displayLives()
-        self.displayScore()
-        for i in range(3, len(gameBoard) - 2):
-            for j in range(len(gameBoard[0])):
-                if gameBoard[i][j] == 3: # Draw wall
-                    imageName = str(currentTile)
-                    if len(imageName) == 1:
-                        imageName = "00" + imageName
-                    elif len(imageName) == 2:
-                         imageName = "0" + imageName
-                    # Get image of desired tile
-                    imageName = "tile" + imageName + ".png"
-                    tileImage = pygame.image.load(BoardPath + imageName)
-                    tileImage = pygame.transform.scale(tileImage, (square, square))
-
-                    #Display image of tile
-                    screen.blit(tileImage, (j * square, i * square, square, square))
-
-                    # pygame.draw.rect(screen, (0, 0, 255),(j * square, i * square, square, square)) # (x, y, width, height)
-                elif gameBoard[i][j] == 2: # Draw Tic-Tak
-                    pygame.draw.circle(screen, pelletColor,(j * square + square//2, i * square + square//2), square//4)
-                elif gameBoard[i][j] == 5: #Black Special Tic-Tak
-                    pygame.draw.circle(screen, (0, 0, 0),(j * square + square//2, i * square + square//2), square//2)
-                elif gameBoard[i][j] == 6: #White Special Tic-Tak
-                    pygame.draw.circle(screen, pelletColor,(j * square + square//2, i * square + square//2), square//2)
-
-                currentTile += 1
-        # Draw Sprites
-        for ghost in self.ghosts:
-            ghost.draw()
-        self.pacman.draw()
-        # Updates the screen
-        pygame.display.update()
-
-
-    def softRender(self):
-        pointsToDraw = []
-        for point in self.points:
-            if point[3] < self.pointsTimer:
-                pointsToDraw.append([point[2], point[0], point[1]])
-                point[3] += 1
-            else:
-                self.points.remove(point)
-                self.drawTilesAround(point[0], point[1])
-
-        for point in pointsToDraw:
-            self.drawPoints(point[0], point[1], point[2])
-
-        # Draw Sprites
-        for ghost in self.ghosts:
-            ghost.draw()
-        self.pacman.draw()
-        self.displayScore()
-        self.displayBerries()
-        self.displayLives()
-        # for point in pointsToDraw:
-        #     self.drawPoints(point[0], point[1], point[2])
-        self.drawBerry()
-        # Updates the screen
-        pygame.display.update()
-
-    def playMusic(self, music):
-        # return False # Uncomment to disable music
-        global musicPlaying
-        if not pygame.mixer.music.get_busy():
-            pygame.mixer.music.unload()
-            pygame.mixer.music.load(MusicPath + music)
-            pygame.mixer.music.queue(MusicPath + music)
-            pygame.mixer.music.play()
-            if music == "munch_1.wav":
-                musicPlaying = 0
-            elif music == "siren_1.wav":
-                musicPlaying = 2
-            else:
-                musicPlaying = 1
-
-    def forcePlayMusic(self, music):
-        # return False # Uncomment to disable music
-        pygame.mixer.music.unload()
-        pygame.mixer.music.load(MusicPath + music)
-        pygame.mixer.music.play()
-        global musicPlaying
-        musicPlaying = 1
-
-    def clearBoard(self):
-            # Draw tiles around ghosts and pacman
-            for ghost in self.ghosts:
-                self.drawTilesAround(ghost.row, ghost.col)
-            self.drawTilesAround(self.pacman.row, self.pacman.col)
-            self.drawTilesAround(self.berryLocation[0], self.berryLocation[1])
-            # Clears Ready! Label
-            self.drawTilesAround(20, 10)
-            self.drawTilesAround(20, 11)
-            self.drawTilesAround(20, 12)
-            self.drawTilesAround(20, 13)
-            self.drawTilesAround(20, 14)
-
-    def checkSurroundings(self):
-        # Check if pacman got killed
-        for ghost in self.ghosts:
-            if self.touchingPacman(ghost.row, ghost.col) and not ghost.attacked:
-                if self.lives == 1:
-                    print("You lose")
-                    self.forcePlayMusic("death_1.wav")
-                    self.gameOver = True
-                    #Removes the ghosts from the screen
-                    for ghost in self.ghosts:
-                        self.drawTilesAround(ghost.row, ghost.col)
-                    self.drawTilesAround(self.pacman.row, self.pacman.col)
-                    self.pacman.draw()
-                    pygame.display.update()
-                    pause(10000000)
-                    return
-                self.started = False
-                self.forcePlayMusic("pacman_death.wav")
-                reset()
-            elif self.touchingPacman(ghost.row, ghost.col) and ghost.isAttacked() and not ghost.isDead():
-                ghost.setDead(True)
-                ghost.setTarget()
-                ghost.ghostSpeed = 1
-                ghost.row = math.floor(ghost.row)
-                ghost.col = math.floor(ghost.col)
-                self.score += self.ghostScore
-                self.points.append([ghost.row, ghost.col, self.ghostScore, 0])
-                self.ghostScore *= 2
-                self.forcePlayMusic("eat_ghost.wav")
-                pause(10000000)
-        if self.touchingPacman(self.berryLocation[0], self.berryLocation[1]) and not self.berryState[2] and self.levelTimer in range(self.berryState[0], self.berryState[1]):
-            self.berryState[2] = True
-            self.score += self.berryScore
-            self.points.append([self.berryLocation[0], self.berryLocation[1], self.berryScore, 0])
-            self.berriesCollected.append(self.berries[(self.level - 1) % 8])
-            self.forcePlayMusic("eat_fruit.wav")
-    # Displays the current score
-    def displayScore(self):
-        textOneUp = ["tile033.png", "tile021.png", "tile016.png"]
-        textHighScore = ["tile007.png", "tile008.png", "tile006.png", "tile007.png", "tile015.png", "tile019.png", "tile002.png", "tile014.png", "tile018.png", "tile004.png"]
-        index = 0
-        scoreStart = 5
-        highScoreStart = 11
-        for i in range(scoreStart, scoreStart+len(textOneUp)):
-            tileImage = pygame.image.load(TextPath + textOneUp[index])
-            tileImage = pygame.transform.scale(tileImage, (square, square))
-            screen.blit(tileImage, (i * square, 4, square, square))
-            index += 1
-        score = str(self.score)
-        if score == "0":
-            score = "00"
-        index = 0
-        for i in range(0, len(score)):
-            digit = int(score[i])
-            tileImage = pygame.image.load(TextPath + "tile0" + str(32 + digit) + ".png")
-            tileImage = pygame.transform.scale(tileImage, (square, square))
-            screen.blit(tileImage, ((scoreStart + 2 + index) * square, square + 4, square, square))
-            index += 1
-
-        index = 0
-        for i in range(highScoreStart, highScoreStart+len(textHighScore)):
-            tileImage = pygame.image.load(TextPath + textHighScore[index])
-            tileImage = pygame.transform.scale(tileImage, (square, square))
-            screen.blit(tileImage, (i * square, 4, square, square))
-            index += 1
-
-        highScore = str(self.highScore)
-        if highScore == "0":
-            highScore = "00"
-        index = 0
-        for i in range(0, len(highScore)):
-            digit = int(highScore[i])
-            tileImage = pygame.image.load(TextPath + "tile0" + str(32 + digit) + ".png")
-            tileImage = pygame.transform.scale(tileImage, (square, square))
-            screen.blit(tileImage, ((highScoreStart + 6 + index) * square, square + 4, square, square))
-            index += 1
-
-    def drawBerry(self):
-        if self.levelTimer in range(self.berryState[0], self.berryState[1]) and not self.berryState[2]:
-            # print("here")
-            berryImage = pygame.image.load(ElementPath + self.berries[(self.level - 1) % 8])
-            berryImage = pygame.transform.scale(berryImage, (int(square * spriteRatio), int(square * spriteRatio)))
-            screen.blit(berryImage, (self.berryLocation[1] * square, self.berryLocation[0] * square, square, square))
-
-
-    def drawPoints(self, points, row, col):
-        pointStr = str(points)
-        index = 0
-        for i in range(len(pointStr)):
-            digit = int(pointStr[i])
-            tileImage = pygame.image.load(TextPath + "tile" + str(224 + digit) + ".png")
-            tileImage = pygame.transform.scale(tileImage, (square//2, square//2))
-            screen.blit(tileImage, ((col) * square + (square//2 * index), row * square - 20, square//2, square//2))
-            index += 1
-
-    def drawReady(self):
-        ready = ["tile274.png", "tile260.png", "tile256.png", "tile259.png", "tile281.png", "tile283.png"]
-        for i in range(len(ready)):
-            letter = pygame.image.load(TextPath + ready[i])
-            letter = pygame.transform.scale(letter, (int(square), int(square)))
-            screen.blit(letter, ((11 + i) * square, 20 * square, square, square))
-
-    def gameOverFunc(self):
-        global running
-        if self.gameOverCounter == 12:
-            running = False
-            self.recordHighScore()
-            return
-
-        # Resets the screen around pacman
-        self.drawTilesAround(self.pacman.row, self.pacman.col)
-
-        # Draws new image
-        pacmanImage = pygame.image.load(ElementPath + "tile" + str(116 + self.gameOverCounter) + ".png")
-        pacmanImage = pygame.transform.scale(pacmanImage, (int(square * spriteRatio), int(square * spriteRatio)))
-        screen.blit(pacmanImage, (self.pacman.col * square + spriteOffset, self.pacman.row * square + spriteOffset, square, square))
-        pygame.display.update()
-        pause(5000000)
-        self.gameOverCounter += 1
-
-    def displayLives(self):
-        # 33 rows || 28 cols
-        # Lives[[31, 5], [31, 3], [31, 1]]
-        livesLoc = [[34, 3], [34, 1]]
-        for i in range(self.lives - 1):
-            lifeImage = pygame.image.load(ElementPath + "tile054.png")
-            lifeImage = pygame.transform.scale(lifeImage, (int(square * spriteRatio), int(square * spriteRatio)))
-            screen.blit(lifeImage, (livesLoc[i][1] * square, livesLoc[i][0] * square - spriteOffset, square, square))
-
-    def displayBerries(self):
-        firstBerrie = [34, 26]
-        for i in range(len(self.berriesCollected)):
-            berrieImage = pygame.image.load(ElementPath + self.berriesCollected[i])
-            berrieImage = pygame.transform.scale(berrieImage, (int(square * spriteRatio), int(square * spriteRatio)))
-            screen.blit(berrieImage, ((firstBerrie[1] - (2*i)) * square, firstBerrie[0] * square + 5, square, square))
-
-    def touchingPacman(self, row, col):
-        if row - 0.5 <= self.pacman.row and row >= self.pacman.row and col == self.pacman.col:
-            return True
-        elif row + 0.5 >= self.pacman.row and row <= self.pacman.row and col == self.pacman.col:
-            return True
-        elif row == self.pacman.row and col - 0.5 <= self.pacman.col and col >= self.pacman.col:
-            return True
-        elif row == self.pacman.row and col + 0.5 >= self.pacman.col and col <= self.pacman.col:
-            return True
-        elif row == self.pacman.row and col == self.pacman.col:
-            return True
-        return False
-
-    def newLevel(self):
-        reset()
-        self.lives += 1
-        self.collected = 0
-        self.started = False
-        self.berryState = [200, 400, False]
-        self.levelTimer = 0
-        self.lockedIn = True
-        for level in self.levels:
-            level[0] = min((level[0] + level[1]) - 100, level[0] + 50)
-            level[1] = max(100, level[1] - 50)
-        random.shuffle(self.levels)
-        index = 0
-        for state in self.ghostStates:
-            state[0] = randrange(2)
-            state[1] = randrange(self.levels[index][state[0]] + 1)
-            index += 1
-        global gameBoard
-        gameBoard = copy.deepcopy(originalGameBoard)
-        self.render()
-
-    def drawTilesAround(self, row, col):
-        row = math.floor(row)
-        col = math.floor(col)
-        for i in range(row-2, row+3):
-            for j in range(col-2, col+3):
-                if i >= 3 and i < len(gameBoard) - 2 and j >= 0 and j < len(gameBoard[0]):
-                    imageName = str(((i - 3) * len(gameBoard[0])) + j)
-                    if len(imageName) == 1:
-                        imageName = "00" + imageName
-                    elif len(imageName) == 2:
-                         imageName = "0" + imageName
-                    # Get image of desired tile
-                    imageName = "tile" + imageName + ".png"
-                    tileImage = pygame.image.load(BoardPath + imageName)
-                    tileImage = pygame.transform.scale(tileImage, (square, square))
-                    #Display image of tile
-                    screen.blit(tileImage, (j * square, i * square, square, square))
-
-                    if gameBoard[i][j] == 2: # Draw Tic-Tak
-                        pygame.draw.circle(screen, pelletColor,(j * square + square//2, i * square + square//2), square//4)
-                    elif gameBoard[i][j] == 5: #Black Special Tic-Tak
-                        pygame.draw.circle(screen, (0, 0, 0),(j * square + square//2, i * square + square//2), square//2)
-                    elif gameBoard[i][j] == 6: #White Special Tic-Tak
-                        pygame.draw.circle(screen, pelletColor,(j * square + square//2, i * square + square//2), square//2)
-
-    # Flips Color of Special Tic-Taks
-    def flipColor(self):
-        global gameBoard
-        for i in range(3, len(gameBoard) - 2):
-            for j in range(len(gameBoard[0])):
-                if gameBoard[i][j] == 5:
-                    gameBoard[i][j] = 6
-                    pygame.draw.circle(screen, pelletColor,(j * square + square//2, i * square + square//2), square//2)
-                elif gameBoard[i][j] == 6:
-                    gameBoard[i][j] = 5
-                    pygame.draw.circle(screen, (0, 0, 0),(j * square + square//2, i * square + square//2), square//2)
-
-    def getCount(self):
-        total = 0
-        for i in range(3, len(gameBoard) - 2):
-            for j in range(len(gameBoard[0])):
-                if gameBoard[i][j] == 2 or gameBoard[i][j] == 5 or gameBoard[i][j] == 6:
-                    total += 1
-        return total
-
-    def getHighScore(self):
-        file = open(DataPath + "HighScore.txt", "r")
-        highScore = int(file.read())
-        file.close()
-        return highScore
-
-    def recordHighScore(self):
-        file = open(DataPath + "HighScore.txt", "w").close()
-        file = open(DataPath + "HighScore.txt", "w+")
-        file.write(str(self.highScore))
-        file.close()
+from create import *
 
 
 
-class Ghost:
-    def __init__(self, row, col, color, changeFeetCount):
-        self.row = row
-        self.col = col
-        self.attacked = False
-        self.color = color
-        self.dir = randrange(4)
-        self.dead = False
-        self.changeFeetCount = changeFeetCount
-        self.changeFeetDelay = 5
-        self.target = [-1, -1]
-        self.ghostSpeed = 1/4
-        self.lastLoc = [-1, -1]
-        self.attackedTimer = 240
-        self.attackedCount = 0
-        self.deathTimer = 120
-        self.deathCount = 0
 
-    def update(self):
-        # print(self.row, self.col)
-        if self.target == [-1, -1] or (self.row == self.target[0] and self.col == self.target[1]) or gameBoard[int(self.row)][int(self.col)] == 4 or self.dead:
-            self.setTarget()
-        self.setDir()
-        self.move()
+def load_image_pacman(name, colorkey=None):
+    fullname = os.path.join('data/pacman_sprites', name)
+    if not os.path.isfile(fullname):
+        print(f"Файл с изображением '{fullname}' не найден")
+        sys.exit()
+    image = pygame.image.load(fullname)
+    if colorkey is not None:
+        image = image.convert()
+        if colorkey == -1:
+            colorkey = image.get_at((0, 0))
+        image.set_colorkey(colorkey)
+    return image
 
-        if self.attacked:
-            self.attackedCount += 1
+# преобразование текстового файла в список спрайтов
+def load_level(filename):
+    filename = "levels/" + filename
+    with open(filename, 'r') as mapFile:
+        level_map = [line.strip() for line in mapFile]
+    max_width = max(map(len, level_map))
+    return list(map(lambda x: x.ljust(max_width, '.'), level_map))
 
-        if self.attacked and not self.dead:
-            self.ghostSpeed = 1/8
 
-        if self.attackedCount == self.attackedTimer and self.attacked:
-            if not self.dead:
-                self.ghostSpeed = 1/4
-                self.row = math.floor(self.row)
-                self.col = math.floor(self.col)
+# создание уровня
+def generate_level(level):
+    global base_group
+    new_player, x, y = None, None, None
+    for y in range(len(level)):
+        for x in range(len(level[y])):
+            if level[y][x] == '@':
+                Tile('empty', x, y)
+                new_player = Player(x, y)
+            elif level[y][x] in list(values.keys()):
+                Tile(values[level[y][x]], x, y)
+    return new_player, x, y
 
-            self.attackedCount = 0
-            self.attacked = False
-            self.setTarget()
 
-        if self.dead and gameBoard[self.row][self.col] == 4:
-            self.deathCount += 1
-            self.attacked = False
-            if self.deathCount == self.deathTimer:
-                self.deathCount = 0
-                self.dead = False
-                self.ghostSpeed = 1/4
+def terminate():
+    pygame.quit()
+    sys.exit()
 
-    def draw(self): # Ghosts states: Alive, Attacked, Dead Attributes: Color, Direction, Location
-        ghostImage = pygame.image.load(ElementPath + "tile152.png")
-        currentDir = ((self.dir + 3) % 4) * 2
-        if self.changeFeetCount == self.changeFeetDelay:
-            self.changeFeetCount = 0
-            currentDir += 1
-        self.changeFeetCount += 1
-        if self.dead:
-            tileNum = 152 + currentDir
-            ghostImage = pygame.image.load(ElementPath + "tile" + str(tileNum) + ".png")
-        elif self.attacked:
-            if self.attackedTimer - self.attackedCount < self.attackedTimer//3:
-                if (self.attackedTimer - self.attackedCount) % 31 < 26:
-                    ghostImage = pygame.image.load(ElementPath + "tile0" + str(70 + (currentDir - (((self.dir + 3) % 4) * 2))) + ".png")
+
+# оформление стартового окна
+def print_intro():
+    screen.fill('black')
+    pygame.display.set_caption('play pacman')
+    pygame.draw.rect(screen, 'yellow', (100, 300, 300, 50), 1)
+    pygame.display.flip()
+    intro_text = ["Welcome to", "PACMAN",
+                  "Введите название своего уровня", "или", "сразу нажмите Enter для начала игры"]
+    font = pygame.font.Font(None, 40)
+    string_rendered = font.render(intro_text[0], 1, pygame.Color('yellow'))
+    intro_rect = string_rendered.get_rect()
+    intro_rect.top = 50
+    intro_rect.x = 250 - intro_rect.width // 2
+    screen.blit(string_rendered, intro_rect)
+    font = pygame.font.Font(None, 80)
+    string_rendered = font.render(intro_text[1], 3, pygame.Color('yellow'))
+    intro_rect = string_rendered.get_rect()
+    intro_rect.top = 80
+    intro_rect.x = 250 - intro_rect.width // 2
+    screen.blit(string_rendered, intro_rect)
+    font = pygame.font.Font(None, 20)
+    for i in range(2, 5):
+        string_rendered = font.render(intro_text[i], 1, pygame.Color('yellow'))
+        intro_rect = string_rendered.get_rect()
+        intro_rect.top = 250 + 15 * (i - 2)
+        intro_rect.x = 250 - intro_rect.width // 2
+        screen.blit(string_rendered, intro_rect)
+    picture = pygame.transform.scale(load_image('intro_picture.jpg'), (300, 70))
+    screen.blit(picture, (100, 400))
+
+
+# отображение ввода текста пользователем в окне
+def print_text(text):
+    font = pygame.font.Font(None, 40)
+    text_coord = 310
+    pygame.draw.rect(screen, 'black', (105, 305, 290, 40), 0)
+    string_rendered = font.render(text, 20, pygame.Color('yellow'))
+    intro_rect = string_rendered.get_rect()
+    intro_rect.top = text_coord
+    intro_rect.x = 110
+    screen.blit(string_rendered, intro_rect)
+    pygame.display.flip()
+
+
+# обработка ввода
+def start_screen():
+    need_input = False
+    input_text = ''
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                terminate()
+            elif need_input is False and event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_RETURN:
+                    return 'default_level'
+            elif need_input and event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_RETURN:
+                    return input_text
+                elif event.key == pygame.K_BACKSPACE:
+                    if len(input_text) > 0:
+                        input_text = input_text[:-1]
                 else:
-                    ghostImage = pygame.image.load(ElementPath + "tile0" + str(72 + (currentDir - (((self.dir + 3) % 4) * 2))) + ".png")
-            else:
-                ghostImage = pygame.image.load(ElementPath + "tile0" + str(72 + (currentDir - (((self.dir + 3) % 4) * 2))) + ".png")
+                    if len(input_text) <= 20:
+                        input_text += event.unicode
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                if event.pos[0] > 100 and event.pos[0] < 400 and \
+                        event.pos[1] > 300 and event.pos[1] < 350:
+                    need_input = True
+        print_text(input_text)
+        pygame.display.flip()
+
+
+# отображение уровней (необходимо название уровня и количество
+def show_level(level, count1, count2):
+    pygame.init()
+    size = count1 * 18 + 100, count2 * 18 + 100
+    screen = pygame.display.set_mode(size)
+    screen.fill('black')
+    pygame.display.set_caption('play pacman')
+    try:
+        player, level_x, level_y = generate_level(load_level(level))
+    except FileNotFoundError:
+        player, level_x, level_y = generate_level(load_level('default_level.txt'))
+    all_sprites.draw(screen)
+    pygame.display.flip()
+    return player, level_x, level_y
+
+
+# класс пакмена
+class Player(pygame.sprite.Sprite):
+    def __init__(self, pos_x, pos_y):
+        super().__init__(player_group, all_sprites)
+        self.image = load_image_pacman('pacman.gif')
+        self.rect = self.image.get_rect().move(
+            tile_width * pos_x + 50, tile_height * pos_y + 50)
+        self.x = pos_x
+        self.y = pos_y
+        self.score = 0
+
+    # проверяет все столкновения
+    def collides(self):
+        lst = ['vertical', 'horisontal', '1', '2', '3', '4']
+        if pygame.sprite.spritecollideany(self, tiles_group) is None or \
+            pygame.sprite.spritecollideany(self, tiles_group).image in [tile_images[_] for _ in lst]:
+            return False
         else:
-            if self.color == "blue":
-                tileNum = 136 + currentDir
-                ghostImage = pygame.image.load(ElementPath + "tile" + str(tileNum) + ".png")
-            elif self.color == "pink":
-                tileNum = 128 + currentDir
-                ghostImage = pygame.image.load(ElementPath + "tile" + str(tileNum) + ".png")
-            elif self.color == "orange":
-                tileNum = 144 + currentDir
-                ghostImage = pygame.image.load(ElementPath + "tile" + str(tileNum) + ".png")
-            elif self.color == "red":
-                tileNum = 96 + currentDir
-                if tileNum < 100:
-                    ghostImage = pygame.image.load(ElementPath + "tile0" + str(tileNum) + ".png")
-                else:
-                    ghostImage = pygame.image.load(ElementPath + "tile" + str(tileNum) + ".png")
-
-        ghostImage = pygame.transform.scale(ghostImage, (int(square * spriteRatio), int(square * spriteRatio)))
-        screen.blit(ghostImage, (self.col * square + spriteOffset, self.row * square + spriteOffset, square, square))
-
-    def isValidTwo(self, cRow, cCol, dist, visited):
-        if cRow < 3 or cRow >= len(gameBoard) - 5 or cCol < 0 or cCol >= len(gameBoard[0]) or gameBoard[cRow][cCol] == 3:
-            return False
-        elif visited[cRow][cCol] <= dist:
-            return False
-        return True
-
-    def isValid(self, cRow, cCol):
-        if cCol < 0 or cCol > len(gameBoard[0]) - 1:
+            if pygame.sprite.spritecollideany(self, tiles_group).image is tile_images['point']:
+                self.score += 10
+                tile = pygame.sprite.spritecollideany(self, tiles_group)
+                tile.image = tile_images['empty']
+            elif pygame.sprite.spritecollideany(self, tiles_group).image is tile_images['energo']:
+                self.score += 50
+                tile = pygame.sprite.spritecollideany(self, tiles_group)
+                tile.image = tile_images['empty']
+            # СЮДА ДОПИСАТЬ ОБРАБОТКУ СТОЛКНОВЕНИЙ С ПРИЗРАКАМИ
             return True
-        for ghost in game.ghosts:
-            if ghost.color == self.color:
-                continue
-            if ghost.row == cRow and ghost.col == cCol and not self.dead:
-                return False
-        if not ghostGate.count([cRow, cCol]) == 0:
-            if self.dead and self.row < cRow:
-                return True
-            elif self.row > cRow and not self.dead and not self.attacked and not game.lockedIn:
-                return True
-            else:
-                return False
-        if gameBoard[cRow][cCol] == 3:
-            return False
-        return True
 
-    def setDir(self): #Very inefficient || can easily refactor
-        # BFS search -> Not best route but a route none the less
-        dirs = [[0, -self.ghostSpeed, 0],
-                [1, 0, self.ghostSpeed],
-                [2, self.ghostSpeed, 0],
-                [3, 0, -self.ghostSpeed]
-        ]
-        random.shuffle(dirs)
-        best = 10000
-        bestDir = -1
-        for newDir in dirs:
-            if self.calcDistance(self.target, [self.row + newDir[1], self.col + newDir[2]]) < best:
-                if not (self.lastLoc[0] == self.row + newDir[1] and self.lastLoc[1] == self.col + newDir[2]):
-                    if newDir[0] == 0 and self.col % 1.0 == 0:
-                        if self.isValid(math.floor(self.row + newDir[1]), int(self.col + newDir[2])):
-                            bestDir = newDir[0]
-                            best = self.calcDistance(self.target, [self.row + newDir[1], self.col + newDir[2]])
-                    elif newDir[0] == 1 and self.row % 1.0 == 0:
-                        if self.isValid(int(self.row + newDir[1]), math.ceil(self.col + newDir[2])):
-                            bestDir = newDir[0]
-                            best = self.calcDistance(self.target, [self.row + newDir[1], self.col + newDir[2]])
-                    elif newDir[0] == 2 and self.col % 1.0 == 0:
-                        if self.isValid(math.ceil(self.row + newDir[1]), int(self.col + newDir[2])):
-                            bestDir = newDir[0]
-                            best = self.calcDistance(self.target, [self.row + newDir[1], self.col + newDir[2]])
-                    elif newDir[0] == 3 and self.row % 1.0 == 0:
-                        if self.isValid(int(self.row + newDir[1]), math.floor(self.col + newDir[2])):
-                            bestDir = newDir[0]
-                            best = self.calcDistance(self.target, [self.row + newDir[1], self.col + newDir[2]])
-        self.dir = bestDir
+    # обрабатывает движение пакмена влево
+    def update_left(self):
+        self.rect = self.rect.move(-9, 0)
+        fl = self.collides()
+        self.rect = self.rect.move(9, 0)
+        lst_picture = ['l_0', 'l_1', 'l_2', 'l_3', 'l_4', 'l_5', 'l_6', 'l_7', 'l_0']
+        if fl:
+            for _ in range(9):
+                self.rect = self.rect.move(-1, 0)
+                self.image = load_image_pacman(lst_picture[_] + '.gif')
+                all_sprites.draw(screen)
+                player_group.draw(screen)
+                pygame.display.flip()
+                clock.tick(FPS)
 
-    def calcDistance(self, a, b):
-        dR = a[0] - b[0]
-        dC = a[1] - b[1]
-        return math.sqrt((dR * dR) + (dC * dC))
+    # обрабатыает движения пакмена вправо
+    def update_right(self):
+        self.rect = self.rect.move(18, 0)
+        fl = self.collides()
+        self.rect = self.rect.move(-18, 0)
+        lst_picture = ['r_0', 'r_1', 'r_2', 'r_3', 'r_4', 'r_5', 'r_6', 'r_7', 'r_0']
+        if fl:
+            for _ in range(9):
+                self.rect = self.rect.move(1, 0)
+                self.image = load_image_pacman(lst_picture[_] + '.gif')
+                all_sprites.draw(screen)
+                player_group.draw(screen)
+                pygame.display.flip()
+                clock.tick(FPS)
 
-    def setTarget(self):
-        if gameBoard[int(self.row)][int(self.col)] == 4 and not self.dead:
-            self.target = [ghostGate[0][0] - 1, ghostGate[0][1]+1]
-            return
-        elif gameBoard[int(self.row)][int(self.col)] == 4 and self.dead:
-            self.target = [self.row, self.col]
-        elif self.dead:
-            self.target = [14, 13]
-            return
+    # обрабатывает движения пакмена вверх
+    def update_up(self):
+        self.rect = self.rect.move(0, -9)
+        fl = self.collides()
+        self.rect = self.rect.move(0, 9)
+        lst_picture = ['u_0', 'u_1', 'u_2', 'u_3', 'u_4', 'u_5', 'u_6', 'u_7', 'u_0']
+        if fl:
+            for _ in range(9):
+                self.rect = self.rect.move(0, -1)
+                self.image = load_image_pacman(lst_picture[_] + '.gif')
+                all_sprites.draw(screen)
+                player_group.draw(screen)
+                pygame.display.flip()
+                clock.tick(FPS)
 
-        # Records the quadrants of each ghost's target
-        quads = [0, 0, 0, 0]
-        for ghost in game.ghosts:
-            # if ghost.target[0] == self.row and ghost.col == self.col:
-            #     continue
-            if ghost.target[0] <= 15 and ghost.target[1] >= 13:
-                quads[0] += 1
-            elif ghost.target[0] <= 15 and ghost.target[1] < 13:
-                quads[1] += 1
-            elif ghost.target[0] > 15 and ghost.target[1] < 13:
-                quads[2] += 1
-            elif ghost.target[0]> 15 and ghost.target[1] >= 13:
-                quads[3] += 1
-
-        # Finds a target that will keep the ghosts dispersed
-        while True:
-            self.target = [randrange(31), randrange(28)]
-            quad = 0
-            if self.target[0] <= 15 and self.target[1] >= 13:
-                quad = 0
-            elif self.target[0] <= 15 and self.target[1] < 13:
-                quad = 1
-            elif self.target[0] > 15 and self.target[1] < 13:
-                quad = 2
-            elif self.target[0] > 15 and self.target[1] >= 13:
-                quad = 3
-            if not gameBoard[self.target[0]][self.target[1]] == 3 and not gameBoard[self.target[0]][self.target[1]] == 4:
-                break
-            elif quads[quad] == 0:
-                break
-
-    def move(self):
-        # print(self.target)
-        self.lastLoc = [self.row, self.col]
-        if self.dir == 0:
-            self.row -= self.ghostSpeed
-        elif self.dir == 1:
-            self.col += self.ghostSpeed
-        elif self.dir == 2:
-            self.row += self.ghostSpeed
-        elif self.dir == 3:
-            self.col -= self.ghostSpeed
-
-        # Incase they go through the middle tunnel
-        self.col = self.col % len(gameBoard[0])
-        if self.col < 0:
-            self.col = len(gameBoard[0]) - 0.5
+    # обрабатывает движения пакмена вниз
+    def update_down(self):
+        self.rect = self.rect.move(0, 18)
+        fl = self.collides()
+        self.rect = self.rect.move(0, -18)
+        lst_picture = ['d_0', 'd_1', 'd_2', 'd_3', 'd_4', 'd_5', 'd_6', 'd_7', 'd_0']
+        if fl:
+            for _ in range(9):
+                self.rect = self.rect.move(0, 1)
+                self.image = load_image_pacman(lst_picture[_] + '.gif')
+                all_sprites.draw(screen)
+                player_group.draw(screen)
+                pygame.display.flip()
+                clock.tick(FPS)
 
 
-
-    def setAttacked(self, isAttacked):
-        self.attacked = isAttacked
-
-    def isAttacked(self):
-        return self.attacked
-
-    def setDead(self, isDead):
-        self.dead = isDead
-
-    def isDead(self):
-        return self.dead
+if __name__ == '__main__':
+    pygame.init()
+    size = width, height = 500, 500
+    screen = pygame.display.set_mode(size)
+    running = True
+    player = None
+    print_intro()
+    level = start_screen()
+    if '.txt' not in level:
+        level += '.txt'
+    try:
+        load_level(level)
+    except FileNotFoundError:
+        level = 'default_level.txt'
+    count2 = len(load_level(level))
+    count1 = len(load_level(level)[0])
+    player, level_x, level_y = show_level(level, count1, count2)
+    clock = pygame.time.Clock()
+    FPS = 60
+    while running:
+        keys = pygame.key.get_pressed()
+        if keys[pygame.K_LEFT]:
+            player.update_left()
+        elif keys[pygame.K_RIGHT]:
+            player.update_right()
+        elif keys[pygame.K_UP]:
+            player.update_up()
+        elif keys[pygame.K_DOWN]:
+            player.update_down()
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_LEFT:
+                    player.update_left()
+                elif event.key == pygame.K_RIGHT:
+                    player.update_right()
+                elif event.key == pygame.K_UP:
+                    player.update_up()
+                elif event.key == pygame.K_DOWN:
+                    player.update_down()
+        all_sprites.draw(screen)
+        player_group.draw(screen)
+        pygame.display.flip()
+        clock.tick(FPS)
