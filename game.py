@@ -1,4 +1,4 @@
-from functios import *
+from functions import *
 
 events_sequence, counter, number = ['up'], 1, 0
 
@@ -19,13 +19,12 @@ class Game:
         grid = load_level(level)
         self.pacman, self.x, self.y, self.pacman_pos = generate_level(grid)
 
-
-
         self.ghosts = []
         temp = sample(ghostGate, k=4)
-        for col in range(1):
-            start_pos = x, y = temp[col]
-            hunter = Hunter(hunter_group, x, y, grid, col)
+        for color_ind in range(4):
+            x, y = temp[color_ind]
+            print(f"Creating Hunter with index {color_ind}")
+            hunter = Hunter(hunter_group, x, y, grid, color_ind)
             self.ghosts.append(hunter)
             all_sprites.add(hunter)
 
@@ -34,6 +33,7 @@ if __name__ == "__main__":
     pygame.init()
     size = width, height = 500, 500
     screen = pygame.display.set_mode(size)
+    pygame.display.set_caption("Pacman")
     game = Game('default_level.txt')
     running = True
     player = None

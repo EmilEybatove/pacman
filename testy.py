@@ -1,8 +1,6 @@
 from create import *
 
 
-
-
 def load_image_pacman(name, colorkey=None):
     fullname = os.path.join('data/pacman_sprites', name)
     if not os.path.isfile(fullname):
@@ -16,7 +14,7 @@ def load_image_pacman(name, colorkey=None):
         image.set_colorkey(colorkey)
     return image
 
-# преобразование текстового файла в список спрайтов
+
 def load_level(filename):
     filename = "levels/" + filename
     with open(filename, 'r') as mapFile:
@@ -25,7 +23,6 @@ def load_level(filename):
     return list(map(lambda x: x.ljust(max_width, '.'), level_map))
 
 
-# создание уровня
 def generate_level(level):
     global base_group
     new_player, x, y = None, None, None
@@ -44,7 +41,6 @@ def terminate():
     sys.exit()
 
 
-# оформление стартового окна
 def print_intro():
     screen.fill('black')
     pygame.display.set_caption('play pacman')

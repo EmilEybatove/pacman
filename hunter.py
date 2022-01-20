@@ -28,7 +28,6 @@ def load_image(name, colorkey=None):
         fullname = os.path.join(SCRIPT_PATH, 'data', name)
     else:
         fullname = os.path.join('data', name)
-
     if not os.path.isfile(fullname):
         print(f"Файл с изображением '{fullname}' не найден")
         sys.exit()
@@ -51,19 +50,14 @@ class Hunter(pygame.sprite.Sprite):
         self.attacked = False
         self.color = color_ind
         self.dead = False
-        self.target = [-1, -1]
         self.ghostSpeed = 1 / 4
-        self.lastLoc = [-1, -1]
         self.attackedTimer = 240
-        self.attackedCount = 0
         self.deathTimer = 120
-        self.deathCount = 0
         try:
             self.frame = 0
             self.anim = {}
             for i in range(6):
                 self.anim[i] = load_image(os.path.join("ghost_sprites", "ghost_" + str(i) + ".gif"))
-                # change the ghost color in this frame
             self.color_frames(ghost_color[0], ghost_color[self.color])
             self.image = self.anim[0]
             self.rect = self.image.get_rect()
@@ -78,7 +72,7 @@ class Hunter(pygame.sprite.Sprite):
             self.rect.x, self.rect.y, *_ = get_rect(self.row, self.col)
         # Usual code
         self.restricted = ["|", "-", "1", "2", "3", "4", 1, 2, 3, 4]
-        self.allowed = ["0", 0, ".", "*"]
+        self.allowed = ["0", 0, ".", "*", "?"]
         # print(f"self.allowed: {self.allowed}")
         self.graph = {}
         for y, row in enumerate(grid):
