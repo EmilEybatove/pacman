@@ -3,7 +3,7 @@ from functios import *
 events_sequence, counter, number = ['up'], 1, 0
 
 class Game:
-    def __init__(self, level, score=0, mode=1):
+    def __init__(self, level, score=0, mode=1, lives=3):
         """значения mode:
         0 - пауза
         1 - основная игра
@@ -13,18 +13,18 @@ class Game:
         5 - уход призрака
         6 - призрак съел пакмена
         """
-        self.lives = 3
+        self.lives = lives
         self.score = score
         self.mode = mode
         grid = load_level(level)
         self.pacman, self.x, self.y, self.pacman_pos = generate_level(grid)
-
-
-
+        self.start_pacman_pos = self.pacman_pos.copy()
+        self.hunter_start_pos = []
         self.ghosts = []
         temp = sample(ghostGate, k=4)
         for col in range(1):
             start_pos = x, y = temp[col]
+            self.hunter_start_pos.append(start_pos)
             hunter = Hunter(hunter_group, x, y, grid, col)
             self.ghosts.append(hunter)
             all_sprites.add(hunter)
@@ -62,13 +62,41 @@ if __name__ == "__main__":
             events_sequence = [events_sequence[1]] if len(events_sequence) > 1 else events_sequence
         if game.mode in [1, 3, 5]:
             if events_sequence[0] == 'left':
-                game.pacman.update_left(number)
+                result = game.pacman.update_left(number)
+                print(result)
+                if game.mode == 1:
+                    if result == 1:
+                        for hunter in hunter_group:
+                            hunter.new()
+                            game.pacman.new()
+                            events_sequence, counter, number = ['up'], 1, 0
+                    elif result == 2:
+                        for hunter in hunter_group:
+                            hunter.setAttacked(True)
+                            game.mode = 3
+
             elif events_sequence[0] == 'right':
-                game.pacman.update_right(number)
+                if game.pacman.update_right(number) and game.mode == 1:
+                    for hunter in hunter_group:
+                        hunter.new()
+                        game.pacman.new()
+                        events_sequence, counter, number = ['up'], 1, 0
+
             elif events_sequence[0] == 'up':
-                game.pacman.update_up(number)
+                if game.pacman.update_up(number) and game.mode == 1:
+                    for hunter in hunter_group:
+                        hunter.new()
+                        game.pacman.new()
+                        events_sequence, counter, number = ['up'], 1, 0
+
+
             elif events_sequence[0] == 'down':
-                game.pacman.update_down(number)
+                if game.pacman.update_down(number) and game.mode == 1:
+                    for hunter in hunter_group:
+                        hunter.new()
+                        game.pacman.new()
+                        events_sequence, counter, number = ['up'], 1, 0
+
         if len(events_sequence) > 0:
             counter = (counter + 1) % 18
             number = (number + 1) % 9
@@ -76,7 +104,6 @@ if __name__ == "__main__":
             if (hunter.row, hunter.col) != game.pacman_pos:
                 hunter.move(choice(hunter.get_next_nodes(game.pacman_pos[0], game.pacman_pos[1])))
         all_sprites.draw(screen)
-        all_sprites.update()
         tiles_group.draw(screen)
         base_group.draw(screen)
         player_group.draw(screen)
