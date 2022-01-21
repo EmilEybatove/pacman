@@ -3,7 +3,7 @@ from functions import *
 events_sequence, counter, number = ['up'], 1, 0
 
 class Game:
-    def __init__(self, level, score=0, mode=1):
+    def __init__(self, level, score=0, mode=1, lives=3):
         """значения mode:
         0 - пауза
         1 - основная игра
@@ -13,7 +13,7 @@ class Game:
         5 - уход призрака
         6 - призрак съел пакмена
         """
-        self.lives = 3
+        self.lives = lives
         self.score = score
         self.mode = mode
         grid = load_level(level)
@@ -21,10 +21,10 @@ class Game:
 
         self.ghosts = []
         temp = sample(ghostGate, k=4)
-        for color_ind in range(4):
+        for color_ind in range(1):
             x, y = temp[color_ind]
-            print(f"Creating Hunter with index {color_ind}")
             hunter = Hunter(hunter_group, x, y, grid, color_ind)
+            hunter.setDead(True)
             self.ghosts.append(hunter)
             all_sprites.add(hunter)
 
@@ -74,7 +74,8 @@ if __name__ == "__main__":
             number = (number + 1) % 9
         for hunter in hunter_group:
             if (hunter.row, hunter.col) != game.pacman_pos:
-                hunter.move(choice(hunter.get_next_nodes(game.pacman_pos[0], game.pacman_pos[1])))
+                hunter.move(choice(hunter.get_next_nodes(game.pacman_pos[0], game.pacman_pos[1])),
+                                   game.pacman.pacman_location())
         all_sprites.draw(screen)
         all_sprites.update()
         tiles_group.draw(screen)

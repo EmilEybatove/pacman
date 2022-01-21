@@ -4,6 +4,8 @@ from collections import deque
 from pprint import pprint
 from random import sample, choice
 import pygame
+from pygame import Color
+from math import sqrt
 
 all_sprites = pygame.sprite.Group()
 tiles_group = pygame.sprite.Group()
@@ -20,11 +22,12 @@ else:
 ghostGate = [(10, 12), (11, 12), (12, 12), (13, 12), (14, 12), (15, 12),
              (10, 13), (11, 13), (12, 13), (13, 13), (14, 13), (15, 13)]
 # GONNA WORK ONLY FOR DEFAULT MAP!!
-ghost_color = [(255, 0, 0, 255), (255, 128, 255, 255), (128, 255, 255, 255),
-                    (255, 128, 0, 255), (50, 50, 255, 255), (255, 255, 255, 255)]
-print(ghost_color[:4])
-print('Red, pink, blue, orange')
-# blue vulnerable, white
+ghost_color = [Color(255, 0, 0, 255),  # Red
+               Color(255, 128, 255, 255),  # pink
+               Color(128, 255, 255, 255),  # light blue
+               Color(255, 128, 0, 255),  # orange
+               Color(50, 50, 255, 255),  # blue vulnerable
+               Color(255, 255, 255, 255)]  # white
 
 SIZE = cols, rows = 26, 26
 
@@ -120,15 +123,9 @@ class Hunter(pygame.sprite.Sprite):
             self.anim = {}
             for i in range(6):
                 self.anim[i] = load_image(os.path.join("ghost_sprites", "ghost_" + str(i) + ".gif"))
-            print(f"self.color_frames({ghost_color[0]}, {ghost_color[self.color]})")
-            print(f"self.anim: {self.anim}")
-            print("\n\n")
             self.color_frames(ghost_color[0], ghost_color[self.color])
             self.image = self.anim[0]
             self.rect = self.image.get_rect()
-            # print(f">>> I am pacman {self.color} row, col: {row, col}")
-            # print(f"get_rect returns: {get_rect(row, col)}")
-            # print(f"size of field: {cols, rows}, REALLY: {cols * TILE, rows * TILE}")
             self.rect.x, self.rect.y, *_ = get_rect(self.row, self.col)
         except FileNotFoundError:
             self.image = pygame.Surface((TILE, TILE))
@@ -145,36 +142,40 @@ class Hunter(pygame.sprite.Sprite):
                     self.graph[(x, y)] = self.graph.get((x, y), []) + self.get_next_nodes(x, y)
                 else:
                     self.graph[(x, y)] = []
-        # print("And here is our graph: ")
-        # pprint(self.graph)
 
-    def color_frames(self, from_color, to_color):
+    def color_frames(self, from_color: Color, to_color: Color):
         for i in range(6):
-            for x in range(16):
-                for y in range(16):
-                    if self.anim[i].get_at((x, y)) == from_color:
-                        self.anim[i].set_at((x, y), to_color)
+            palette = list(self.anim[i].get_palette())
+            for j, c in enumerate(palette):
+                if c == from_color:
+                    palette[j] = to_color
+            self.anim[i].set_palette(palette)
 
-    def move(self, goal):
+    def move(self, goal, pacman_pos):
         if goal and self.graph[goal]:
+            if not self.attacked and not self.dead:
+                real_goal = goal
+            elif self.attacked and not self.dead:
+                self.color_frames(ghost_color[self.color], ghost_color[4])
+                distances = {}
+                for node in self.get_next_nodes(self.row, self.col):
+                    distances[node] = sqrt((pacman_pos[0] - node[0]) ** 2 + (pacman_pos[1] - node[1]) ** 2)
+                for el in distances.keys():
+                    if distances[el] == max(distances.values()):
+                        real_goal = el
+            elif self.dead:
+                self.color_frames(ghost_color[self.color], Color(0, 0, 0, 255))
+                real_goal = choice(ghostGate)
+
             if self.counter == 0:
-                if not self.attacked and not self.dead:
-                    self.frame = (self.frame + 1) % 6
-                    self.image = self.anim[self.frame]
-                    self.rect = self.image.get_rect()
-                    self.rect.x, self.rect.y, *_ = get_rect(self.row, self.col)
-                    self.path = self.find_path((self.row, self.col), goal)
-                elif self.attacked and not self.dead:
-                    goal = choice([el for el in self.graph if self.graph[el]])
-                    self.path = self.find_path((self.row, self.col), goal)
-                else:
-                    goal = choice(ghostGate)
-                    self.path = self.find_path((self.row, self.col), goal)
+                self.path = self.find_path((self.row, self.col), real_goal)
             self.counter = (self.counter + 1) % 18
-            self.row, self.col = self.rect.x // TILE, self.rect.y // TILE
+            self.frame = (self.frame + 1) % 6
+            self.image = self.anim[self.frame]
+            self.rect = self.image.get_rect()
+            self.rect.x, self.rect.y, *_ = get_rect(self.row, self.col)
             if self.path and len(self.path) > 1:
-                final = self.path[1]
-                self.move_to_one_node((self.row, self.col), final)
+                self.move_to_one_node((self.row, self.col), self.path[1])
         return None
 
     def move_to_one_node(self, from_node, to_node):
@@ -366,7 +367,6 @@ def show_level(level, count1, count2):
 
 
 class Player(pygame.sprite.Sprite):
-
     def __init__(self, pos_x, pos_y):
         super().__init__(player_group, all_sprites)
         self.image = load_image_pacman('pacman.gif')
@@ -376,9 +376,12 @@ class Player(pygame.sprite.Sprite):
         self.y = tile_height * pos_y
         self.score = 0
 
+    def pacman_location(self):
+        return (self.x, self.y)
+
     # проверяет все столкновения
     def collides(self):
-        lst = ['vertical', 'horisontal', '1', '2', '3', '4']
+        lst = ['vertical', 'horisontal', '1', '2', '3', '4', 'gate']
         if pygame.sprite.spritecollideany(self, tiles_group) is None or \
                 pygame.sprite.spritecollideany(self, tiles_group).image in [tile_images[_] for _ in lst]:
             return False
