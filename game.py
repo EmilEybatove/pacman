@@ -3,6 +3,7 @@ from functios import *
 events_sequence, counter, number = ['up'], 1, 0
 pause = False
 
+
 class Game:
     def __init__(self, level, score=0, mode=1, lives=3):
         """значения mode:
@@ -23,7 +24,7 @@ class Game:
         self.hunter_start_pos = []
         self.ghosts = []
         temp = sample(ghostGate, k=4)
-        for col in range(1):
+        for col in range(4):
             start_pos = x, y = temp[col]
             self.hunter_start_pos.append(start_pos)
             hunter = Hunter(hunter_group, x, y, grid, col)
@@ -51,7 +52,6 @@ def react(game, side):
                 if pygame.sprite.spritecollideany(hunter, player_group) is not None:
                     hunter.setDead(True)
             game.mode = 4
-
 
 
 if __name__ == "__main__":
@@ -93,7 +93,7 @@ if __name__ == "__main__":
                 counter = (counter + 1) % 18
                 number = (number + 1) % 9
             for hunter in hunter_group:
-                    hunter.move(choice(hunter.get_next_nodes(game.pacman_pos[0], game.pacman_pos[1])))
+                hunter.move((game.pacman_pos[0], game.pacman_pos[1]))
         all_sprites.draw(screen)
         tiles_group.draw(screen)
         base_group.draw(screen)

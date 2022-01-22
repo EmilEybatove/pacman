@@ -4,6 +4,7 @@ from collections import deque
 from pprint import pprint
 from random import sample, choice
 import pygame
+from pygame import Color
 
 all_sprites = pygame.sprite.Group()
 tiles_group = pygame.sprite.Group()
@@ -13,8 +14,6 @@ hunter_group = pygame.sprite.Group()
 pause_group = pygame.sprite.Group()
 TILE = tile_width = tile_height = 18
 
-
-
 SCRIPT_PATH = None
 if os.name == "nt":
     SCRIPT_PATH = os.getcwd()
@@ -22,12 +21,17 @@ else:
     SCRIPT_PATH = sys.path[0]
 
 ghostGate = [(10, 12), (11, 12), (12, 12), (13, 12), (14, 12), (15, 12),
-                  (10, 13), (11, 13), (12, 13), (13, 13), (14, 13), (15, 13)]
+             (10, 13), (11, 13), (12, 13), (13, 13), (14, 13), (15, 13)]
 # GONNA WORK ONLY FOR DEFAULT MAP!!
-ghost_color = [(255, 0, 0, 255), (255, 128, 255, 255), (128, 255, 255, 255),
-                    (255, 128, 0, 255), (50, 50, 255, 255), (255, 255, 255, 255)]
+ghost_color = [Color(255, 0, 0, 255),  # Red
+               Color(255, 128, 255, 255),  # pink
+               Color(128, 255, 255, 255),  # light blue
+               Color(255, 128, 0, 255),  # orange
+               Color(50, 50, 255, 255),  # blue vulnerable
+               Color(255, 255, 255, 255)]  # white
 
 SIZE = cols, rows = 26, 26
+
 
 def load_image(name, colorkey=None):
     fullname = os.path.join('data', name)
@@ -68,6 +72,7 @@ values = {
     '0': 'point',
     '?': 'gate'
 }
+
 
 class Tile(pygame.sprite.Sprite):
     def __init__(self, tile_type, pos_x, pos_y, groups=(tiles_group, all_sprites)):
@@ -171,33 +176,14 @@ class Hunter(pygame.sprite.Sprite):
         self.rect.x = self.start_pos[0] * TILE
         self.rect.y = self.start_pos[1] * TILE
         self.counter = 0
-        print(self.rect.x, self.rect.y)
 
-    def update(self):  # Ghosts states: Alive, Attacked, Dead Attributes: Color, Direction, Location
-        if not self.attacked and not self.dead:
-            self.frame += 1
-            if self.frame >= len(self.anim):
-                self.frame = 0
-        elif self.attacked:
-            self.color_frames(ghost_color[self.color], ghost_color[4])
-            self.frame += 1
-            if self.frame >= len(self.anim):
-                self.frame = 0
-            # [Q timer works here than color sprite to blue/white and then recolor to define one]
-        else:
-            self.color_frames(ghost_color[self.color], (0, 0, 0, 0))
-            self.move(choice(ghostGate))
-
-        self.image = self.anim[self.frame]
-        self.rect = self.image.get_rect()
-
-    def color_frames(self, from_color, to_color):
+    def color_frames(self, from_color: Color, to_color: Color):
         for i in range(6):
-            for x in range(16):
-                for y in range(16):
-                    if self.anim[i].get_at((x, y)) == from_color:
-                        self.anim[i].set_at((x, y), to_color)
-                        # blue vulnerable
+            palette = list(self.anim[i].get_palette())
+            for j, c in enumerate(palette):
+                if c == from_color:
+                    palette[j] = to_color
+            self.anim[i].set_palette(palette)
 
     def move(self, goal):
         if goal and self.graph[goal]:
@@ -205,7 +191,7 @@ class Hunter(pygame.sprite.Sprite):
                 self.color_frames(ghost_color[self.color], ghost_color[4])
                 goal = choice([el for el in self.graph if self.graph[el]])
             if self.dead:
-                self.color_frames(ghost_color[self.color], (255, 255, 255, 0))
+                self.color_frames(ghost_color[self.color], Color(0, 0, 0, 255))
                 goal = choice(ghostGate)
             if self.counter == 0:
                 self.row, self.col = int(self.rect.x / 18), int(self.rect.y / 18)
@@ -279,6 +265,7 @@ class Hunter(pygame.sprite.Sprite):
     def collides(self):
         # print(pygame.sprite.spritecollideany(self, player_group))
         pass
+
 
 def load_image_pacman(name, colorkey=None):
     fullname = os.path.join('data/pacman_sprites', name)
@@ -456,13 +443,12 @@ class Player(pygame.sprite.Sprite):
             'down': ['d_0', 'd_1', 'd_2', 'd_3', 'd_4', 'd_5', 'd_6', 'd_7', 'd_0']
         }
 
-    
     def new(self):
         self.x = tile_width * self.start_pos[0]
         self.y = tile_height * self.start_pos[1]
         self.rect.x = self.x
         self.rect.y = self.y
-    
+
     # проверяет все столкновения
     def collides(self):
         lst = ['vertical', 'horisontal', '1', '2', '3', '4', 'gate']
@@ -496,5 +482,3 @@ class Player(pygame.sprite.Sprite):
             self.y += self.side_tuples[side][1]
         lst_picture = self.image_list[side]
         self.image = load_image_pacman(lst_picture[number] + '.gif')
-
-
