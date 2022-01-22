@@ -10,7 +10,9 @@ tiles_group = pygame.sprite.Group()
 base_group = pygame.sprite.Group()
 player_group = pygame.sprite.Group()
 hunter_group = pygame.sprite.Group()
+pause_group = pygame.sprite.Group()
 TILE = tile_width = tile_height = 18
+
 
 
 SCRIPT_PATH = None
@@ -50,7 +52,8 @@ tile_images = {
     '4': load_image('3.png'),
     'empty': load_image('empty.png'),
     'point': load_image('point.png'),
-    'energo': load_image('energo.png')}
+    'energo': load_image('energo.png'),
+    'gate': load_image('gate.png')}
 
 values = {
     '|': 'vertical',
@@ -62,7 +65,8 @@ values = {
     '.': 'empty',
     '@': 'pacman',
     '*': 'energo',
-    '0': 'point'
+    '0': 'point',
+    '?': 'gate'
 }
 
 class Tile(pygame.sprite.Sprite):
@@ -148,7 +152,7 @@ class Hunter(pygame.sprite.Sprite):
             self.rect.x, self.rect.y, *_ = get_rect(self.row, self.col)
         # Usual code
         self.restricted = ["|", "-", "1", "2", "3", "4", 1, 2, 3, 4]
-        self.allowed = ["0", 0, ".", "*"]
+        self.allowed = ["0", 0, ".", "*", "?"]
         # print(f"self.allowed: {self.allowed}")
         self.graph = {}
         for y, row in enumerate(grid):
@@ -407,8 +411,17 @@ def show_level(level, count1, count2):
     return player, level_x, level_y
 
 
-def pause():
-    pygame.time.delay(2000)
+class PauseImage(pygame.sprite.Sprite):
+    def __init__(self, pos_x, pos_y):
+        super().__init__(pause_group)
+        self.n = 0
+        self.image = load_image('pause.png')
+        self.rect = self.image.get_rect().move(pos_x, pos_y)
+
+    def update(self):
+        self.n += 1
+        self.image = load_image('on.png' if self.n % 2 == 1 else 'pause.png')
+
 
 # класс пакмена
 class Player(pygame.sprite.Sprite):
@@ -452,11 +465,8 @@ class Player(pygame.sprite.Sprite):
     
     # проверяет все столкновения
     def collides(self):
-        lst = ['vertical', 'horisontal', '1', '2', '3', '4']
+        lst = ['vertical', 'horisontal', '1', '2', '3', '4', 'gate']
         collid_lst = pygame.sprite.spritecollideany(self, tiles_group)
-
-        if pygame.sprite.spritecollideany(self, hunter_group) is not None:
-            return 2
         if collid_lst is None or collid_lst.image in [tile_images[_] for _ in lst]:
             return False
         else:
@@ -476,6 +486,8 @@ class Player(pygame.sprite.Sprite):
         self.rect = self.rect.move(self.check_tuple[side][0], self.check_tuple[side][1])
         fl = self.collides()
         self.rect = self.rect.move(-self.check_tuple[side][0], -self.check_tuple[side][1])
+        if pygame.sprite.spritecollideany(self, hunter_group) is not None:
+            fl = 2
         if fl in [2, 3]:
             return fl - 1
         if fl:

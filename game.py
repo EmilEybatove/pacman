@@ -1,7 +1,7 @@
 from functios import *
 
 events_sequence, counter, number = ['up'], 1, 0
-
+pause = False
 
 class Game:
     def __init__(self, level, score=0, mode=1, lives=3):
@@ -79,19 +79,21 @@ if __name__ == "__main__":
                 running = False
                 break
             if event.type == pygame.KEYDOWN:
+                if event.key == 27:
+                    pause = bool(1 - pause)
                 if event.key in change_values.keys() and len(events_sequence) <= 1:
                     events_sequence.append(change_values[event.key])
         if counter == 0:
             game.pacman_pos = [int(game.pacman.x / 18), int(game.pacman.y / 18)]
             events_sequence = [events_sequence[1]] if len(events_sequence) > 1 else events_sequence
-        if game.mode in [1, 3, 5]:
-            react(game, events_sequence[0])
-        if len(events_sequence) > 0:
-            counter = (counter + 1) % 18
-            number = (number + 1) % 9
-        for hunter in hunter_group:
-            if (hunter.row, hunter.col) != game.pacman_pos:
-                hunter.move(choice(hunter.get_next_nodes(game.pacman_pos[0], game.pacman_pos[1])))
+        if not pause:
+            if game.mode in [1, 3, 5]:
+                react(game, events_sequence[0])
+            if len(events_sequence) > 0:
+                counter = (counter + 1) % 18
+                number = (number + 1) % 9
+            for hunter in hunter_group:
+                    hunter.move(choice(hunter.get_next_nodes(game.pacman_pos[0], game.pacman_pos[1])))
         all_sprites.draw(screen)
         tiles_group.draw(screen)
         base_group.draw(screen)
