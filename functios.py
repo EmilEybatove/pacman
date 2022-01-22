@@ -197,50 +197,32 @@ class Hunter(pygame.sprite.Sprite):
 
     def move(self, goal):
         if goal and self.graph[goal]:
-            if not self.dead:
-                if self.attacked:
-                    self.color_frames(ghost_color[self.color], ghost_color[4])
-                    goal = choice([el for el in self.graph if self.graph[el]])
-                if self.counter == 0:
-                    self.row, self.col = int(self.rect.x / 18), int(self.rect.y / 18)
-                    self.path = self.find_path((self.row, self.col), goal)
-                self.counter = (self.counter + 1) % 18
-                self.image_number = (self.image_number + 1) % 6
-                self.image = self.anim[self.image_number]
-                # print(f"We are now at position {self.row, self.col} and gonna go to {goal}")
-                # print(f"Our path is {self.path}")
-
-                if self.path and len(self.path) > 1:
-                    final = self.path[1]
-                    # print(f"Finally go to {final}")
-                    if final[0] - self.row > 0:
-                        self.rect.x += 1
-                    elif final[0] - self.row < 0:
-                        self.rect.x -= 1
-                    elif final[1] - self.col > 0:
-                        self.rect.y += 1
-                    elif final[1] - self.col < 0:
-                        self.rect.y -= 1
-                return
-            # elif self.attacked:
-            #     self.color_frames(ghost_color[self.color], ghost_color[4])
-            #     self.image_number = (self.image_number + 1) % 6
-            #     self.image = self.anim[self.image_number]
-            #     goal = choice([el for el in self.graph if self.graph[el]])
-            #     path = self.find_path((self.row, self.col), goal)
-            #     if path and len(path) > 1:
-            #         final = path[1]
-            #         self.row, self.col = final
-            #     return
-            else:
+            if self.attacked:
+                self.color_frames(ghost_color[self.color], ghost_color[4])
+                goal = choice([el for el in self.graph if self.graph[el]])
+            if self.dead:
+                self.color_frames(ghost_color[self.color], (255, 255, 255, 0))
                 goal = choice(ghostGate)
-                path = self.find_path((self.row, self.col), goal)
-                if path and len(path) > 1:
-                    final = path[1]
+            if self.counter == 0:
+                self.row, self.col = int(self.rect.x / 18), int(self.rect.y / 18)
+                self.path = self.find_path((self.row, self.col), goal)
+            self.counter = (self.counter + 1) % 18
+            self.image_number = (self.image_number + 1) % 6
+            self.image = self.anim[self.image_number]
+            # print(f"We are now at position {self.row, self.col} and gonna go to {goal}")
+            # print(f"Our path is {self.path}")
 
-                    # self.row, self.col = final
-                return
-        return None
+            if self.path and len(self.path) > 1:
+                final = self.path[1]
+                # print(f"Finally go to {final}")
+                if final[0] - self.row > 0:
+                    self.rect.x += 1
+                elif final[0] - self.row < 0:
+                    self.rect.x -= 1
+                elif final[1] - self.col > 0:
+                    self.rect.y += 1
+                elif final[1] - self.col < 0:
+                    self.rect.y -= 1
 
     def get_next_nodes(self, x, y):
         check_node = lambda x, y: True if (0 <= x < cols) and (0 <= y < rows) and \
@@ -425,6 +407,9 @@ def show_level(level, count1, count2):
     return player, level_x, level_y
 
 
+def pause():
+    pygame.time.delay(2000)
+
 # класс пакмена
 class Player(pygame.sprite.Sprite):
 
@@ -437,6 +422,27 @@ class Player(pygame.sprite.Sprite):
         self.y = tile_height * pos_y
         self.score = 0
         self.start_pos = [pos_x, pos_y]
+        self.side_tuples = {
+            'left': (-1, 0),
+            'right': (1, 0),
+            'up': (0, -1),
+            'down': (0, 1)
+        }
+
+        self.check_tuple = {
+            'left': (-1, 0),
+            'right': (18, 0),
+            'up': (0, -1),
+            'down': (0, 18)
+        }
+
+        self.image_list = {
+            'left': ['l_0', 'l_1', 'l_2', 'l_3', 'l_4', 'l_5', 'l_6', 'l_7', 'l_0'],
+            'right': ['r_0', 'r_1', 'r_2', 'r_3', 'r_4', 'r_5', 'r_6', 'r_7', 'r_0'],
+            'up': ['u_0', 'u_1', 'u_2', 'u_3', 'u_4', 'u_5', 'u_6', 'u_7', 'u_0'],
+            'down': ['d_0', 'd_1', 'd_2', 'd_3', 'd_4', 'd_5', 'd_6', 'd_7', 'd_0']
+        }
+
     
     def new(self):
         self.x = tile_width * self.start_pos[0]
@@ -465,61 +471,18 @@ class Player(pygame.sprite.Sprite):
                 return 3
             return True
 
-    # обрабатывает движение пакмена влево
-    def update_left(self, number):
-        self.rect = self.rect.move(-1, 0)
+    # обрабатывает движение пакмена
+    def update(self, number, side):
+        self.rect = self.rect.move(self.check_tuple[side][0], self.check_tuple[side][1])
         fl = self.collides()
-        self.rect = self.rect.move(1, 0)
+        self.rect = self.rect.move(-self.check_tuple[side][0], -self.check_tuple[side][1])
         if fl in [2, 3]:
             return fl - 1
         if fl:
-            self.rect = self.rect.move(-1, 0)
-            self.x -= 1
-        lst_picture = ['l_0', 'l_1', 'l_2', 'l_3', 'l_4', 'l_5', 'l_6', 'l_7', 'l_0']
+            self.rect = self.rect.move(self.side_tuples[side])
+            self.x += self.side_tuples[side][0]
+            self.y += self.side_tuples[side][1]
+        lst_picture = self.image_list[side]
         self.image = load_image_pacman(lst_picture[number] + '.gif')
 
-        return False
 
-    # обрабатыает движения пакмена вправо
-    def update_right(self, number):
-        self.rect = self.rect.move(18, 0)
-        fl = self.collides()
-        self.rect = self.rect.move(-18, 0)
-        if fl in [2, 3]:
-            return fl - 1
-        if fl:
-            self.x += 1
-            self.rect = self.rect.move(1, 0)
-        lst_picture = ['r_0', 'r_1', 'r_2', 'r_3', 'r_4', 'r_5', 'r_6', 'r_7', 'r_0']
-        self.image = load_image_pacman(lst_picture[number] + '.gif')
-
-        return False
-
-    # обрабатывает движения пакмена вверх
-    def update_up(self, number):
-        self.rect = self.rect.move(0, -1)
-        fl = self.collides()
-        self.rect = self.rect.move(0, 1)
-        if fl in [2, 3]:
-            return fl - 1
-        if fl:
-            self.rect = self.rect.move(0, -1)
-            self.y -= 1
-        lst_picture = ['u_0', 'u_1', 'u_2', 'u_3', 'u_4', 'u_5', 'u_6', 'u_7', 'u_0']
-        self.image = load_image_pacman(lst_picture[number] + '.gif')
-
-        return False
-
-    # обрабатывает движения пакмена вниз
-    def update_down(self, number):
-        self.rect = self.rect.move(0, 18)
-        fl = self.collides()
-        self.rect = self.rect.move(0, -18)
-        if fl in [2, 3]:
-            return fl - 1
-        if fl:
-            self.y += 1
-            self.rect = self.rect.move(0, 1)
-        lst_picture = ['d_0', 'd_1', 'd_2', 'd_3', 'd_4', 'd_5', 'd_6', 'd_7', 'd_0']
-        self.image = load_image_pacman(lst_picture[number] + '.gif')
-        return False
