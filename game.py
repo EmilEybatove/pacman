@@ -1,6 +1,8 @@
 from functions import *
 
 events_sequence, counter, number = ['up'], 1, 0
+pause = False
+
 
 class Game:
     def __init__(self, level, score=0, mode=1, lives=3):
@@ -17,31 +19,80 @@ class Game:
         self.score = score
         self.mode = mode
         grid = load_level(level)
-        self.pacman, self.x, self.y, self.pacman_pos = generate_level(grid)
-
+        self.pacman, self.x, self.y, self.pacman_pos, self.points = generate_level(grid)
+        self.start_pacman_pos = self.pacman_pos.copy()
+        self.hunter_start_pos = []
         self.ghosts = []
         temp = sample(ghostGate, k=4)
-        for color_ind in range(1):
-            x, y = temp[color_ind]
-            hunter = Hunter(hunter_group, x, y, grid, color_ind)
-            hunter.setDead(True)
+        for col in range(4):
+            start_pos = x, y = temp[col]
+            self.hunter_start_pos.append(start_pos)
+            hunter = Hunter(hunter_group, x, y, grid, col)
             self.ghosts.append(hunter)
             all_sprites.add(hunter)
+
+
+def react(game, side, timers):
+    global events_sequence, counter, number, i
+    if game.points == 0:
+        print('you win')
+    result = game.pacman.update(number, side)
+    if result == 1:
+        for hunter in hunter_group:
+            if not hunter.isAttacked() and not hunter.isDead():
+                for hunter in hunter_group:
+                    hunter.new()
+                game.pacman.new()
+                events_sequence, counter, number = ['up'], 1, 0
+                break
+            elif hunter.isAttacked():
+                if pygame.sprite.spritecollideany(hunter, player_group) is not None:
+                    if not hunter.isDead():
+                        hunter.setDead(True)
+                        hunter.setAttacked(False)
+                        pygame.time.delay(pygame.time.delay(500))
+                        counter -= 1
+
+    elif result == 2:
+        for hunter in hunter_group:
+            if hunter.isAttacked:
+                timers[i].cancel()
+            if not hunter.isDead():
+                hunter.setAttacked(True)
+        pygame.time.delay(pygame.time.delay(500))
+        counter -= 1
+        i += 1
+        timers[i - 1].start()
+
+    elif result == 3:
+        game.points -= 1
 
 
 if __name__ == "__main__":
     pygame.init()
     size = width, height = 500, 500
     screen = pygame.display.set_mode(size)
-    pygame.display.set_caption("Pacman")
     game = Game('default_level.txt')
+    i = 0
+
+
+    def revival():
+        for hunter in hunter_group:
+            hunter.attacked = False
+
+
+    timer1 = threading.Timer(10, revival)
+    timer2 = threading.Timer(10, revival)
+    timer3 = threading.Timer(10, revival)
+    timer4 = threading.Timer(10, revival)
+    timers = [timer1, timer2, timer3, timer4]
+
     running = True
     player = None
     level = 'default_level.txt'
     count1 = count2 = 26
     clock = pygame.time.Clock()
     FPS = 60
-
     change_values = {
         pygame.K_LEFT: 'left',
         pygame.K_RIGHT: 'right',
@@ -55,29 +106,22 @@ if __name__ == "__main__":
                 running = False
                 break
             if event.type == pygame.KEYDOWN:
+                if event.key == 27:
+                    pause = bool(1 - pause)
                 if event.key in change_values.keys() and len(events_sequence) <= 1:
                     events_sequence.append(change_values[event.key])
         if counter == 0:
             game.pacman_pos = [int(game.pacman.x / 18), int(game.pacman.y / 18)]
             events_sequence = [events_sequence[1]] if len(events_sequence) > 1 else events_sequence
-        if game.mode in [1, 3, 5]:
-            if events_sequence[0] == 'left':
-                game.pacman.update_left(number)
-            elif events_sequence[0] == 'right':
-                game.pacman.update_right(number)
-            elif events_sequence[0] == 'up':
-                game.pacman.update_up(number)
-            elif events_sequence[0] == 'down':
-                game.pacman.update_down(number)
-        if len(events_sequence) > 0:
-            counter = (counter + 1) % 18
-            number = (number + 1) % 9
-        for hunter in hunter_group:
-            if (hunter.row, hunter.col) != game.pacman_pos:
-                hunter.move(choice(hunter.get_next_nodes(game.pacman_pos[0], game.pacman_pos[1])),
-                                   game.pacman.pacman_location())
+        if not pause:
+            if game.mode in [1, 3, 5]:
+                react(game, events_sequence[0], timers)
+            if len(events_sequence) > 0:
+                counter = (counter + 1) % 18
+                number = (number + 1) % 9
+            for hunter in hunter_group:
+                hunter.move((game.pacman_pos[0], game.pacman_pos[1]))
         all_sprites.draw(screen)
-        all_sprites.update()
         tiles_group.draw(screen)
         base_group.draw(screen)
         player_group.draw(screen)

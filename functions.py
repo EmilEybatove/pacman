@@ -2,18 +2,21 @@ import os
 import sys
 from collections import deque
 from pprint import pprint
-from random import sample, choice
+from random import sample, choice, random
 import pygame
 from pygame import Color
+import threading
 from math import sqrt
+
 
 all_sprites = pygame.sprite.Group()
 tiles_group = pygame.sprite.Group()
 base_group = pygame.sprite.Group()
 player_group = pygame.sprite.Group()
 hunter_group = pygame.sprite.Group()
+pause_group = pygame.sprite.Group()
 TILE = tile_width = tile_height = 18
-
+SCRIPT_PATH = None
 if os.name == "nt":
     SCRIPT_PATH = os.getcwd()
 else:
@@ -29,7 +32,7 @@ ghost_color = [Color(255, 0, 0, 255),  # Red
                Color(50, 50, 255, 255),  # blue vulnerable
                Color(255, 255, 255, 255)]  # white
 
-SIZE = cols, rows = 26, 26
+cols, rows = 26, 26
 
 
 def load_image(name, colorkey=None):
@@ -56,8 +59,7 @@ tile_images = {
     'empty': load_image('empty.png'),
     'point': load_image('point.png'),
     'energo': load_image('energo.png'),
-    'gate': load_image('gate.png')
-}
+    'gate': load_image('gate.png')}
 
 values = {
     '|': 'vertical',
@@ -111,13 +113,12 @@ class Hunter(pygame.sprite.Sprite):
         self.grid = grid
         self.row = row
         self.col = col
-        self.attacked = False
         self.color = color_ind
+        self.attacked = False
         self.dead = False
-        self.attackedTimer = 240
-        self.deathTimer = 120
         self.counter = 0
         self.path = []
+        self.start_pos = [row, col]
         try:
             self.frame = 0
             self.anim = {}
@@ -141,7 +142,17 @@ class Hunter(pygame.sprite.Sprite):
                 if col in self.allowed:
                     self.graph[(x, y)] = self.graph.get((x, y), []) + self.get_next_nodes(x, y)
                 else:
-                    self.graph[(x, y)] = []
+                    self.graph[(x, y)] = self.graph.get((x, y), ["unavailable"]) + self.get_next_nodes(x, y)
+        self.available_nodes = self.get_available_nodes()
+
+    def new(self):
+        self.row = self.start_pos[0]
+        self.col = self.start_pos[1]
+        self.rect.x = self.start_pos[0] * TILE
+        self.rect.y = self.start_pos[1] * TILE
+        self.counter = 0
+        self.setDead(False)
+        self.setAttacked(False)
 
     def color_frames(self, from_color: Color, to_color: Color):
         for i in range(6):
@@ -151,53 +162,64 @@ class Hunter(pygame.sprite.Sprite):
                     palette[j] = to_color
             self.anim[i].set_palette(palette)
 
-    def move(self, goal, pacman_pos):
+    def move(self, goal):
         if goal and self.graph[goal]:
-            if not self.attacked and not self.dead:
-                real_goal = goal
-            elif self.attacked and not self.dead:
+            if self.attacked:
                 self.color_frames(ghost_color[self.color], ghost_color[4])
                 distances = {}
                 for node in self.get_next_nodes(self.row, self.col):
-                    distances[node] = sqrt((pacman_pos[0] - node[0]) ** 2 + (pacman_pos[1] - node[1]) ** 2)
+                    distances[node] = sqrt((node[0] - goal[0]) ** 2 + (node[1] - goal[1]) ** 2)
                 for el in distances.keys():
                     if distances[el] == max(distances.values()):
                         real_goal = el
-            elif self.dead:
-                self.color_frames(ghost_color[self.color], Color(0, 0, 0, 255))
+                        # real_goal = choice([el for el in self.graph if self.graph[el]])
+            if self.dead:
+                self.color_frames(ghost_color[4], Color(0, 0, 0, 255))
+                if (self.row, self.col) in ghostGate:
+                    self.setDead(False)
                 real_goal = choice(ghostGate)
-
+            if not self.attacked and not self.dead:
+                self.color_frames(Color(0, 0, 0, 255), ghost_color[self.color])
+                self.color_frames(ghost_color[4], ghost_color[self.color])
+                real_goal = goal
             if self.counter == 0:
+                self.row, self.col = int(self.rect.x / 18), int(self.rect.y / 18)
                 self.path = self.find_path((self.row, self.col), real_goal)
             self.counter = (self.counter + 1) % 18
             self.frame = (self.frame + 1) % 6
             self.image = self.anim[self.frame]
-            self.rect = self.image.get_rect()
-            self.rect.x, self.rect.y, *_ = get_rect(self.row, self.col)
-            if self.path and len(self.path) > 1:
-                self.move_to_one_node((self.row, self.col), self.path[1])
-        return None
+            # print(f"We are now at position {self.row, self.col} and gonna go to {goal}")
+            # print(f"Our path is {self.path}")
 
-    def move_to_one_node(self, from_node, to_node):
-        if from_node[0] < to_node[0]:
-            self.rect = self.rect.move(1, 0)
-        elif from_node[0] > to_node[0]:
-            self.rect = self.rect.move(-1, 0)
-        elif from_node[1] < to_node[1]:
-            self.rect = self.rect.move(0, 1)
-        elif from_node[1] > to_node[1]:
-            self.rect = self.rect.move(0, -1)
-        else:
-            if self.attacked:
-                self.setDead(True)
-            else:
-                return ValueError("YOUR STUPID PACMAN DEAD")
+            if self.path and len(self.path) > 1:
+                final_goal = self.path[1]
+                if  self.row < final_goal[0]:
+                    self.rect.x += 1
+                elif self.row > final_goal[0]:
+                    self.rect.x -= 1
+                elif self.col < final_goal[1]:
+                    self.rect.y += 1
+                elif self.col > final_goal[1]:
+                    self.rect.y -= 1
 
     def get_next_nodes(self, x, y):
         check_node = lambda x, y: True if (0 <= x < cols) and (0 <= y < rows) and \
                                           (self.grid[y][x] in self.allowed) else False
         ways = [0, -1], [0, 1], [1, 0], [-1, 0]
         return [(x + dx, y + dy) for dx, dy in ways if check_node(x + dx, y + dy)]
+
+    def get_available_nodes(self):
+        check_node = lambda x, y: True if (0 <= x < cols) and (0 <= y < rows) and \
+                                          (self.grid[y][x] in self.allowed) else False
+        return [(x, y) for x in range(cols + 1) for y in range(rows + 1) if check_node(x, y)]
+
+    def closest_available_node(self, search_node):
+        distances = {}
+        for node in self.available_nodes:
+            distances[node] = sqrt((node[0] - search_node[0]) ** 2 + (node[1] - search_node[1]) ** 2)
+        for el in distances.keys():
+            if distances[el] == min(distances.values()):
+                return el
 
     def cleanup(self):
         self.parent = dict()
@@ -222,6 +244,7 @@ class Hunter(pygame.sprite.Sprite):
                     while n is not None:
                         self.path.append(n)
                         n = self.parent.get(n)
+                    # print(self.path[::-1])
                     return self.path[::-1]
                 if neighbour not in self.parent:
                     self.queue.append(neighbour)
@@ -236,9 +259,16 @@ class Hunter(pygame.sprite.Sprite):
 
     def setDead(self, isDead):
         self.dead = isDead
+        print(self.dead)
 
     def isDead(self):
         return self.dead
+
+    def collides(self):
+        # print(pygame.sprite.spritecollideany(self, player_group))
+        pass
+
+
 
 
 def load_image_pacman(name, colorkey=None):
@@ -255,6 +285,7 @@ def load_image_pacman(name, colorkey=None):
     return image
 
 
+# преобразование текстового файла в список спрайтов
 def load_level(filename):
     filename = "levels/" + filename
     with open(filename, 'r') as mapFile:
@@ -263,8 +294,12 @@ def load_level(filename):
     return list(map(lambda x: x.ljust(max_width, '.'), level_map))
 
 
+# создание уровня
 def generate_level(level):
-    global base_group
+    global base_group, cols, rows
+    points = 0
+    rows = len(level)
+    cols = len(level[0])
     new_player, x, y, pacman_pos = None, None, None, None
     for y in range(len(level)):
         for x in range(len(level[y])):
@@ -273,15 +308,18 @@ def generate_level(level):
                 new_player = Player(x, y)
                 pacman_pos = [x, y]
             elif level[y][x] in list(values.keys()):
+                if level[y][x] in ['0', '*']:
+                    points += 1
                 Tile(values[level[y][x]], x, y)
-    return new_player, x, y, pacman_pos
+
+    return new_player, x, y, pacman_pos, points
 
 
 def terminate():
     pygame.quit()
     sys.exit()
 
-
+# оформление стартового окна
 def print_intro():
     screen.fill('black')
     pygame.display.set_caption('play pacman')
@@ -312,6 +350,7 @@ def print_intro():
     screen.blit(picture, (100, 400))
 
 
+# отображение ввода текста пользователем в окне
 def print_text(text):
     font = pygame.font.Font(None, 40)
     text_coord = 310
@@ -324,6 +363,7 @@ def print_text(text):
     pygame.display.flip()
 
 
+# обработка ввода
 def start_screen():
     need_input = False
     input_text = ''
@@ -351,22 +391,21 @@ def start_screen():
         pygame.display.flip()
 
 
-def show_level(level, count1, count2):
-    pygame.init()
-    size = count1 * 18 + 100, count2 * 18 + 100
-    screen = pygame.display.set_mode(size)
-    screen.fill('black')
-    pygame.display.set_caption('play pacman')
-    try:
-        player, level_x, level_y, _ = generate_level(load_level(level))
-    except FileNotFoundError:
-        player, level_x, level_y, _ = generate_level(load_level('default_level.txt'))
-    all_sprites.draw(screen)
-    pygame.display.flip()
-    return player, level_x, level_y
+class PauseImage(pygame.sprite.Sprite):
+    def __init__(self, pos_x, pos_y):
+        super().__init__(pause_group)
+        self.n = 0
+        self.image = load_image('pause.png')
+        self.rect = self.image.get_rect().move(pos_x, pos_y)
+
+    def update(self):
+        self.n += 1
+        self.image = load_image('on.png' if self.n % 2 == 1 else 'pause.png')
 
 
+# класс пакмена
 class Player(pygame.sprite.Sprite):
+
     def __init__(self, pos_x, pos_y):
         super().__init__(player_group, all_sprites)
         self.image = load_image_pacman('pacman.gif')
@@ -375,68 +414,77 @@ class Player(pygame.sprite.Sprite):
         self.x = tile_width * pos_x
         self.y = tile_height * pos_y
         self.score = 0
+        self.start_pos = [pos_x, pos_y]
+        self.side_tuples = {
+            'left': (-1, 0),
+            'right': (1, 0),
+            'up': (0, -1),
+            'down': (0, 1)
+        }
 
-    def pacman_location(self):
-        return (self.x, self.y)
+        self.check_tuple = {
+            'left': (-1, 0),
+            'right': (18, 0),
+            'up': (0, -1),
+            'down': (0, 18)
+        }
+
+        self.image_list = {
+            'left': ['l_0', 'l_1', 'l_2', 'l_3', 'l_4', 'l_5', 'l_6', 'l_7', 'l_0'],
+            'right': ['r_0', 'r_1', 'r_2', 'r_3', 'r_4', 'r_5', 'r_6', 'r_7', 'r_0'],
+            'up': ['u_0', 'u_1', 'u_2', 'u_3', 'u_4', 'u_5', 'u_6', 'u_7', 'u_0'],
+            'down': ['d_0', 'd_1', 'd_2', 'd_3', 'd_4', 'd_5', 'd_6', 'd_7', 'd_0']
+        }
+
+    def new(self):
+        self.x = tile_width * self.start_pos[0]
+        self.y = tile_height * self.start_pos[1]
+        self.rect.x = self.x
+        self.rect.y = self.y
 
     # проверяет все столкновения
     def collides(self):
         lst = ['vertical', 'horisontal', '1', '2', '3', '4', 'gate']
-        if pygame.sprite.spritecollideany(self, tiles_group) is None or \
-                pygame.sprite.spritecollideany(self, tiles_group).image in [tile_images[_] for _ in lst]:
+        collid_lst = pygame.sprite.spritecollideany(self, tiles_group)
+        if collid_lst is None or collid_lst.image in [tile_images[_] for _ in lst]:
             return False
         else:
-            if pygame.sprite.spritecollideany(self, tiles_group).image is tile_images['point']:
+            if collid_lst.image is tile_images['point']:
                 self.score += 10
                 tile = pygame.sprite.spritecollideany(self, tiles_group)
                 tile.image = tile_images['empty']
-            elif pygame.sprite.spritecollideany(self, tiles_group).image is tile_images['energo']:
+                return 4
+            elif collid_lst.image is tile_images['energo']:
                 self.score += 50
                 tile = pygame.sprite.spritecollideany(self, tiles_group)
                 tile.image = tile_images['empty']
-            # СЮДА ДОПИСАТЬ ОБРАБОТКУ СТОЛКНОВЕНИЙ С ПРИЗРАКАМИ
+                return 3
             return True
 
-    # обрабатывает движение пакмена влево
-    def update_left(self, number):
-        self.rect = self.rect.move(-1, 0)
+    # обрабатывает движение пакмена
+    def update(self, number, side):
+        self.rect = self.rect.move(self.check_tuple[side][0], self.check_tuple[side][1])
         fl = self.collides()
-        self.rect = self.rect.move(1, 0)
-        if fl:
-            self.rect = self.rect.move(-1, 0)
-            self.x -= 1
-        lst_picture = ['l_0', 'l_1', 'l_2', 'l_3', 'l_4', 'l_5', 'l_6', 'l_7', 'l_0']
+        self.rect = self.rect.move(-self.check_tuple[side][0], -self.check_tuple[side][1])
+        if pygame.sprite.spritecollideany(self, hunter_group) is not None:
+            print(pygame.sprite.spritecollideany(self, hunter_group))
+            check = False
+            for hunter in pygame.sprite.spritecollide(self, hunter_group, dokill=False):
+                if not hunter.isDead():
+                    if hunter.isAttacked():
+                        pygame.time.delay(pygame.time.delay(500))
+                        hunter.setDead(True)
+                        hunter.setAttacked(False)
+                        check = True
+            if check:
+                fl = 2
+        if fl and fl not in [2, 3]:
+            self.rect = self.rect.move(self.side_tuples[side])
+            self.x += self.side_tuples[side][0]
+            self.y += self.side_tuples[side][1]
+        lst_picture = self.image_list[side]
         self.image = load_image_pacman(lst_picture[number] + '.gif')
+        if fl in [2, 3, 4]:
+            return fl - 1
 
-    # обрабатыает движения пакмена вправо
-    def update_right(self, number):
-        self.rect = self.rect.move(18, 0)
-        fl = self.collides()
-        self.rect = self.rect.move(-18, 0)
-        if fl:
-            self.x += 1
-            self.rect = self.rect.move(1, 0)
-        lst_picture = ['r_0', 'r_1', 'r_2', 'r_3', 'r_4', 'r_5', 'r_6', 'r_7', 'r_0']
-        self.image = load_image_pacman(lst_picture[number] + '.gif')
 
-    # обрабатывает движения пакмена вверх
-    def update_up(self, number):
-        self.rect = self.rect.move(0, -1)
-        fl = self.collides()
-        self.rect = self.rect.move(0, 1)
-        if fl:
-            self.rect = self.rect.move(0, -1)
-            self.y -= 1
-        lst_picture = ['u_0', 'u_1', 'u_2', 'u_3', 'u_4', 'u_5', 'u_6', 'u_7', 'u_0']
-        self.image = load_image_pacman(lst_picture[number] + '.gif')
-
-    # обрабатывает движения пакмена вниз
-    def update_down(self, number):
-        self.rect = self.rect.move(0, 18)
-        fl = self.collides()
-        self.rect = self.rect.move(0, -18)
-        if fl:
-            self.y += 1
-            self.rect = self.rect.move(0, 1)
-        lst_picture = ['d_0', 'd_1', 'd_2', 'd_3', 'd_4', 'd_5', 'd_6', 'd_7', 'd_0']
-        self.image = load_image_pacman(lst_picture[number] + '.gif')
