@@ -213,6 +213,14 @@ class Hunter(pygame.sprite.Sprite):
                                           (self.grid[y][x] in self.allowed) else False
         return [(x, y) for x in range(cols + 1) for y in range(rows + 1) if check_node(x, y)]
 
+    def closest_available_node(self, search_node):
+        distances = {}
+        for node in self.available_nodes:
+            distances[node] = sqrt((node[0] - search_node[0]) ** 2 + (node[1] - search_node[1]) ** 2)
+        for el in distances.keys():
+            if distances[el] == min(distances.values()):
+                return el
+
     def cleanup(self):
         self.parent = dict()
         self.queue = ""
