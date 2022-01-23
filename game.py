@@ -1,4 +1,4 @@
-from functios import *
+from functions import *
 
 events_sequence, counter, number = ['up'], 1, 0
 pause = False

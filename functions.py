@@ -2,10 +2,12 @@ import os
 import sys
 from collections import deque
 from pprint import pprint
-from random import sample, choice
+from random import sample, choice, random
 import pygame
 from pygame import Color
 import threading
+from math import sqrt
+
 
 all_sprites = pygame.sprite.Group()
 tiles_group = pygame.sprite.Group()
@@ -87,18 +89,6 @@ def get_rect(x, y):
     return x * TILE + 1, y * TILE + 1, TILE - 2, TILE - 2
 
 
-class Pacman:
-    def packman_location(self):
-        return (24, 24)
-        # return self.get_click_mouse_pos()
-
-    def get_click_mouse_pos(self):
-        x, y = pygame.mouse.get_pos()
-        grid_x, grid_y = x // TILE, y // TILE
-        click = pygame.mouse.get_pressed()
-        return (grid_x, grid_y) if click[0] else False
-
-
 def load_image(name, colorkey=None):
     if SCRIPT_PATH:
         fullname = os.path.join(SCRIPT_PATH, 'data', name)
@@ -123,32 +113,20 @@ class Hunter(pygame.sprite.Sprite):
         self.grid = grid
         self.row = row
         self.col = col
-        self.attacked = False
         self.color = color_ind
+        self.attacked = False
         self.dead = False
-        self.target = [-1, -1]
-        self.ghostSpeed = 1 / 4
-        self.lastLoc = [-1, -1]
-        self.attackedTimer = 240
-        self.attackedCount = 0
-        self.deathTimer = 120
-        self.deathCount = 0
         self.counter = 0
         self.path = []
-        self.image_number = 0
         self.start_pos = [row, col]
         try:
             self.frame = 0
             self.anim = {}
             for i in range(6):
                 self.anim[i] = load_image(os.path.join("ghost_sprites", "ghost_" + str(i) + ".gif"))
-                # change the ghost color in this frame
             self.color_frames(ghost_color[0], ghost_color[self.color])
             self.image = self.anim[0]
             self.rect = self.image.get_rect()
-            # print(f"row, col: {row, col}")
-            # print(f"get_rect returns: {get_rect(row, col)}")
-            # print(f"size of field: {cols, rows}, REALLY: {cols * TILE, rows * TILE}")
             self.rect.x, self.rect.y, *_ = get_rect(self.row, self.col)
         except FileNotFoundError:
             self.image = pygame.Surface((TILE, TILE))
@@ -158,7 +136,6 @@ class Hunter(pygame.sprite.Sprite):
         # Usual code
         self.restricted = ["|", "-", "1", "2", "3", "4", 1, 2, 3, 4]
         self.allowed = ["0", 0, ".", "*", "?"]
-        # print(f"self.allowed: {self.allowed}")
         self.graph = {}
         for y, row in enumerate(grid):
             for x, col in enumerate(row):
@@ -166,9 +143,6 @@ class Hunter(pygame.sprite.Sprite):
                     self.graph[(x, y)] = self.graph.get((x, y), []) + self.get_next_nodes(x, y)
                 else:
                     self.graph[(x, y)] = []
-
-        # print("And here is our graph: ")
-        # pprint(self.graph)
 
     def new(self):
         self.row = self.start_pos[0]
@@ -189,34 +163,41 @@ class Hunter(pygame.sprite.Sprite):
         if goal and self.graph[goal]:
             if self.attacked:
                 self.color_frames(ghost_color[self.color], ghost_color[4])
-                goal = choice([el for el in self.graph if self.graph[el]])
+                distances = {}
+                for node in self.get_next_nodes(self.row, self.col):
+                    distances[node] = sqrt((node[0] - goal[0]) ** 2 + (node[1] - goal[1]) ** 2)
+                for el in distances.keys():
+                    if distances[el] == max(distances.values()) and random() <= 0.8:
+                        real_goal = el
+                    else:
+                        real_goal = choice([el for el in self.graph if self.graph[el]])
             if self.dead:
                 self.color_frames(ghost_color[4], Color(0, 0, 0, 255))
                 if (self.row, self.col) in ghostGate:
                     self.setDead(False)
-                goal = choice(ghostGate)
+                real_goal = choice(ghostGate)
             if not self.attacked and not self.dead:
                 self.color_frames(Color(0, 0, 0, 255), ghost_color[self.color])
                 self.color_frames(ghost_color[4], ghost_color[self.color])
+                real_goal = goal
             if self.counter == 0:
                 self.row, self.col = int(self.rect.x / 18), int(self.rect.y / 18)
-                self.path = self.find_path((self.row, self.col), goal)
+                self.path = self.find_path((self.row, self.col), real_goal)
             self.counter = (self.counter + 1) % 18
-            self.image_number = (self.image_number + 1) % 6
-            self.image = self.anim[self.image_number]
+            self.frame = (self.frame + 1) % 6
+            self.image = self.anim[self.frame]
             # print(f"We are now at position {self.row, self.col} and gonna go to {goal}")
             # print(f"Our path is {self.path}")
 
             if self.path and len(self.path) > 1:
-                final = self.path[1]
-                # print(f"Finally go to {final}")
-                if final[0] - self.row > 0:
+                final_goal = self.path[1]
+                if  self.row < final_goal[0]:
                     self.rect.x += 1
-                elif final[0] - self.row < 0:
+                elif self.row > final_goal[0]:
                     self.rect.x -= 1
-                elif final[1] - self.col > 0:
+                elif self.col < final_goal[1]:
                     self.rect.y += 1
-                elif final[1] - self.col < 0:
+                elif self.col > final_goal[1]:
                     self.rect.y -= 1
 
     def get_next_nodes(self, x, y):
@@ -275,7 +256,6 @@ class Hunter(pygame.sprite.Sprite):
 
 
 
-
 def load_image_pacman(name, colorkey=None):
     fullname = os.path.join('data/pacman_sprites', name)
     if not os.path.isfile(fullname):
@@ -317,7 +297,6 @@ def generate_level(level):
 def terminate():
     pygame.quit()
     sys.exit()
-
 
 # оформление стартового окна
 def print_intro():
