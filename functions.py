@@ -142,7 +142,8 @@ class Hunter(pygame.sprite.Sprite):
                 if col in self.allowed:
                     self.graph[(x, y)] = self.graph.get((x, y), []) + self.get_next_nodes(x, y)
                 else:
-                    self.graph[(x, y)] = []
+                    self.graph[(x, y)] = self.graph.get((x, y), ["unavailable"]) + self.get_next_nodes(x, y)
+        self.available_nodes = self.get_available_nodes()
 
     def new(self):
         self.row = self.start_pos[0]
@@ -169,10 +170,9 @@ class Hunter(pygame.sprite.Sprite):
                 for node in self.get_next_nodes(self.row, self.col):
                     distances[node] = sqrt((node[0] - goal[0]) ** 2 + (node[1] - goal[1]) ** 2)
                 for el in distances.keys():
-                    if distances[el] == max(distances.values()) and random() <= 0.8:
+                    if distances[el] == max(distances.values()):
                         real_goal = el
-                    else:
-                        real_goal = choice([el for el in self.graph if self.graph[el]])
+                        # real_goal = choice([el for el in self.graph if self.graph[el]])
             if self.dead:
                 self.color_frames(ghost_color[4], Color(0, 0, 0, 255))
                 if (self.row, self.col) in ghostGate:
@@ -207,6 +207,11 @@ class Hunter(pygame.sprite.Sprite):
                                           (self.grid[y][x] in self.allowed) else False
         ways = [0, -1], [0, 1], [1, 0], [-1, 0]
         return [(x + dx, y + dy) for dx, dy in ways if check_node(x + dx, y + dy)]
+
+    def get_available_nodes(self):
+        check_node = lambda x, y: True if (0 <= x < cols) and (0 <= y < rows) and \
+                                          (self.grid[y][x] in self.allowed) else False
+        return [(x, y) for x in range(cols + 1) for y in range(rows + 1) if check_node(x, y)]
 
     def cleanup(self):
         self.parent = dict()
