@@ -32,7 +32,7 @@ class Game:
             all_sprites.add(hunter)
 
 
-def react(game, side):
+def react(game, side, timers):
     global events_sequence, counter, number
     result = game.pacman.update(number, side)
     if game.mode == 1:
@@ -44,14 +44,16 @@ def react(game, side):
         elif result == 2:
             for hunter in hunter_group:
                 hunter.setAttacked(True)
+                timers[i].cancel()
                 game.mode = 2
     if game.mode == 3:
-
         if result == 1:
             for hunter in hunter_group:
                 if pygame.sprite.spritecollideany(hunter, player_group) is not None:
-                    hunter.setDead(True)
-            game.mode = 4
+                    if not hunter.dead:
+                        hunter.setDead(True)
+                        hunter.setAttacked(False)
+                        pygame.time.delay(pygame.time.delay(500))
 
 
 if __name__ == "__main__":
@@ -59,6 +61,23 @@ if __name__ == "__main__":
     size = width, height = 500, 500
     screen = pygame.display.set_mode(size)
     game = Game('default_level.txt')
+    i = 0
+
+
+    def revival():
+        global i
+        for hunter in hunter_group:
+            hunter.attacked = False
+        game.mode = 1
+        i += 1
+
+
+    timer1 = threading.Timer(10, revival)
+    timer2 = threading.Timer(10, revival)
+    timer3 = threading.Timer(10, revival)
+    timer4 = threading.Timer(10, revival)
+    timers = [timer1, timer2, timer3, timer4]
+
     running = True
     player = None
     level = 'default_level.txt'
@@ -88,7 +107,7 @@ if __name__ == "__main__":
             events_sequence = [events_sequence[1]] if len(events_sequence) > 1 else events_sequence
         if not pause:
             if game.mode in [1, 3, 5]:
-                react(game, events_sequence[0])
+                react(game, events_sequence[0], timers)
             if len(events_sequence) > 0:
                 counter = (counter + 1) % 18
                 number = (number + 1) % 9
@@ -101,7 +120,9 @@ if __name__ == "__main__":
         hunter_group.draw(screen)
         pygame.display.flip()
         clock.tick(FPS)
-        if game.mode in [2, 4]:
+
+        if game.mode in [2]:
             pygame.time.delay(pygame.time.delay(500))
-            game.mode += 1
+            game.mode = 3
+            timers[i].start()
     terminate()

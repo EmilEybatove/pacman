@@ -5,6 +5,7 @@ from pprint import pprint
 from random import sample, choice
 import pygame
 from pygame import Color
+import threading
 
 all_sprites = pygame.sprite.Group()
 tiles_group = pygame.sprite.Group()
@@ -13,7 +14,6 @@ player_group = pygame.sprite.Group()
 hunter_group = pygame.sprite.Group()
 pause_group = pygame.sprite.Group()
 TILE = tile_width = tile_height = 18
-
 SCRIPT_PATH = None
 if os.name == "nt":
     SCRIPT_PATH = os.getcwd()
@@ -191,8 +191,13 @@ class Hunter(pygame.sprite.Sprite):
                 self.color_frames(ghost_color[self.color], ghost_color[4])
                 goal = choice([el for el in self.graph if self.graph[el]])
             if self.dead:
-                self.color_frames(ghost_color[self.color], Color(0, 0, 0, 255))
+                self.color_frames(ghost_color[4], Color(0, 0, 0, 255))
+                if (self.row, self.col) in ghostGate:
+                    self.setDead(False)
                 goal = choice(ghostGate)
+            if not self.attacked and not self.dead:
+                self.color_frames(Color(0, 0, 0, 255), ghost_color[self.color])
+                self.color_frames(ghost_color[4], ghost_color[self.color])
             if self.counter == 0:
                 self.row, self.col = int(self.rect.x / 18), int(self.rect.y / 18)
                 self.path = self.find_path((self.row, self.col), goal)
@@ -258,6 +263,7 @@ class Hunter(pygame.sprite.Sprite):
 
     def setDead(self, isDead):
         self.dead = isDead
+        print(self.dead)
 
     def isDead(self):
         return self.dead
@@ -265,6 +271,9 @@ class Hunter(pygame.sprite.Sprite):
     def collides(self):
         # print(pygame.sprite.spritecollideany(self, player_group))
         pass
+
+
+
 
 
 def load_image_pacman(name, colorkey=None):
@@ -473,12 +482,19 @@ class Player(pygame.sprite.Sprite):
         fl = self.collides()
         self.rect = self.rect.move(-self.check_tuple[side][0], -self.check_tuple[side][1])
         if pygame.sprite.spritecollideany(self, hunter_group) is not None:
-            fl = 2
-        if fl in [2, 3]:
-            return fl - 1
-        if fl:
+            print(pygame.sprite.spritecollideany(self, hunter_group))
+            for hunter in pygame.sprite.spritecollide(self, hunter_group, dokill=False):
+                if hunter.isDead():
+                    break
+            else:
+                fl = 2
+        if fl and fl not in [2, 3]:
             self.rect = self.rect.move(self.side_tuples[side])
             self.x += self.side_tuples[side][0]
             self.y += self.side_tuples[side][1]
         lst_picture = self.image_list[side]
         self.image = load_image_pacman(lst_picture[number] + '.gif')
+        if fl in [2, 3]:
+            return fl - 1
+
+
