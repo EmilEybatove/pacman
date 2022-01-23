@@ -19,7 +19,7 @@ class Game:
         self.score = score
         self.mode = mode
         grid = load_level(level)
-        self.pacman, self.x, self.y, self.pacman_pos = generate_level(grid)
+        self.pacman, self.x, self.y, self.pacman_pos, self.points = generate_level(grid)
         self.start_pacman_pos = self.pacman_pos.copy()
         self.hunter_start_pos = []
         self.ghosts = []
@@ -33,27 +33,39 @@ class Game:
 
 
 def react(game, side, timers):
-    global events_sequence, counter, number
+    global events_sequence, counter, number, i
+    if game.points == 0:
+        print('you win')
     result = game.pacman.update(number, side)
-    if game.mode == 1:
-        if result == 1:
-            for hunter in hunter_group:
-                hunter.new()
+    if result == 1:
+        for hunter in hunter_group:
+            if not hunter.isAttacked() and not hunter.isDead():
+                for hunter in hunter_group:
+                    hunter.new()
                 game.pacman.new()
                 events_sequence, counter, number = ['up'], 1, 0
-        elif result == 2:
-            for hunter in hunter_group:
-                hunter.setAttacked(True)
-                timers[i].cancel()
-                game.mode = 2
-    if game.mode == 3:
-        if result == 1:
-            for hunter in hunter_group:
+                break
+            elif hunter.isAttacked():
                 if pygame.sprite.spritecollideany(hunter, player_group) is not None:
-                    if not hunter.dead:
+                    if not hunter.isDead():
                         hunter.setDead(True)
                         hunter.setAttacked(False)
                         pygame.time.delay(pygame.time.delay(500))
+                        counter -= 1
+
+    elif result == 2:
+        for hunter in hunter_group:
+            if hunter.isAttacked:
+                timers[i].cancel()
+            if not hunter.isDead():
+                hunter.setAttacked(True)
+        pygame.time.delay(pygame.time.delay(500))
+        counter -= 1
+        i += 1
+        timers[i - 1].start()
+
+    elif result == 3:
+        game.points -= 1
 
 
 if __name__ == "__main__":
@@ -65,11 +77,8 @@ if __name__ == "__main__":
 
 
     def revival():
-        global i
         for hunter in hunter_group:
             hunter.attacked = False
-        game.mode = 1
-        i += 1
 
 
     timer1 = threading.Timer(10, revival)
@@ -84,7 +93,6 @@ if __name__ == "__main__":
     count1 = count2 = 26
     clock = pygame.time.Clock()
     FPS = 60
-
     change_values = {
         pygame.K_LEFT: 'left',
         pygame.K_RIGHT: 'right',
@@ -120,9 +128,4 @@ if __name__ == "__main__":
         hunter_group.draw(screen)
         pygame.display.flip()
         clock.tick(FPS)
-
-        if game.mode in [2]:
-            pygame.time.delay(pygame.time.delay(500))
-            game.mode = 3
-            timers[i].start()
     terminate()

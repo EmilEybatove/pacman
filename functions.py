@@ -32,7 +32,7 @@ ghost_color = [Color(255, 0, 0, 255),  # Red
                Color(50, 50, 255, 255),  # blue vulnerable
                Color(255, 255, 255, 255)]  # white
 
-SIZE = cols, rows = 26, 26
+cols, rows = 26, 26
 
 
 def load_image(name, colorkey=None):
@@ -150,6 +150,8 @@ class Hunter(pygame.sprite.Sprite):
         self.rect.x = self.start_pos[0] * TILE
         self.rect.y = self.start_pos[1] * TILE
         self.counter = 0
+        self.setDead(False)
+        self.setAttacked(False)
 
     def color_frames(self, from_color: Color, to_color: Color):
         for i in range(6):
@@ -281,7 +283,10 @@ def load_level(filename):
 
 # создание уровня
 def generate_level(level):
-    global base_group
+    global base_group, cols, rows
+    points = 0
+    rows = len(level)
+    cols = len(level[0])
     new_player, x, y, pacman_pos = None, None, None, None
     for y in range(len(level)):
         for x in range(len(level[y])):
@@ -290,8 +295,11 @@ def generate_level(level):
                 new_player = Player(x, y)
                 pacman_pos = [x, y]
             elif level[y][x] in list(values.keys()):
+                if level[y][x] in ['0', '*']:
+                    points += 1
                 Tile(values[level[y][x]], x, y)
-    return new_player, x, y, pacman_pos
+
+    return new_player, x, y, pacman_pos, points
 
 
 def terminate():
@@ -370,22 +378,6 @@ def start_screen():
         pygame.display.flip()
 
 
-# отображение уровней (необходимо название уровня и количество
-def show_level(level, count1, count2):
-    pygame.init()
-    size = count1 * 18 + 100, count2 * 18 + 100
-    screen = pygame.display.set_mode(size)
-    screen.fill('black')
-    pygame.display.set_caption('play pacman')
-    try:
-        player, level_x, level_y, _ = generate_level(load_level(level))
-    except FileNotFoundError:
-        player, level_x, level_y, _ = generate_level(load_level('default_level.txt'))
-    all_sprites.draw(screen)
-    pygame.display.flip()
-    return player, level_x, level_y
-
-
 class PauseImage(pygame.sprite.Sprite):
     def __init__(self, pos_x, pos_y):
         super().__init__(pause_group)
@@ -448,6 +440,7 @@ class Player(pygame.sprite.Sprite):
                 self.score += 10
                 tile = pygame.sprite.spritecollideany(self, tiles_group)
                 tile.image = tile_images['empty']
+                return 4
             elif collid_lst.image is tile_images['energo']:
                 self.score += 50
                 tile = pygame.sprite.spritecollideany(self, tiles_group)
@@ -462,10 +455,15 @@ class Player(pygame.sprite.Sprite):
         self.rect = self.rect.move(-self.check_tuple[side][0], -self.check_tuple[side][1])
         if pygame.sprite.spritecollideany(self, hunter_group) is not None:
             print(pygame.sprite.spritecollideany(self, hunter_group))
+            check = False
             for hunter in pygame.sprite.spritecollide(self, hunter_group, dokill=False):
-                if hunter.isDead():
-                    break
-            else:
+                if not hunter.isDead():
+                    if hunter.isAttacked():
+                        pygame.time.delay(pygame.time.delay(500))
+                        hunter.setDead(True)
+                        hunter.setAttacked(False)
+                        check = True
+            if check:
                 fl = 2
         if fl and fl not in [2, 3]:
             self.rect = self.rect.move(self.side_tuples[side])
@@ -473,7 +471,7 @@ class Player(pygame.sprite.Sprite):
             self.y += self.side_tuples[side][1]
         lst_picture = self.image_list[side]
         self.image = load_image_pacman(lst_picture[number] + '.gif')
-        if fl in [2, 3]:
+        if fl in [2, 3, 4]:
             return fl - 1
 
 
