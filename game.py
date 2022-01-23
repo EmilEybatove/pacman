@@ -1,8 +1,11 @@
 from functions import *
 
 events_sequence, counter, number = ['up'], 1, 0
-pause = False
+pause, stop = False, False
 i = -1
+
+def start():
+    stop = False
 
 class Game:
     def __init__(self, level, score=0, mode=1, lives=3):
@@ -34,8 +37,6 @@ class Game:
 
 def react(game, side, timers):
     global events_sequence, counter, number, i
-    if game.points == 0:
-        print('you win')
     result = game.pacman.update(number, side)
 
     if result:
@@ -49,6 +50,7 @@ def react(game, side, timers):
                 hunter.setAttacked(True)
 
         pygame.time.delay(500)
+
         counter -= 1
         i += 1
 
@@ -116,13 +118,13 @@ if __name__ == "__main__":
             game.pacman_pos = [int(game.pacman.x / 18), int(game.pacman.y / 18)]
             events_sequence = [events_sequence[1]] if len(events_sequence) > 1 else events_sequence
         if not pause:
-            if game.mode in [1, 3, 5]:
-                react(game, events_sequence[0], timers)
-            if len(events_sequence) > 0:
-                counter = (counter + 1) % 18
-                number = (number + 1) % 9
+            react(game, events_sequence[0], timers)
+            counter = (counter + 1) % 18
+            number = (number + 1) % 9
+            num = 0
             for hunter in hunter_group:
-                hunter.move((game.pacman_pos[0], game.pacman_pos[1]))
+                hunter.move(return_path(game, num, events_sequence[0], hunter))
+                num += 1
         all_sprites.draw(screen)
         tiles_group.draw(screen)
         base_group.draw(screen)
