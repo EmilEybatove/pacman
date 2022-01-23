@@ -453,12 +453,12 @@ class Player(pygame.sprite.Sprite):
                 self.score += 10
                 tile = pygame.sprite.spritecollideany(self, tiles_group)
                 tile.image = tile_images['empty']
-                return 4
+                return 'point'
             elif collid_lst.image is tile_images['energo']:
                 self.score += 50
                 tile = pygame.sprite.spritecollideany(self, tiles_group)
                 tile.image = tile_images['empty']
-                return 3
+                return 'energo'
             return True
 
     # обрабатывает движение пакмена
@@ -466,25 +466,11 @@ class Player(pygame.sprite.Sprite):
         self.rect = self.rect.move(self.check_tuple[side][0], self.check_tuple[side][1])
         fl = self.collides()
         self.rect = self.rect.move(-self.check_tuple[side][0], -self.check_tuple[side][1])
-        if pygame.sprite.spritecollideany(self, hunter_group) is not None:
-            print(pygame.sprite.spritecollideany(self, hunter_group))
-            check = False
-            for hunter in pygame.sprite.spritecollide(self, hunter_group, dokill=False):
-                if not hunter.isDead():
-                    if hunter.isAttacked():
-                        pygame.time.delay(pygame.time.delay(500))
-                        hunter.setDead(True)
-                        hunter.setAttacked(False)
-                        check = True
-            if check:
-                fl = 2
-        if fl and fl not in [2, 3]:
+        if fl:
             self.rect = self.rect.move(self.side_tuples[side])
             self.x += self.side_tuples[side][0]
             self.y += self.side_tuples[side][1]
         lst_picture = self.image_list[side]
         self.image = load_image_pacman(lst_picture[number] + '.gif')
-        if fl in [2, 3, 4]:
-            return fl - 1
-
-
+        if fl in ['point', 'energo']:
+            return fl
