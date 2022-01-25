@@ -395,7 +395,7 @@ def return_path(game, num, event, hunter):
     }
     
     if num == 0:
-        return x, y
+        return hunter.closest_available_node((x, y))
     
     if num == 1:
         return hunter.closest_available_node((x + side[event][0] * 2, y + side[event][1] * 2))
@@ -406,7 +406,7 @@ def return_path(game, num, event, hunter):
     if num == 3:
         if (x - hunter.row) ** 2 + (y - hunter.col) ** 2 <= 64:
             return hunter.closest_available_node((0, rows))
-        return x, y
+        return hunter.closest_available_node((x, y))
             
             
             
@@ -422,6 +422,10 @@ class PauseImage(pygame.sprite.Sprite):
         self.n += 1
         self.image = load_image('on.png' if self.n % 2 == 1 else 'pause.png')
 
+
+def revival():
+    for hunter in hunter_group:
+        hunter.setAttacked(False)
 
 # класс пакмена
 class Player(pygame.sprite.Sprite):
@@ -487,7 +491,7 @@ class Player(pygame.sprite.Sprite):
         self.rect = self.rect.move(self.check_tuple[side][0], self.check_tuple[side][1])
         fl = self.collides()
         self.rect = self.rect.move(-self.check_tuple[side][0], -self.check_tuple[side][1])
-        if fl and fl != 'energo' and pygame.sprite.spritecollideany(self, hunter_group) is None:
+        if fl and fl != 'energo':
             self.rect = self.rect.move(self.side_tuples[side])
             self.x += self.side_tuples[side][0]
             self.y += self.side_tuples[side][1]
