@@ -72,10 +72,36 @@ def react(game, side, timers):
 
 if __name__ == "__main__":
     pygame.init()
-    size = width, height = 500, 500
-    screen = pygame.display.set_mode(size)
-    game = Game('default_level.txt')
+    level = 'default_level.txt'
+    # вычисление размеров поля для загруженного уровня
+    count_columns = len(load_level(level)[0])
+    count_rows = len(load_level(level))
+    width = count_columns * 18 + 150
+    height = count_rows * 18
+    size = width, height
 
+    screen = pygame.display.set_mode(size)
+    game = Game(level)
+
+    # отрисовка кнопок плей/пауза
+    image_pause = pygame.transform.scale(load_image('pause.png'), (30, 30))
+    image_play = pygame.transform.scale(load_image('on.png'), (30, 30))
+    screen.blit(image_pause, (count_columns * 18 + 80, count_rows * 18 - 40))
+    screen.blit(image_play, (count_columns * 18 + 40, count_rows * 18 - 40))
+    # отрисовка надписи "SCORE"
+    font = pygame.font.Font(None, 35)
+    string_rendered = font.render('S C O R E', 1, pygame.Color('yellow'))
+    intro_rect = string_rendered.get_rect()
+    intro_rect.top = 20
+    intro_rect.x = count_columns * 18 + 15
+    screen.blit(string_rendered, intro_rect)
+    # отрисовка количество очков
+    font = pygame.font.Font(None, 40)
+    string_rendered = font.render(str(game.score), 1, pygame.Color('yellow'))
+    intro_rect = string_rendered.get_rect()
+    intro_rect.top = 60
+    intro_rect.x = count_columns * 18 + (75 - intro_rect.width // 2)
+    screen.blit(string_rendered, intro_rect)
 
 
     def revival():
@@ -91,8 +117,6 @@ if __name__ == "__main__":
 
     running = True
     player = None
-    level = 'default_level.txt'
-    count1 = count2 = 26
     clock = pygame.time.Clock()
     FPS = 60
     change_values = {
@@ -112,6 +136,14 @@ if __name__ == "__main__":
                     pause = bool(1 - pause)
                 if event.key in change_values.keys() and len(events_sequence) <= 1:
                     events_sequence.append(change_values[event.key])
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                x = event.pos[0]
+                y = event.pos[1]
+                if y >= count_rows * 18 - 40 and y <= count_rows * 18 - 10:
+                    if x >= count_columns * 18 + 80 and x  <= count_columns * 18 + 90:
+                        pause = True
+                    elif x >= count_columns * 18 + 40 and x  <= count_columns * 18 + 50:
+                        pause = False
         if counter == 0:
             game.pacman_pos = [int(game.pacman.x / 18), int(game.pacman.y / 18)]
             events_sequence = [events_sequence[1]] if len(events_sequence) > 1 else events_sequence
