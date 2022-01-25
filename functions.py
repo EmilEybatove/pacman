@@ -10,7 +10,6 @@ from math import sqrt
 
 all_sprites = pygame.sprite.Group()
 tiles_group = pygame.sprite.Group()
-base_group = pygame.sprite.Group()
 player_group = pygame.sprite.Group()
 hunter_group = pygame.sprite.Group()
 pause_group = pygame.sprite.Group()
@@ -289,7 +288,7 @@ def load_level(filename):
 
 # создание уровня
 def generate_level(level):
-    global base_group, cols, rows
+    global cols, rows
     points = 0
     rows = len(level)
     cols = len(level[0])
@@ -423,9 +422,7 @@ class PauseImage(pygame.sprite.Sprite):
         self.image = load_image('on.png' if self.n % 2 == 1 else 'pause.png')
 
 
-def revival():
-    for hunter in hunter_group:
-        hunter.setAttacked(False)
+
 
 # класс пакмена
 class Player(pygame.sprite.Sprite):

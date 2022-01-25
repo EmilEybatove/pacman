@@ -1,0 +1,14 @@
+<changelist name="Uncommitted_changes_before_Update_at_23_01_2022_19_38_[all_game_6_0]1" date="1642955910216" recycled="true" deleted="true">
+  <option name="PATH" value="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_23_01_2022_19_38_[all_game_6_0]1/shelved.patch" />
+  <option name="DESCRIPTION" value="Uncommitted changes before Update at 23.01.2022 19:38 [all_game 6.0]" />
+  <binary>
+    <option name="BEFORE_PATH" value="data/arrow_down.png" />
+    <option name="AFTER_PATH" value="data/down.png" />
+    <option name="SHELVED_PATH" value="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_23_01_2022_19_38_[all_game_6_0]1/down.png" />
+  </binary>
+  <binary>
+    <option name="BEFORE_PATH" value="data/arrow_up.png" />
+    <option name="AFTER_PATH" value="data/up.png" />
+    <option name="SHELVED_PATH" value="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_23_01_2022_19_38_[all_game_6_0]1/up.png" />
+  </binary>
+</changelist>
