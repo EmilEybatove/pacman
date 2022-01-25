@@ -140,9 +140,9 @@ if __name__ == "__main__":
                 x = event.pos[0]
                 y = event.pos[1]
                 if y >= count_rows * 18 - 40 and y <= count_rows * 18 - 10:
-                    if x >= count_columns * 18 + 80 and x  <= count_columns * 18 + 90:
+                    if x >= count_columns * 18 + 80 and x  <= count_columns * 18 + 110:
                         pause = True
-                    elif x >= count_columns * 18 + 40 and x  <= count_columns * 18 + 50:
+                    elif x >= count_columns * 18 + 40 and x  <= count_columns * 18 + 70:
                         pause = False
         if counter == 0:
             game.pacman_pos = [int(game.pacman.x / 18), int(game.pacman.y / 18)]
