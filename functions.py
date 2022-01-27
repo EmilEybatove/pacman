@@ -8,10 +8,8 @@ from pygame import Color
 import threading
 from math import sqrt
 
-
 all_sprites = pygame.sprite.Group()
 tiles_group = pygame.sprite.Group()
-base_group = pygame.sprite.Group()
 player_group = pygame.sprite.Group()
 hunter_group = pygame.sprite.Group()
 pause_group = pygame.sprite.Group()
@@ -193,7 +191,7 @@ class Hunter(pygame.sprite.Sprite):
 
             if self.path and len(self.path) > 1:
                 final_goal = self.path[1]
-                if  self.row < final_goal[0]:
+                if self.row < final_goal[0]:
                     self.rect.x += 1
                 elif self.row > final_goal[0]:
                     self.rect.x -= 1
@@ -259,96 +257,6 @@ class Hunter(pygame.sprite.Sprite):
 
     def setDead(self, isDead):
         self.dead = isDead
-        print(self.dead)
-
-    def isDead(self):
-        return self.dead
-
-    def collides(self):
-        # print(pygame.sprite.spritecollideany(self, player_group))
-        pass
-
-
-class Player_hunter(pygame.sprite.Sprite):
-    def __init__(self, sprite_group, row, col, color):
-        """Color must be in pygame.Color() format!"""
-        super().__init__(sprite_group)
-        self.row = row
-        self.col = col
-        self.color = color
-        self.attacked = False
-        self.dead = False
-        self.start_pos = [row, col]
-        self.check_tuple = {
-            'left': (-1, 0),
-            'right': (18, 0),
-            'up': (0, -1),
-            'down': (0, 18)
-        }
-        self.side_tuples = {
-            'left': (-1, 0),
-            'right': (1, 0),
-            'up': (0, -1),
-            'down': (0, 1)
-        }
-        self.frame = 0
-        self.anim = {}
-        for i in range(6):
-            self.anim[i] = load_image(os.path.join("ghost_sprites", "ghost_" + str(i) + ".gif"))
-        self.color_frames(ghost_color[0], self.color)
-        self.image = self.anim[0]
-        self.rect = self.image.get_rect()
-        self.rect.x, self.rect.y, *_ = get_rect(self.row, self.col)
-        # Usual code
-        self.restricted = ["|", "-", "1", "2", "3", "4", 1, 2, 3, 4]
-        self.allowed = ["0", 0, ".", "*", "?"]
-
-    def new(self):
-        self.row = self.start_pos[0]
-        self.col = self.start_pos[1]
-        self.rect.x = self.start_pos[0] * TILE
-        self.rect.y = self.start_pos[1] * TILE
-        self.setDead(False)
-        self.setAttacked(False)
-
-    def color_frames(self, from_color: Color, to_color: Color):
-        for i in range(6):
-            palette = list(self.anim[i].get_palette())
-            for j, c in enumerate(palette):
-                if c == from_color:
-                    palette[j] = to_color
-            self.anim[i].set_palette(palette)
-
-    def move(self, side):
-        if self.attacked:
-            self.color_frames(self.color, ghost_color[4])
-        elif self.dead:
-            self.color_frames(self.color, Color(0, 0, 0, 255))
-
-        self.rect = self.rect.move(self.check_tuple[side][0], self.check_tuple[side][1])
-        if self.collides():
-            self.rect = self.rect.move(-self.check_tuple[side][0], -self.check_tuple[side][1])
-        self.row += self.side_tuples[side][0] // TILE
-        self.col += self.side_tuples[side][1] // TILE
-
-        # Update self.image
-        self.frame = (self.frame + 1) % 6
-        self.image = self.anim[self.frame]
-
-
-    def collides(self):
-        if pygame.sprite.spritecollideany(self, tiles_group) is not None:
-            return True
-        return False
-
-    def setAttacked(self, isAttacked):
-        self.attacked = isAttacked
-
-    def isAttacked(self):
-        return self.attacked
-
-    def setDead(self, isDead):
-        self.dead = isDead
 
     def isDead(self):
         return self.dead
@@ -380,7 +288,7 @@ def load_level(filename):
 
 # создание уровня
 def generate_level(level):
-    global base_group, cols, rows
+    global cols, rows
     points = 0
     rows = len(level)
     cols = len(level[0])
@@ -402,6 +310,7 @@ def generate_level(level):
 def terminate():
     pygame.quit()
     sys.exit()
+
 
 # оформление стартового окна
 def print_intro():
@@ -468,12 +377,38 @@ def start_screen():
                     if len(input_text) <= 20:
                         input_text += event.unicode
             elif event.type == pygame.MOUSEBUTTONDOWN:
-                if event.pos[0] > 100 and event.pos[0] < 400 and \
-                        event.pos[1] > 300 and event.pos[1] < 350:
+                if 100 < event.pos[0] < 400 and 300 < event.pos[1] < 350:
                     need_input = True
         print_text(input_text)
         pygame.display.flip()
 
+
+
+def return_path(game, num, event, hunter):
+    x, y = game.pacman_pos
+    side = {
+        'left': (-1, 0),
+        'right': (1, 0),
+        'up': (0, -1),
+        'down': (0, 1)
+    }
+    
+    if num == 0:
+        return hunter.closest_available_node((x, y))
+    
+    if num == 1:
+        return hunter.closest_available_node((x + side[event][0] * 2, y + side[event][1] * 2))
+    
+    if num == 2:
+        return hunter.closest_available_node((x - side[event][0] * 2, y - side[event][1] * 2)) 
+    
+    if num == 3:
+        if (x - hunter.row) ** 2 + (y - hunter.col) ** 2 <= 64:
+            return hunter.closest_available_node((0, rows))
+        return hunter.closest_available_node((x, y))
+            
+            
+            
 
 class PauseImage(pygame.sprite.Sprite):
     def __init__(self, pos_x, pos_y):
@@ -487,8 +422,11 @@ class PauseImage(pygame.sprite.Sprite):
         self.image = load_image('on.png' if self.n % 2 == 1 else 'pause.png')
 
 
+
+
 # класс пакмена
 class Player(pygame.sprite.Sprite):
+
     def __init__(self, pos_x, pos_y):
         super().__init__(player_group, all_sprites)
         self.image = load_image_pacman('pacman.gif')
@@ -498,6 +436,7 @@ class Player(pygame.sprite.Sprite):
         self.y = tile_height * pos_y
         self.score = 0
         self.start_pos = [pos_x, pos_y]
+        self.counter = 1
         self.side_tuples = {
             'left': (-1, 0),
             'right': (1, 0),
@@ -527,17 +466,17 @@ class Player(pygame.sprite.Sprite):
 
     # проверяет все столкновения
     def collides(self):
-        restricted = ['vertical', 'horisontal', '1', '2', '3', '4', 'gate']
-        collides_list = pygame.sprite.spritecollideany(self, tiles_group)
-        if collides_list is None or collides_list.image in [tile_images[_] for _ in restricted]:
+        lst = ['vertical', 'horisontal', '1', '2', '3', '4', 'gate']
+        collid_lst = pygame.sprite.spritecollideany(self, tiles_group)
+        if collid_lst is None or collid_lst.image in [tile_images[_] for _ in lst]:
             return False
         else:
-            if collides_list.image is tile_images['point']:
+            if collid_lst.image is tile_images['point']:
                 self.score += 10
                 tile = pygame.sprite.spritecollideany(self, tiles_group)
                 tile.image = tile_images['empty']
                 return 'point'
-            elif collides_list.image is tile_images['energo']:
+            elif collid_lst.image is tile_images['energo']:
                 self.score += 50
                 tile = pygame.sprite.spritecollideany(self, tiles_group)
                 tile.image = tile_images['empty']
@@ -549,7 +488,7 @@ class Player(pygame.sprite.Sprite):
         self.rect = self.rect.move(self.check_tuple[side][0], self.check_tuple[side][1])
         fl = self.collides()
         self.rect = self.rect.move(-self.check_tuple[side][0], -self.check_tuple[side][1])
-        if fl:
+        if fl and fl != 'energo':
             self.rect = self.rect.move(self.side_tuples[side])
             self.x += self.side_tuples[side][0]
             self.y += self.side_tuples[side][1]
