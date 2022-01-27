@@ -108,12 +108,12 @@ def draw(screen, game):
     intro_rect.x = count_columns * 18 + (75 - intro_rect.width // 2)
     screen.blit(string_rendered, intro_rect)
 
-def dead(screen):
+# def dead(screen):
 
 
 if __name__ == "__main__":
     pygame.init()
-    level = 'default_level.txt'
+    level = 'at.txt'
     # вычисление размеров поля для загруженного уровня
     count_columns = len(load_level(level)[0])
     count_rows = len(load_level(level))
@@ -134,7 +134,6 @@ if __name__ == "__main__":
 
     running = True
     player = None
-    level = 'default_level.txt'
     count1 = count2 = 26
     clock = pygame.time.Clock()
     FPS = 40

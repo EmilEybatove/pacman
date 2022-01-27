@@ -34,8 +34,10 @@ tile_images = {
     '3': load_image('4.png'),
     '4': load_image('3.png'),
     'empty': load_image('empty.png'),
+    'point': load_image('point.png'),
+    'energo': load_image('energo.png'),
     'pacman': load_image('pacman.png'),
-    'energo': load_image('energo.png')}
+    'gate': load_image('gate.png')}
 
 dct = {
     'vertical': '|',
@@ -46,7 +48,9 @@ dct = {
     '4': '4',
     'empty': '.',
     'pacman': '@',
-    'energo': '*'
+    'energo': '*',
+    '?': '?',
+    'point': '0'
 }
 
 tile_width = tile_height = 18
@@ -69,9 +73,10 @@ values = {
     '3': '3',
     '4': '4',
     '.': 'empty',
+    '0': 'point',
+    '*': 'energo',
     '@': 'pacman',
-    '*': 'energo'
-
+    '?': 'gate'
 }
 
 
@@ -154,7 +159,9 @@ class Board:
         for i in [-2, -1, 0, 1]:
             for j in [-4, -3, -2, -1, 0, 1, 2, 3]:
                 b, a = self.height // 2 + i, self.width // 2 + j
-                if i == -2 and j == -4:
+                if j in [-1, 0] and i == -2:
+                    Tile(values['?'], a, b, (base_group,))
+                elif i == -2 and j == -4:
                     Tile(values['1'], a, b, (base_group,))
                 elif i == -2 and j == 3:
                     Tile(values['2'], a, b, (base_group,))
@@ -198,11 +205,15 @@ class Board:
         if filename + '.txt' not in os.listdir('levels'):
             file = open(f'levels/{filename}.txt', mode='w', encoding='utf-8')
             board = deepcopy(self.board)
+            pacman = False
+            energo = 0
 
             for i in [-2, -1, 0, 1]:
                 for j in [-4, -3, -2, -1, 0, 1, 2, 3]:
                     b, a = self.height // 2 + i, self.width // 2 + j
-                    if i == -2 and j == -4:
+                    if j in [-1, 0] and i == -2:
+                        board[b][a] = '?'
+                    elif i == -2 and j == -4:
                         board[b][a] = '1'
                     elif i == -2 and j == 3:
                         board[b][a] = '2'
@@ -217,6 +228,15 @@ class Board:
                     else:
                         board[b][a] = '.'
 
+            for elem in board:
+                if '@' in elem:
+                    pacman = True
+                energo += elem.count('*')
+            print(pacman)
+            if not pacman or energo < 4:
+                file.close()
+                os.remove(f'levels/{filename}.txt')
+                return None
             for elem in board:
                 print(''.join(list(map(lambda x: '.' if x == ' ' else x, elem))), file=file)
             file.close()
@@ -257,7 +277,7 @@ def cords(mouse_pos):
             b = i
             break
 
-    if a >= 0 and b >= 0 and not (a == 1 and b == 4):
+    if a >= 0 and b >= 0:
         return b * 2 + a
     return None
 
@@ -332,8 +352,9 @@ if __name__ == '__main__':
     down = 0
 
     for elem in tile_images:
-        Images(elem, a // 2, a % 2)
-        a += 1
+        if elem != 'gate':
+            Images(elem, a // 2, a % 2)
+            a += 1
     click, text, position = False, '', -1
 
     while running:
@@ -369,8 +390,9 @@ if __name__ == '__main__':
                 player, level_x, level_y = generate_level([''.join(elem) for elem in board.board])
                 a = 0
                 for elem in tile_images:
-                    Images(elem, a // 2, a % 2)
-                    a += 1
+                    if elem != 'gate':
+                        Images(elem, a // 2, a % 2)
+                        a += 1
             if event.type == pygame.KEYDOWN:
                 if click:
                     if event.key == pygame.K_RETURN:

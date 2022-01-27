@@ -20,8 +20,9 @@ if os.name == "nt":
 else:
     SCRIPT_PATH = sys.path[0]
 
-ghostGate = [(10, 12), (11, 12), (12, 12), (13, 12), (14, 12), (15, 12),
-             (10, 13), (11, 13), (12, 13), (13, 13), (14, 13), (15, 13)]
+# ghostGate = [(10, 12), (11, 12), (12, 12), (13, 12), (14, 12), (15, 12),
+#              (10, 13), (11, 13), (12, 13), (13, 13), (14, 13), (15, 13)]
+ghostGate = []
 # GONNA WORK ONLY FOR DEFAULT MAP!!
 ghost_color = [Color(255, 0, 0, 255),  # Red
                Color(255, 128, 255, 255),  # pink
@@ -288,7 +289,7 @@ def load_level(filename):
 
 # создание уровня
 def generate_level(level):
-    global cols, rows
+    global cols, rows, ghostGate
     points = 0
     rows = len(level)
     cols = len(level[0])
@@ -303,7 +304,9 @@ def generate_level(level):
                 if level[y][x] in ['0', '*']:
                     points += 1
                 Tile(values[level[y][x]], x, y)
-
+    for i in [-3, -2, -1, 0, 1, 2]:
+        for j in [-1, 0]:
+            ghostGate.append((cols // 2 + i, rows // 2 + j))
     return new_player, x, y, pacman_pos, points
 
 
