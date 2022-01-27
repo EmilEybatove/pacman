@@ -76,8 +76,8 @@ if __name__ == "__main__":
     # вычисление размеров поля для загруженного уровня
     count_columns = len(load_level(level)[0])
     count_rows = len(load_level(level))
-    width = count_columns * 18 + 150
-    height = count_rows * 18
+    width = count_columns * TILE + 150
+    height = count_rows * TILE
     size = width, height
 
     screen = pygame.display.set_mode(size)
@@ -86,28 +86,26 @@ if __name__ == "__main__":
     # отрисовка кнопок плей/пауза
     image_pause = pygame.transform.scale(load_image('pause.png'), (30, 30))
     image_play = pygame.transform.scale(load_image('on.png'), (30, 30))
-    screen.blit(image_pause, (count_columns * 18 + 80, count_rows * 18 - 40))
-    screen.blit(image_play, (count_columns * 18 + 40, count_rows * 18 - 40))
+    screen.blit(image_pause, (count_columns * TILE + 80, count_rows * TILE - 40))
+    screen.blit(image_play, (count_columns * TILE + 40, count_rows * TILE - 40))
     # отрисовка надписи "SCORE"
     font = pygame.font.Font(None, 35)
     string_rendered = font.render('S C O R E', 1, pygame.Color('yellow'))
     intro_rect = string_rendered.get_rect()
     intro_rect.top = 20
-    intro_rect.x = count_columns * 18 + 15
+    intro_rect.x = count_columns * TILE + 15
     screen.blit(string_rendered, intro_rect)
-    # отрисовка количество очков
+    # отрисовка количества очков
     font = pygame.font.Font(None, 40)
     string_rendered = font.render(str(game.score), 1, pygame.Color('yellow'))
     intro_rect = string_rendered.get_rect()
     intro_rect.top = 60
-    intro_rect.x = count_columns * 18 + (75 - intro_rect.width // 2)
+    intro_rect.x = count_columns * TILE + (75 - intro_rect.width // 2)
     screen.blit(string_rendered, intro_rect)
-
 
     def revival():
         for hunter in hunter_group:
             hunter.setAttacked(False)
-
 
     timer1 = threading.Timer(10, revival)
     timer2 = threading.Timer(10, revival)
@@ -139,19 +137,19 @@ if __name__ == "__main__":
             if event.type == pygame.MOUSEBUTTONDOWN:
                 x = event.pos[0]
                 y = event.pos[1]
-                if y >= count_rows * 18 - 40 and y <= count_rows * 18 - 10:
-                    if x >= count_columns * 18 + 80 and x  <= count_columns * 18 + 110:
+                if y >= count_rows * TILE - 40 and y <= count_rows * TILE - 10:
+                    if x >= count_columns * TILE + 80 and x  <= count_columns * TILE + 110:
                         pause = True
-                    elif x >= count_columns * 18 + 40 and x  <= count_columns * 18 + 70:
+                    elif x >= count_columns * TILE + 40 and x  <= count_columns * TILE + 70:
                         pause = False
         if counter == 0:
-            game.pacman_pos = [int(game.pacman.x / 18), int(game.pacman.y / 18)]
+            game.pacman_pos = [int(game.pacman.x / TILE), int(game.pacman.y / TILE)]
             events_sequence = [events_sequence[1]] if len(events_sequence) > 1 else events_sequence
         if not pause:
             if game.mode in [1, 3, 5]:
                 react(game, events_sequence[0], timers)
             if len(events_sequence) > 0:
-                counter = (counter + 1) % 18
+                counter = (counter + 1) % TILE
                 number = (number + 1) % 9
             for hunter in hunter_group:
                 hunter.move((game.pacman_pos[0], game.pacman_pos[1]))
