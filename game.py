@@ -19,12 +19,15 @@ class Game:
         """
         self.lives = lives
         self.mode = mode
-        grid = load_level(level)
-        self.pacman, self.x, self.y, self.pacman_pos, self.points = generate_level(grid)
+        self.pacman, self.x, self.y, self.pacman_pos, self.points, self.ghostGate = generate_level(grid)
+        global ghostGate
+        ghostGate = self.ghostGate
+
         self.start_pacman_pos = self.pacman_pos.copy()
         self.hunter_start_pos = []
         self.ghosts = []
-        temp = sample(ghostGate, k=4)
+        temp = sample(self.ghostGate, k=4)
+        print(f"\n\ntemp: {temp} \nghostGate: {ghostGate}\n\n")
         for col in range(4):
             start_pos = x, y = temp[col]
             self.hunter_start_pos.append(start_pos)
@@ -87,7 +90,7 @@ def draw(screen, game):
     image_play = pygame.transform.scale(load_image('on.png'), (30, 30))
     screen.blit(image_pause, (count_columns * 18 + 80, count_rows * 18 - 40))
     screen.blit(image_play, (count_columns * 18 + 40, count_rows * 18 - 40))
-    #отрисовка эизней
+    # отрисовка жизней
     image_pacman = pygame.transform.scale(load_image('pacman_sprites/r_1.gif'), (25, 25))
     if game.lives > 2:
         screen.blit(image_pacman, (count_columns * 18 + 40, count_rows * 9 - 20))
@@ -100,7 +103,7 @@ def draw(screen, game):
     intro_rect.top = 20
     intro_rect.x = count_columns * 18 + 15
     screen.blit(string_rendered, intro_rect)
-    # отрисовка количество очков
+    # отрисовка количества очков
     font = pygame.font.Font(None, 40)
     string_rendered = font.render(str(game.pacman.score), True, pygame.Color('yellow'))
     intro_rect = string_rendered.get_rect()
@@ -108,12 +111,9 @@ def draw(screen, game):
     intro_rect.x = count_columns * 18 + (75 - intro_rect.width // 2)
     screen.blit(string_rendered, intro_rect)
 
-# def dead(screen):
-
 
 if __name__ == "__main__":
     pygame.init()
-    level = 'at.txt'
     # вычисление размеров поля для загруженного уровня
     count_columns = len(load_level(level)[0])
     count_rows = len(load_level(level))
@@ -136,7 +136,7 @@ if __name__ == "__main__":
     player = None
     count1 = count2 = 26
     clock = pygame.time.Clock()
-    FPS = 40
+    FPS = 80
     change_values = {
         pygame.K_LEFT: 'left',
         pygame.K_RIGHT: 'right',
