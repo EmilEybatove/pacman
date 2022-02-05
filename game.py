@@ -5,6 +5,7 @@ pause, stop = False, False
 i = -1
 mult = 0
 exit_down = False
+SOUND = 1
 
 
 class Game:
@@ -74,6 +75,14 @@ def react(game, side, timers):
                 screen.fill((0, 0, 0))
                 draw(screen, game)
 
+def change_image_volume(SOUND):
+    if SOUND:
+        image_volume = pygame.transform.scale(load_image('volume.png'), (40, 40))
+    else:
+        image_volume = pygame.transform.scale(load_image('mute.png'), (40, 40))
+    screen.blit(image_volume, (count_columns * 18 + 55, count_rows * 18 - 170))
+
+
 
 def draw(screen, game):
     # отрисовка кнопок плей/пауза
@@ -81,6 +90,9 @@ def draw(screen, game):
     image_play = pygame.transform.scale(load_image('on.png'), (30, 30))
     screen.blit(image_pause, (count_columns * 18 + 80, count_rows * 18 - 100))
     screen.blit(image_play, (count_columns * 18 + 40, count_rows * 18 - 100))
+    # отрисовка кнопки volume
+    image_volume = pygame.transform.scale(load_image('volume.png'), (40, 40))
+    screen.blit(image_volume, (count_columns * 18 + 55, count_rows * 18 - 170))
     # отрисовка жизней
     image_pacman = pygame.transform.scale(load_image('pacman_sprites/r_1.gif'), (25, 25))
     if game.lives > 2:
@@ -156,6 +168,9 @@ if __name__ == "__main__":
                     pause = bool(1 - pause)
                 if event.key in change_values.keys() and len(events_sequence) <= 1:
                     events_sequence.append(change_values[event.key])
+                if event.key == pygame.K_m:
+                    SOUND = (SOUND + 1) % 2
+                    change_image_volume(SOUND)
             if event.type == pygame.MOUSEBUTTONDOWN:
                 x = event.pos[0]
                 y = event.pos[1]
@@ -164,6 +179,10 @@ if __name__ == "__main__":
                         pause = True
                     elif count_columns * 18 + 40 <= x <= count_columns * 18 + 70:
                         pause = False
+                elif count_columns * 18 + 55 <= x <= count_columns * 18 + 95 and \
+                        count_rows * 18 - 170 <= y <= count_rows * 18 - 130:
+                    SOUND = (SOUND + 1) % 2
+                    change_image_volume(SOUND)
                 if exit_game.rect.collidepoint(pygame.mouse.get_pos()):
                     exit_game.image.fill((150, 0, 0))
                     exit_down = True
