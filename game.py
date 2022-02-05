@@ -4,27 +4,21 @@ events_sequence, number = ['up'], 0
 pause, stop = False, False
 i = -1
 mult = 0
+exit_down = False
 
 
 class Game:
     def __init__(self, level, mode=1, lives=3):
-        """значения mode:
-        0 - пауза
-        1 - основная игра
-        2 - съел точку (пауза)
-        3 - съел точку процесс
-        4 - съел призрака (пауза)
-        5 - уход призрака
-        6 - призрак съел пакмена
-        """
         self.lives = lives
         self.mode = mode
-        grid = load_level(level)
-        self.pacman, self.x, self.y, self.pacman_pos, self.points = generate_level(grid)
+        self.pacman, self.x, self.y, self.pacman_pos, self.points, self.ghostGate = generate_level(grid)
+        global ghostGate
+        ghostGate = self.ghostGate
+
         self.start_pacman_pos = self.pacman_pos.copy()
         self.hunter_start_pos = []
         self.ghosts = []
-        temp = sample(ghostGate, k=4)
+        temp = sample(self.ghostGate, k=4)
         for col in range(4):
             start_pos = x, y = temp[col]
             self.hunter_start_pos.append(start_pos)
@@ -85,9 +79,9 @@ def draw(screen, game):
     # отрисовка кнопок плей/пауза
     image_pause = pygame.transform.scale(load_image('pause.png'), (30, 30))
     image_play = pygame.transform.scale(load_image('on.png'), (30, 30))
-    screen.blit(image_pause, (count_columns * 18 + 80, count_rows * 18 - 40))
-    screen.blit(image_play, (count_columns * 18 + 40, count_rows * 18 - 40))
-    #отрисовка эизней
+    screen.blit(image_pause, (count_columns * 18 + 80, count_rows * 18 - 100))
+    screen.blit(image_play, (count_columns * 18 + 40, count_rows * 18 - 100))
+    # отрисовка жизней
     image_pacman = pygame.transform.scale(load_image('pacman_sprites/r_1.gif'), (25, 25))
     if game.lives > 2:
         screen.blit(image_pacman, (count_columns * 18 + 40, count_rows * 9 - 20))
@@ -100,7 +94,7 @@ def draw(screen, game):
     intro_rect.top = 20
     intro_rect.x = count_columns * 18 + 15
     screen.blit(string_rendered, intro_rect)
-    # отрисовка количество очков
+    # отрисовка количества очков
     font = pygame.font.Font(None, 40)
     string_rendered = font.render(str(game.pacman.score), True, pygame.Color('yellow'))
     intro_rect = string_rendered.get_rect()
@@ -108,15 +102,23 @@ def draw(screen, game):
     intro_rect.x = count_columns * 18 + (75 - intro_rect.width // 2)
     screen.blit(string_rendered, intro_rect)
 
-# def dead(screen):
-
+def draw_exit_text():
+    font = pygame.font.Font(None, 40)
+    string_rendered = font.render('E X I T', True, (255, 255, 255))
+    screen.blit(string_rendered, (count_columns * 18 + 28, count_rows * 18 - 43))
 
 if __name__ == "__main__":
     pygame.init()
-    level = 'at.txt'
     # вычисление размеров поля для загруженного уровня
     count_columns = len(load_level(level)[0])
     count_rows = len(load_level(level))
+
+    exit_game = pygame.sprite.Sprite()
+    exit_game.image = pygame.Surface((125, 40))
+    exit_game.rect = pygame.Rect(count_columns * 18 + 10, count_rows * 18 - 50, 125, 40)
+    exit_game.image.fill((200, 0, 0))
+    exit_group.add(exit_game)
+
     width = count_columns * 18 + 150
     height = count_rows * 18
     size = width, height
@@ -136,7 +138,7 @@ if __name__ == "__main__":
     player = None
     count1 = count2 = 26
     clock = pygame.time.Clock()
-    FPS = 40
+    FPS = 80
     change_values = {
         pygame.K_LEFT: 'left',
         pygame.K_RIGHT: 'right',
@@ -157,12 +159,20 @@ if __name__ == "__main__":
             if event.type == pygame.MOUSEBUTTONDOWN:
                 x = event.pos[0]
                 y = event.pos[1]
-                if count_rows * 18 - 40 <= y <= count_rows * 18 - 10:
+                if count_rows * 18 - 100 <= y <= count_rows * 18 - 70:
                     if count_columns * 18 + 80 <= x <= count_columns * 18 + 110:
                         pause = True
                     elif count_columns * 18 + 40 <= x <= count_columns * 18 + 70:
                         pause = False
-
+                if exit_game.rect.collidepoint(pygame.mouse.get_pos()):
+                    exit_game.image.fill((150, 0, 0))
+                    exit_down = True
+            elif event.type == pygame.MOUSEBUTTONUP:
+                if exit_game.rect.collidepoint(pygame.mouse.get_pos()) and exit_down:
+                    pass
+                #ЗДЕСЬ ЕСТЬ МЕСТО ДЛЯ ВЫХОДА
+                exit_down = False
+                exit_game.image.fill((200, 0, 0))
 
         if game.pacman.counter == 0:
             game.pacman_pos = [int(game.pacman.x / 18), int(game.pacman.y / 18)]
@@ -179,7 +189,8 @@ if __name__ == "__main__":
         tiles_group.draw(screen)
         player_group.draw(screen)
         hunter_group.draw(screen)
-
+        exit_group.draw(screen)
+        draw_exit_text()
         pygame.display.flip()
         clock.tick(FPS)
         if game.points == 0:

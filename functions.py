@@ -5,75 +5,15 @@ from pprint import pprint
 from random import sample, choice, random
 import pygame
 from pygame import Color
-import threading
 from math import sqrt
+import threading
 
 all_sprites = pygame.sprite.Group()
 tiles_group = pygame.sprite.Group()
 player_group = pygame.sprite.Group()
 hunter_group = pygame.sprite.Group()
 pause_group = pygame.sprite.Group()
-TILE = tile_width = tile_height = 18
-SCRIPT_PATH = None
-if os.name == "nt":
-    SCRIPT_PATH = os.getcwd()
-else:
-    SCRIPT_PATH = sys.path[0]
-
-# ghostGate = [(10, 12), (11, 12), (12, 12), (13, 12), (14, 12), (15, 12),
-#              (10, 13), (11, 13), (12, 13), (13, 13), (14, 13), (15, 13)]
-ghostGate = []
-# GONNA WORK ONLY FOR DEFAULT MAP!!
-ghost_color = [Color(255, 0, 0, 255),  # Red
-               Color(255, 128, 255, 255),  # pink
-               Color(128, 255, 255, 255),  # light blue
-               Color(255, 128, 0, 255),  # orange
-               Color(50, 50, 255, 255),  # blue vulnerable
-               Color(255, 255, 255, 255)]  # white
-
-cols, rows = 26, 26
-
-
-def load_image(name, colorkey=None):
-    fullname = os.path.join('data', name)
-    if not os.path.isfile(fullname):
-        print(f"Файл с изображением '{fullname}' не найден")
-        sys.exit()
-    image = pygame.image.load(fullname)
-    if colorkey is not None:
-        image = image.convert()
-        if colorkey == -1:
-            colorkey = image.get_at((0, 0))
-        image.set_colorkey(colorkey)
-    return image
-
-
-tile_images = {
-    'vertical': load_image('vertical.png'),
-    'horisontal': load_image('horisontal.png'),
-    '1': load_image('1.png'),
-    '2': load_image('2.png'),
-    '3': load_image('4.png'),
-    '4': load_image('3.png'),
-    'empty': load_image('empty.png'),
-    'point': load_image('point.png'),
-    'energo': load_image('energo.png'),
-    'gate': load_image('gate.png')}
-
-values = {
-    '|': 'vertical',
-    '-': 'horisontal',
-    '1': '1',
-    '2': '2',
-    '3': '3',
-    '4': '4',
-    '.': 'empty',
-    '@': 'pacman',
-    '*': 'energo',
-    '0': 'point',
-    '?': 'gate'
-}
-
+exit_group = pygame.sprite.Group()
 
 class Tile(pygame.sprite.Sprite):
     def __init__(self, tile_type, pos_x, pos_y, groups=(tiles_group, all_sprites)):
@@ -116,7 +56,6 @@ class Hunter(pygame.sprite.Sprite):
         self.attacked = False
         self.dead = False
         self.counter = 0
-        self.path = []
         self.start_pos = [row, col]
         try:
             self.frame = 0
@@ -132,17 +71,9 @@ class Hunter(pygame.sprite.Sprite):
             self.image.fill(pygame.Color("green"))
             self.rect = self.image.get_rect()
             self.rect.x, self.rect.y, *_ = get_rect(self.row, self.col)
-        # Usual code
-        self.restricted = ["|", "-", "1", "2", "3", "4", 1, 2, 3, 4]
-        self.allowed = ["0", 0, ".", "*", "?"]
-        self.graph = {}
-        for y, row in enumerate(grid):
-            for x, col in enumerate(row):
-                if col in self.allowed:
-                    self.graph[(x, y)] = self.graph.get((x, y), []) + self.get_next_nodes(x, y)
-                else:
-                    self.graph[(x, y)] = self.graph.get((x, y), ["unavailable"]) + self.get_next_nodes(x, y)
-        self.available_nodes = self.get_available_nodes()
+        if color_ind == 0:  # Потому что надо вызвать только один раз
+            get_available_nodes((self.row, self.col))
+            print(available_nodes)
 
     def new(self):
         self.row = self.start_pos[0]
@@ -162,7 +93,8 @@ class Hunter(pygame.sprite.Sprite):
             self.anim[i].set_palette(palette)
 
     def move(self, goal):
-        if goal and self.graph[goal]:
+        real_goal = ""
+        if goal and graph[goal]:
             if self.attacked:
                 self.color_frames(ghost_color[self.color], ghost_color[4])
                 distances = {}
@@ -171,7 +103,6 @@ class Hunter(pygame.sprite.Sprite):
                 for el in distances.keys():
                     if distances[el] == max(distances.values()):
                         real_goal = el
-                        # real_goal = choice([el for el in self.graph if self.graph[el]])
             if self.dead:
                 self.color_frames(ghost_color[4], Color(0, 0, 0, 255))
                 if (self.row, self.col) in ghostGate:
@@ -183,13 +114,12 @@ class Hunter(pygame.sprite.Sprite):
                 real_goal = goal
             if self.counter == 0:
                 self.row, self.col = int(self.rect.x / 18), int(self.rect.y / 18)
-                self.path = self.find_path((self.row, self.col), real_goal)
+                self.path = find_path((self.row, self.col), real_goal)
             self.counter = (self.counter + 1) % 18
             self.frame = (self.frame + 1) % 6
             self.image = self.anim[self.frame]
-            # print(f"We are now at position {self.row, self.col} and gonna go to {goal}")
+            # print(f"We are now at position {self.row, self.col} and gonna go to {real_goal}")
             # print(f"Our path is {self.path}")
-
             if self.path and len(self.path) > 1:
                 final_goal = self.path[1]
                 if self.row < final_goal[0]:
@@ -203,52 +133,18 @@ class Hunter(pygame.sprite.Sprite):
 
     def get_next_nodes(self, x, y):
         check_node = lambda x, y: True if (0 <= x < cols) and (0 <= y < rows) and \
-                                          (self.grid[y][x] in self.allowed) else False
+                                          (grid[y][x] in allowed) else False
         ways = [0, -1], [0, 1], [1, 0], [-1, 0]
         return [(x + dx, y + dy) for dx, dy in ways if check_node(x + dx, y + dy)]
 
-    def get_available_nodes(self):
-        check_node = lambda x, y: True if (0 <= x < cols) and (0 <= y < rows) and \
-                                          (self.grid[y][x] in self.allowed) else False
-        return [(x, y) for x in range(cols + 1) for y in range(rows + 1) if check_node(x, y)]
-
     def closest_available_node(self, search_node):
         distances = {}
-        for node in self.available_nodes:
-            distances[node] = sqrt((node[0] - search_node[0]) ** 2 + (node[1] - search_node[1]) ** 2)
+        for node in available_nodes:
+            if node != (self.row, self.col):
+                distances[node] = sqrt((node[0] - search_node[0]) ** 2 + (node[1] - search_node[1]) ** 2)
         for el in distances.keys():
             if distances[el] == min(distances.values()):
                 return el
-
-    def cleanup(self):
-        self.parent = dict()
-        self.queue = ""
-        self.node = ""
-        self.path = []
-
-    def find_path(self, start_point, end_point):
-        self.cleanup()
-        self.parent, self.queue = {start_point: None}, deque([start_point])
-
-        if start_point not in self.graph:
-            raise ValueError("Start point is not in graph")
-        if end_point not in self.graph:
-            raise ValueError("End point is not in graph")
-        while self.queue:
-            self.node = self.queue.popleft()
-            for neighbour in self.graph[self.node]:
-                if self.node == end_point:
-                    self.path = [self.node]
-                    n = self.parent.get(self.node)
-                    while n is not None:
-                        self.path.append(n)
-                        n = self.parent.get(n)
-                    # print(self.path[::-1])
-                    return self.path[::-1]
-                if neighbour not in self.parent:
-                    self.queue.append(neighbour)
-                    self.parent[neighbour] = self.node
-        return None
 
     def setAttacked(self, isAttacked):
         self.attacked = isAttacked
@@ -261,7 +157,6 @@ class Hunter(pygame.sprite.Sprite):
 
     def isDead(self):
         return self.dead
-
 
 
 def load_image_pacman(name, colorkey=None):
@@ -278,7 +173,6 @@ def load_image_pacman(name, colorkey=None):
     return image
 
 
-# преобразование текстового файла в список спрайтов
 def load_level(filename):
     filename = "levels/" + filename
     with open(filename, 'r') as mapFile:
@@ -287,7 +181,6 @@ def load_level(filename):
     return list(map(lambda x: x.ljust(max_width, '.'), level_map))
 
 
-# создание уровня
 def generate_level(level):
     global cols, rows, ghostGate
     points = 0
@@ -307,7 +200,7 @@ def generate_level(level):
     for i in [-3, -2, -1, 0, 1, 2]:
         for j in [-1, 0]:
             ghostGate.append((cols // 2 + i, rows // 2 + j))
-    return new_player, x, y, pacman_pos, points
+    return new_player, x, y, pacman_pos, points, ghostGate
 
 
 def terminate():
@@ -315,10 +208,9 @@ def terminate():
     sys.exit()
 
 
-# оформление стартового окна
 def print_intro():
     screen.fill('black')
-    pygame.display.set_caption('play pacman')
+    pygame.display.set_caption('Play Pacman')
     pygame.draw.rect(screen, 'yellow', (100, 300, 300, 50), 1)
     pygame.display.flip()
     intro_text = ["Welcome to", "PACMAN",
@@ -346,7 +238,6 @@ def print_intro():
     screen.blit(picture, (100, 400))
 
 
-# отображение ввода текста пользователем в окне
 def print_text(text):
     font = pygame.font.Font(None, 40)
     text_coord = 310
@@ -359,7 +250,6 @@ def print_text(text):
     pygame.display.flip()
 
 
-# обработка ввода
 def start_screen():
     need_input = False
     input_text = ''
@@ -386,7 +276,6 @@ def start_screen():
         pygame.display.flip()
 
 
-
 def return_path(game, num, event, hunter):
     x, y = game.pacman_pos
     side = {
@@ -395,23 +284,20 @@ def return_path(game, num, event, hunter):
         'up': (0, -1),
         'down': (0, 1)
     }
-    
     if num == 0:
         return hunter.closest_available_node((x, y))
-    
+
     if num == 1:
         return hunter.closest_available_node((x + side[event][0] * 2, y + side[event][1] * 2))
-    
+
     if num == 2:
-        return hunter.closest_available_node((x - side[event][0] * 2, y - side[event][1] * 2)) 
-    
+        return hunter.closest_available_node((x - side[event][0] * 2, y - side[event][1] * 2))
+
     if num == 3:
         if (x - hunter.row) ** 2 + (y - hunter.col) ** 2 <= 64:
             return hunter.closest_available_node((0, rows))
         return hunter.closest_available_node((x, y))
-            
-            
-            
+
 
 class PauseImage(pygame.sprite.Sprite):
     def __init__(self, pos_x, pos_y):
@@ -425,11 +311,7 @@ class PauseImage(pygame.sprite.Sprite):
         self.image = load_image('on.png' if self.n % 2 == 1 else 'pause.png')
 
 
-
-
-# класс пакмена
 class Player(pygame.sprite.Sprite):
-
     def __init__(self, pos_x, pos_y):
         super().__init__(player_group, all_sprites)
         self.image = load_image_pacman('pacman.gif')
@@ -469,17 +351,17 @@ class Player(pygame.sprite.Sprite):
 
     # проверяет все столкновения
     def collides(self):
-        lst = ['vertical', 'horisontal', '1', '2', '3', '4', 'gate']
-        collid_lst = pygame.sprite.spritecollideany(self, tiles_group)
-        if collid_lst is None or collid_lst.image in [tile_images[_] for _ in lst]:
+        lst = ['vertical', 'horizontal', '1', '2', '3', '4', 'gate']
+        collide_list = pygame.sprite.spritecollideany(self, tiles_group)
+        if collide_list is None or collide_list.image in [tile_images[_] for _ in lst]:
             return False
         else:
-            if collid_lst.image is tile_images['point']:
+            if collide_list.image is tile_images['point']:
                 self.score += 10
                 tile = pygame.sprite.spritecollideany(self, tiles_group)
                 tile.image = tile_images['empty']
                 return 'point'
-            elif collid_lst.image is tile_images['energo']:
+            elif collide_list.image is tile_images['energo']:
                 self.score += 50
                 tile = pygame.sprite.spritecollideany(self, tiles_group)
                 tile.image = tile_images['empty']
@@ -499,3 +381,100 @@ class Player(pygame.sprite.Sprite):
         self.image = load_image_pacman(lst_picture[number] + '.gif')
         if fl in ['point', 'energo']:
             return fl
+
+
+def get_available_nodes(start_node):
+    if graph.get(start_node):
+        for node in graph.get(start_node):
+            if node not in available_nodes:
+                available_nodes.append(node)
+                get_available_nodes(node)
+
+
+def get_next_nodes(x, y):
+    check_node = lambda x, y: True if (0 <= x < len(grid[0])) and (0 <= y < len(grid)) and \
+                                      (grid[y][x] in allowed) else False
+    ways = [0, -1], [0, 1], [1, 0], [-1, 0]
+    return [(x + dx, y + dy) for dx, dy in ways if check_node(x + dx, y + dy)]
+
+
+def find_path(start_point, end_point):
+    parent, queue = {start_point: None}, deque([start_point])
+    if start_point not in graph:
+        raise ValueError("Start point is not in graph")
+    if end_point not in graph:
+        raise ValueError("End point is not in graph")
+    while queue:
+        node = queue.popleft()
+        for neighbour in graph[node]:
+            if node == end_point:
+                path = [node]
+                n = parent.get(node)
+                while n is not None:
+                    path.append(n)
+                    n = parent.get(n)
+                # print(self.path[::-1])
+                return path[::-1]
+            if neighbour not in parent:
+                queue.append(neighbour)
+                parent[neighbour] = node
+    return None
+
+
+level = 'default_level.txt'
+grid = load_level(level)
+
+restricted = ["|", "-", "1", "2", "3", "4", 1, 2, 3, 4]
+allowed = ["0", 0, ".", "*", "?"]
+
+graph = {}
+for y, row in enumerate(grid):
+    for x, col in enumerate(row):
+        if col in allowed:
+            graph[(x, y)] = graph.get((x, y), []) + get_next_nodes(x, y)
+        else:
+            # graph[(x, y)] = graph.get((x, y), ["unavailable"]) + get_next_nodes(x, y)
+            graph[(x, y)] = []
+
+TILE = tile_width = tile_height = 18
+
+SCRIPT_PATH = None
+if os.name == "nt":
+    SCRIPT_PATH = os.getcwd()
+else:
+    SCRIPT_PATH = sys.path[0]
+
+tile_images = {
+    'vertical': load_image('vertical.png'),
+    'horizontal': load_image('horizontal.png'),
+    '1': load_image('1.png'),
+    '2': load_image('2.png'),
+    '3': load_image('4.png'),
+    '4': load_image('3.png'),
+    'empty': load_image('empty.png'),
+    'point': load_image('point.png'),
+    'energo': load_image('energo.png'),
+    'gate': load_image('gate.png')}
+
+values = {
+    '|': 'vertical',
+    '-': 'horizontal',
+    '1': '1',
+    '2': '2',
+    '3': '3',
+    '4': '4',
+    '.': 'empty',
+    '@': 'pacman',
+    '*': 'energo',
+    '0': 'point',
+    '?': 'gate'
+}
+available_nodes = []
+ghostGate = []
+ghost_color = [Color(255, 0, 0, 255),  # Red
+               Color(255, 128, 255, 255),  # pink
+               Color(128, 255, 255, 255),  # light blue
+               Color(255, 128, 0, 255),  # orange
+               Color(50, 50, 255, 255),  # blue vulnerable
+               Color(255, 255, 255, 255)]  # white
+cols, rows = 26, 26

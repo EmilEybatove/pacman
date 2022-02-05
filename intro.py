@@ -11,7 +11,7 @@ load_image = functions.load_image
 
 tile_images = {
     'vertical': load_image('vertical.png'),
-    'horisontal': load_image('horisontal.png'),
+    'horizontal': load_image('horizontal.png'),
     '1': load_image('1.png'),
     '2': load_image('2.png'),
     '3': load_image('4.png'),
@@ -24,7 +24,7 @@ tile_images = {
 
 values = {
     '|': 'vertical',
-    '-': 'horisontal',
+    '-': 'horizontal',
     '1': '1',
     '2': '2',
     '3': '3',
