@@ -12,8 +12,7 @@ all_sprites = pygame.sprite.Group()
 tiles_group = pygame.sprite.Group()
 player_group = pygame.sprite.Group()
 hunter_group = pygame.sprite.Group()
-exit_group = pygame.sprite.Group()
-
+pause_group = pygame.sprite.Group()
 TILE = tile_width = tile_height = 18
 SCRIPT_PATH = None
 if os.name == "nt":
@@ -24,6 +23,7 @@ else:
 # ghostGate = [(10, 12), (11, 12), (12, 12), (13, 12), (14, 12), (15, 12),
 #              (10, 13), (11, 13), (12, 13), (13, 13), (14, 13), (15, 13)]
 ghostGate = []
+# GONNA WORK ONLY FOR DEFAULT MAP!!
 ghost_color = [Color(255, 0, 0, 255),  # Red
                Color(255, 128, 255, 255),  # pink
                Color(128, 255, 255, 255),  # light blue
@@ -263,6 +263,7 @@ class Hunter(pygame.sprite.Sprite):
         return self.dead
 
 
+
 def load_image_pacman(name, colorkey=None):
     fullname = os.path.join('data/pacman_sprites', name)
     if not os.path.isfile(fullname):
@@ -314,6 +315,37 @@ def terminate():
     sys.exit()
 
 
+# оформление стартового окна
+def print_intro():
+    screen.fill('black')
+    pygame.display.set_caption('play pacman')
+    pygame.draw.rect(screen, 'yellow', (100, 300, 300, 50), 1)
+    pygame.display.flip()
+    intro_text = ["Welcome to", "PACMAN",
+                  "Введите название своего уровня", "или", "сразу нажмите Enter для начала игры"]
+    font = pygame.font.Font(None, 40)
+    string_rendered = font.render(intro_text[0], 1, pygame.Color('yellow'))
+    intro_rect = string_rendered.get_rect()
+    intro_rect.top = 50
+    intro_rect.x = 250 - intro_rect.width // 2
+    screen.blit(string_rendered, intro_rect)
+    font = pygame.font.Font(None, 80)
+    string_rendered = font.render(intro_text[1], 3, pygame.Color('yellow'))
+    intro_rect = string_rendered.get_rect()
+    intro_rect.top = 80
+    intro_rect.x = 250 - intro_rect.width // 2
+    screen.blit(string_rendered, intro_rect)
+    font = pygame.font.Font(None, 20)
+    for i in range(2, 5):
+        string_rendered = font.render(intro_text[i], 1, pygame.Color('yellow'))
+        intro_rect = string_rendered.get_rect()
+        intro_rect.top = 250 + 15 * (i - 2)
+        intro_rect.x = 250 - intro_rect.width // 2
+        screen.blit(string_rendered, intro_rect)
+    picture = pygame.transform.scale(load_image('intro_picture.jpg'), (300, 70))
+    screen.blit(picture, (100, 400))
+
+
 # отображение ввода текста пользователем в окне
 def print_text(text):
     font = pygame.font.Font(None, 40)
@@ -354,6 +386,7 @@ def start_screen():
         pygame.display.flip()
 
 
+
 def return_path(game, num, event, hunter):
     x, y = game.pacman_pos
     side = {
@@ -362,20 +395,36 @@ def return_path(game, num, event, hunter):
         'up': (0, -1),
         'down': (0, 1)
     }
-
+    
     if num == 0:
         return hunter.closest_available_node((x, y))
-
+    
     if num == 1:
         return hunter.closest_available_node((x + side[event][0] * 2, y + side[event][1] * 2))
-
+    
     if num == 2:
-        return hunter.closest_available_node((x - side[event][0] * 2, y - side[event][1] * 2))
-
+        return hunter.closest_available_node((x - side[event][0] * 2, y - side[event][1] * 2)) 
+    
     if num == 3:
         if (x - hunter.row) ** 2 + (y - hunter.col) ** 2 <= 64:
             return hunter.closest_available_node((0, rows))
         return hunter.closest_available_node((x, y))
+            
+            
+            
+
+class PauseImage(pygame.sprite.Sprite):
+    def __init__(self, pos_x, pos_y):
+        super().__init__(pause_group)
+        self.n = 0
+        self.image = load_image('pause.png')
+        self.rect = self.image.get_rect().move(pos_x, pos_y)
+
+    def update(self):
+        self.n += 1
+        self.image = load_image('on.png' if self.n % 2 == 1 else 'pause.png')
+
+
 
 
 # класс пакмена
@@ -450,104 +499,3 @@ class Player(pygame.sprite.Sprite):
         self.image = load_image_pacman(lst_picture[number] + '.gif')
         if fl in ['point', 'energo']:
             return fl
-
-
-class PlayerHunter(pygame.sprite.Sprite):
-    def __init__(self, sprite_group, row, col, color):
-        """Color must be in pygame.Color() format!"""
-        super().__init__(sprite_group)
-        self.row = row
-        self.col = col
-        # self.x = tile_width * row
-        # self.y = tile_height * col
-        self.color = color
-        self.attacked = False
-        self.dead = False
-        self.start_pos = [row, col]
-        self.check_tuple = {
-            'left': (-1, 0),
-            'right': (18, 0),
-            'up': (0, -1),
-            'down': (0, 18)
-        }
-        self.side_tuples = {
-            'left': (-1, 0),
-            'right': (1, 0),
-            'up': (0, -1),
-            'down': (0, 1)
-        }
-        self.frame = 0
-        self.anim = {}
-        for i in range(6):
-            self.anim[i] = load_image(os.path.join("ghost_sprites", "ghost_" + str(i) + ".gif"))
-        self.color_frames(ghost_color[0], ghost_color[self.color])
-        self.image = self.anim[0]
-        self.rect = self.image.get_rect()
-        self.rect.x, self.rect.y, *_ = get_rect(self.row, self.col)
-        # Usual code
-        self.restricted = ["|", "-", "1", "2", "3", "4", 1, 2, 3, 4]
-        self.allowed = ["0", 0, ".", "*", "?"]
-
-    def new(self):
-        self.row = self.start_pos[0]
-        self.col = self.start_pos[1]
-        self.rect.x = self.start_pos[0] * TILE
-        self.rect.y = self.start_pos[1] * TILE
-        self.setDead(False)
-        self.setAttacked(False)
-
-    def color_frames(self, from_color: Color, to_color: Color):
-        for i in range(6):
-            palette = list(self.anim[i].get_palette())
-            for j, c in enumerate(palette):
-                if c == from_color:
-                    palette[j] = to_color
-            self.anim[i].set_palette(palette)
-
-    def move(self, side):
-        if self.attacked:
-            self.color_frames(ghost_color[self.color], ghost_color[4])
-        elif self.dead:
-            self.color_frames(ghost_color[4], Color(0, 0, 0, 255))
-            if (self.rect.x // 18, self.rect.y // 18) in ghostGate:
-                self.setDead(False)
-
-        elif not self.attacked and not self.dead:
-            self.color_frames(Color(0, 0, 0, 255), ghost_color[self.color])
-            self.color_frames(ghost_color[4], ghost_color[self.color])
-        self.rect = self.rect.move(self.check_tuple[side][0], self.check_tuple[side][1])
-        fl = self.collides()
-        self.rect = self.rect.move(-self.check_tuple[side][0], -self.check_tuple[side][1])
-        # self.rect = self.rect.move(self.side_tuples[side])
-        # self.rect = self.rect.move(self.check_tuple[side][0], self.check_tuple[side][1])
-        if fl:
-            # self.rect = self.rect.move(-self.check_tuple[side][0], -self.check_tuple[side][1])
-            self.rect = self.rect.move(self.side_tuples[side])
-        # self.row += self.side_tuples[side][0] // TILE
-        # self.col += self.side_tuples[side][1] // TILE
-
-        # self.rect.x += self.side_tuples[side][0]
-        # self.rect.y += self.side_tuples[side][1]
-
-        # Update self.image
-        self.frame = (self.frame + 1) % 6
-        self.image = self.anim[self.frame]
-
-    def collides(self):
-        lst = ['vertical', 'horisontal', '1', '2', '3', '4']
-        collid_lst = pygame.sprite.spritecollideany(self, tiles_group)
-        if collid_lst is None or collid_lst.image in [tile_images[_] for _ in lst]:
-            return False
-        return True
-
-    def setAttacked(self, isAttacked):
-        self.attacked = isAttacked
-
-    def isAttacked(self):
-        return self.attacked
-
-    def setDead(self, isDead):
-        self.dead = isDead
-
-    def isDead(self):
-        return self.dead
