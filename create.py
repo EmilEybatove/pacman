@@ -28,7 +28,7 @@ def load_image(name, colorkey=None):
 
 tile_images = {
     'vertical': load_image('vertical.png'),
-    'horisontal': load_image('horisontal.png'),
+    'horizontal': load_image('horizontal.png'),
     '1': load_image('1.png'),
     '2': load_image('2.png'),
     '3': load_image('4.png'),
@@ -41,7 +41,7 @@ tile_images = {
 
 dct = {
     'vertical': '|',
-    'horisontal': '-',
+    'horizontal': '-',
     '1': '1',
     '2': '2',
     '3': '3',
@@ -67,7 +67,7 @@ class Tile(pygame.sprite.Sprite):
 
 values = {
     '|': 'vertical',
-    '-': 'horisontal',
+    '-': 'horizontal',
     '1': '1',
     '2': '2',
     '3': '3',
@@ -99,7 +99,9 @@ class Board:
         self.number = 0
         self.board = [[' '] * width for _ in range(height)]
         self.center()
-
+        self.wall()
+        self.way = []
+        self.mandatory_cell = []
         self.left = 50
         self.top = 50
         self.cell_size = 18
@@ -119,6 +121,7 @@ class Board:
 
     def get_click(self, mouse_pos, arr):
         global saved
+
         if arr == '@' and sum(map(lambda x: x.count('@'), self.board)) == 1:
             return None
         if arr == '*' and sum(map(lambda x: x.count('*'), self.board)) == 4:
@@ -128,7 +131,7 @@ class Board:
             if self.width // 2 - 4 <= cell[0] <= self.width // 2 + 3:
                 if self.height // 2 - 2 <= cell[1] <= self.height // 2 + 1:
                     return None
-        if cell is None:
+        if cell is None or cell[0] in [0, self.width - 1] or cell[1] in [0, self.height - 1]:
             return None
         if arr == '.':
             for elem in tiles_group:
@@ -176,6 +179,50 @@ class Board:
                 else:
                     Tile(values['.'], a, b, (base_group,))
 
+    def wall(self):
+        for i in range(self.height):
+            Tile(values['|'], 0, i, (base_group,))
+            Tile(values['|'], self.width - 1, i, (base_group,))
+
+
+        for i in range(self.width):
+            if i == 0:
+                Tile(values['1'], i, 0, (base_group,))
+                Tile(values['3'], i, self.height - 1, (base_group,))
+            elif i == self.width - 1:
+                Tile(values['2'], i, 0, (base_group,))
+                Tile(values['4'], i, self.height - 1, (base_group,))
+            else:
+                Tile(values['-'], i, 0, (base_group,))
+                Tile(values['-'], i, self.height - 1, (base_group,))
+
+    def voln(self, pos, board):
+        self.way.append(pos)
+        for i in [-1, 0, 1]:
+            for j in [-1, 0, 1]:
+                a, b = pos[0] + i, pos[1] + j
+                if [a, b] not in self.way and board[a][b] not in ['1', '2', '3', '4', '|', '-']:
+                    self.voln([a, b], board)
+
+
+    def make_way(self, board):
+        player_pos = None
+        self.way = []
+        self.mandatory_cell = []
+        for i in range(self.height):
+            for j in range(self.width):
+                if board[i][j] in ['0', '*', '?']:
+                    self.mandatory_cell.append([i, j])
+                if board[i][j] == '@':
+                    player_pos = [i, j]
+        if player_pos is None:
+            return False
+        self.voln(player_pos, board)
+        for elem in self.mandatory_cell:
+            if elem not in self.way:
+                return False
+        return True
+
     def size_event(self, event_num):
         if event_num == 0:
             if self.width % 2 == 1:
@@ -200,10 +247,14 @@ class Board:
                     tiles_group.remove(elem)
             self.board = self.board[:-1]
         self.center()
+        self.wall()
+
+
+
 
     def save_file(self, filename):
         if filename + '.txt' not in os.listdir('levels'):
-            file = open(f'levels/{filename}.txt', mode='w', encoding='utf-8')
+
             board = deepcopy(self.board)
             pacman = False
             energo = 0
@@ -228,15 +279,35 @@ class Board:
                     else:
                         board[b][a] = '.'
 
+            for i in range(self.height):
+                board[i][0] = '|'
+                board[i][self.width - 1] = '|'
+
+            for i in range(self.width):
+                if i == 0:
+                    board[0][i] = '1'
+                    board[self.height - 1][i] = '3'
+                elif i == self.width - 1:
+                    board[0][i] = '2'
+                    board[self.height - 1][i] = '4'
+                else:
+                    board[0][i] = '-'
+                    board[self.height - 1][i] = '-'
+
+            if not self.make_way(board):
+                return None
+
             for elem in board:
                 if '@' in elem:
                     pacman = True
                 energo += elem.count('*')
-            print(pacman)
+
+
             if not pacman or energo < 4:
-                file.close()
-                os.remove(f'levels/{filename}.txt')
                 return None
+
+            file = open(f'levels/{filename}.txt', mode='w', encoding='utf-8')
+
             for elem in board:
                 print(''.join(list(map(lambda x: '.' if x == ' ' else x, elem))), file=file)
             file.close()
