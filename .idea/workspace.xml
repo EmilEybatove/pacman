@@ -2,9 +2,26 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="09d3b88e-24f4-4ae1-ac9a-04ab1890266e" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/data/sounds/All You Need Is Love.wav" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/data/sounds/death.wav" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/data/sounds/default.wav" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/data/sounds/eatfruit.wav" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/data/sounds/eatgh2.wav" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/data/sounds/extralife.wav" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/data/sounds/extrapac.wav" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/data/sounds/fruitbounce.wav" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/data/sounds/gh2gohome.wav" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/data/sounds/levelintro.wav" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/data/sounds/pellet1.wav" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/data/sounds/pellet2.wav" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/data/sounds/powerpellet.wav" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_06_02_2022__13_01__Default_Changelist_.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/check_this_out_guys.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/functions.py" beforeDir="false" afterPath="$PROJECT_DIR$/functions.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/game.py" beforeDir="false" afterPath="$PROJECT_DIR$/game.py" afterDir="false" />
     </list>
+    <list id="a7fd88fd-893e-4a87-be09-4ab5bc0a1143" name="Music files" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -25,11 +42,46 @@
   <component name="PropertiesComponent">
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/data" />
+  </component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/data" />
+    </key>
+  </component>
+  <component name="RunManager">
+    <configuration name="game" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="/opt/anaconda3/bin/python3.8" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/game.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Python.game" />
+      </list>
+    </recent_temporary>
   </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
       <changelist id="09d3b88e-24f4-4ae1-ac9a-04ab1890266e" name="Changes" comment="" />
+      <changelist id="a7fd88fd-893e-4a87-be09-4ab5bc0a1143" name="Music files" comment="" />
       <created>1644144106670</created>
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
@@ -42,7 +94,19 @@
       <map>
         <entry key="MAIN">
           <value>
-            <State />
+            <State>
+              <option name="FILTERS">
+                <map>
+                  <entry key="branch">
+                    <value>
+                      <list>
+                        <option value="master" />
+                      </list>
+                    </value>
+                  </entry>
+                </map>
+              </option>
+            </State>
           </value>
         </entry>
       </map>
