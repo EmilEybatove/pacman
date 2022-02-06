@@ -5,6 +5,7 @@ pause, stop = False, False
 i = -1
 mult = 0
 exit_down = False
+SOUND = 1
 
 
 class Game:
@@ -26,11 +27,13 @@ class Game:
             self.ghosts.append(hunter)
             all_sprites.add(hunter)
 
+
 def revival():
     global mult
     for hunter in hunter_group:
         hunter.setAttacked(False)
     mult = 0
+
 
 def react(game, side, timers):
     global events_sequence, number, i, mult
@@ -75,12 +78,81 @@ def react(game, side, timers):
                 draw(screen, game)
 
 
+def open_result_window():
+    # открываем окно
+    pygame.init()
+    size = 500, 500
+    screen = pygame.display.set_mode(size)
+    pygame.display.set_caption('result')
+    screen.fill('black')
+    running = True
+    # выбор надписи и картинки в зависимости от результата
+    if game.lives == 0:
+        intro_text = ["GAME OVER", "Try again!!"]
+    else:
+        intro_text = ["YOU WIN", "Congratulations!!"]
+        picture = pygame.transform.scale(load_image('ballons.jpg'), (400, 220))
+        screen.blit(picture, (50, 0))
+    # отрисовываем надписи
+    font = pygame.font.Font(None, 80)
+    string_rendered = font.render(intro_text[0], 3, pygame.Color('yellow'))
+    intro_rect = string_rendered.get_rect()
+    intro_rect.top = 220
+    intro_rect.x = 250 - intro_rect.width // 2
+    screen.blit(string_rendered, intro_rect)
+    font = pygame.font.Font(None, 40)
+    string_rendered = font.render(intro_text[1], 1, pygame.Color('yellow'))
+    intro_rect = string_rendered.get_rect()
+    intro_rect.top = 300
+    intro_rect.x = 250 - intro_rect.width // 2
+    screen.blit(string_rendered, intro_rect)
+    # отрисовываем кнопки
+    pygame.draw.rect(screen, 'yellow', (100, 370, 100, 50), 2)
+    pygame.draw.rect(screen, 'yellow', (300, 370, 100, 50), 2)
+    font = pygame.font.Font(None, 25)
+    string_rendered = font.render('choise map', 1, pygame.Color('yellow'))
+    intro_rect = string_rendered.get_rect()
+    intro_rect.top = 395 - intro_rect.height // 2
+    intro_rect.x = 150 - intro_rect.width // 2
+    screen.blit(string_rendered, intro_rect)
+    font = pygame.font.Font(None, 25)
+    string_rendered = font.render('play', 1, pygame.Color('yellow'))
+    intro_rect = string_rendered.get_rect()
+    intro_rect.top = 395 - intro_rect.height // 2
+    intro_rect.x = 350 - intro_rect.width // 2
+    screen.blit(string_rendered, intro_rect)
+    while running:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if 100 <= event.pos[0] <= 200 and 370 <= event.pos[1] <= 420:
+                    terminate()
+                    #переход к выбору карты
+                elif 300 <= event.pos[0] <= 400 and 370 <= event.pos[1] <= 420:
+                    #играем на той же карте заново
+                    game = Game(level, 1, 3)
+                    terminate()
+        pygame.display.flip()
+
+
+def change_image_volume(SOUND):
+    if SOUND:
+        image_volume = pygame.transform.scale(load_image('volume.png'), (40, 40))
+    else:
+        image_volume = pygame.transform.scale(load_image('mute.png'), (40, 40))
+    screen.blit(image_volume, (count_columns * 18 + 55, count_rows * 18 - 170))
+
+
 def draw(screen, game):
     # отрисовка кнопок плей/пауза
     image_pause = pygame.transform.scale(load_image('pause.png'), (30, 30))
     image_play = pygame.transform.scale(load_image('on.png'), (30, 30))
     screen.blit(image_pause, (count_columns * 18 + 80, count_rows * 18 - 100))
     screen.blit(image_play, (count_columns * 18 + 40, count_rows * 18 - 100))
+    # отрисовка кнопки volume
+    image_volume = pygame.transform.scale(load_image('volume.png'), (40, 40))
+    screen.blit(image_volume, (count_columns * 18 + 55, count_rows * 18 - 170))
     # отрисовка жизней
     image_pacman = pygame.transform.scale(load_image('pacman_sprites/r_1.gif'), (25, 25))
     if game.lives > 2:
@@ -102,10 +174,12 @@ def draw(screen, game):
     intro_rect.x = count_columns * 18 + (75 - intro_rect.width // 2)
     screen.blit(string_rendered, intro_rect)
 
+
 def draw_exit_text():
     font = pygame.font.Font(None, 40)
     string_rendered = font.render('E X I T', True, (255, 255, 255))
     screen.blit(string_rendered, (count_columns * 18 + 28, count_rows * 18 - 43))
+
 
 if __name__ == "__main__":
     pygame.init()
@@ -145,7 +219,7 @@ if __name__ == "__main__":
         pygame.K_UP: 'up',
         pygame.K_DOWN: 'down'
     }
-
+    open_result_window()
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -156,6 +230,9 @@ if __name__ == "__main__":
                     pause = bool(1 - pause)
                 if event.key in change_values.keys() and len(events_sequence) <= 1:
                     events_sequence.append(change_values[event.key])
+                if event.key == pygame.K_m:
+                    SOUND = (SOUND + 1) % 2
+                    change_image_volume(SOUND)
             if event.type == pygame.MOUSEBUTTONDOWN:
                 x = event.pos[0]
                 y = event.pos[1]
@@ -164,6 +241,10 @@ if __name__ == "__main__":
                         pause = True
                     elif count_columns * 18 + 40 <= x <= count_columns * 18 + 70:
                         pause = False
+                elif count_columns * 18 + 55 <= x <= count_columns * 18 + 95 and \
+                        count_rows * 18 - 170 <= y <= count_rows * 18 - 130:
+                    SOUND = (SOUND + 1) % 2
+                    change_image_volume(SOUND)
                 if exit_game.rect.collidepoint(pygame.mouse.get_pos()):
                     exit_game.image.fill((150, 0, 0))
                     exit_down = True
