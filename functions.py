@@ -13,7 +13,7 @@ tiles_group = pygame.sprite.Group()
 player_group = pygame.sprite.Group()
 hunter_group = pygame.sprite.Group()
 pause_group = pygame.sprite.Group()
-
+exit_group = pygame.sprite.Group()
 
 class Tile(pygame.sprite.Sprite):
     def __init__(self, tile_type, pos_x, pos_y, groups=(tiles_group, all_sprites)):
@@ -71,7 +71,7 @@ class Hunter(pygame.sprite.Sprite):
             self.image.fill(pygame.Color("green"))
             self.rect = self.image.get_rect()
             self.rect.x, self.rect.y, *_ = get_rect(self.row, self.col)
-        if color_ind == 0: # Потому что надо вызвать только один раз
+        if color_ind == 0:  # Потому что надо вызвать только один раз
             get_available_nodes((self.row, self.col))
             print(available_nodes)
 
@@ -118,8 +118,8 @@ class Hunter(pygame.sprite.Sprite):
             self.counter = (self.counter + 1) % 18
             self.frame = (self.frame + 1) % 6
             self.image = self.anim[self.frame]
-            print(f"We are now at position {self.row, self.col} and gonna go to {real_goal}")
-            print(f"Our path is {self.path}")
+            # print(f"We are now at position {self.row, self.col} and gonna go to {real_goal}")
+            # print(f"Our path is {self.path}")
             if self.path and len(self.path) > 1:
                 final_goal = self.path[1]
                 if self.row < final_goal[0]:
@@ -136,7 +136,6 @@ class Hunter(pygame.sprite.Sprite):
                                           (grid[y][x] in allowed) else False
         ways = [0, -1], [0, 1], [1, 0], [-1, 0]
         return [(x + dx, y + dy) for dx, dy in ways if check_node(x + dx, y + dy)]
-
 
     def closest_available_node(self, search_node):
         distances = {}
@@ -287,18 +286,18 @@ def return_path(game, num, event, hunter):
     }
     if num == 0:
         return hunter.closest_available_node((x, y))
-    
+
     if num == 1:
         return hunter.closest_available_node((x + side[event][0] * 2, y + side[event][1] * 2))
-    
+
     if num == 2:
-        return hunter.closest_available_node((x - side[event][0] * 2, y - side[event][1] * 2)) 
-    
+        return hunter.closest_available_node((x - side[event][0] * 2, y - side[event][1] * 2))
+
     if num == 3:
         if (x - hunter.row) ** 2 + (y - hunter.col) ** 2 <= 64:
             return hunter.closest_available_node((0, rows))
         return hunter.closest_available_node((x, y))
-            
+
 
 class PauseImage(pygame.sprite.Sprite):
     def __init__(self, pos_x, pos_y):
