@@ -5,7 +5,7 @@ pause, stop = False, False
 i = -1
 mult = 0
 exit_down = False
-SOUND = 1
+SOUND = True
 
 
 class Game:
@@ -26,6 +26,12 @@ class Game:
             hunter = Hunter(hunter_group, x, y, grid, col)
             self.ghosts.append(hunter)
             all_sprites.add(hunter)
+
+    @staticmethod
+    def PlayBackgoundSound(snd):
+        channel_backgound.stop()
+        if SOUND:
+            channel_backgound.play(snd, loops=-1)
 
 
 def revival():
@@ -79,6 +85,7 @@ def react(game, side, timers):
 
 
 def open_result_window():
+    global game
     # открываем окно
     pygame.init()
     size = 500, 500
@@ -138,8 +145,10 @@ def open_result_window():
 
 def change_image_volume(SOUND):
     if SOUND:
+        game.PlayBackgoundSound(snd_love)
         image_volume = pygame.transform.scale(load_image('volume.png'), (40, 40))
     else:
+        game.PlayBackgoundSound(snd_love)
         image_volume = pygame.transform.scale(load_image('mute.png'), (40, 40))
     screen.blit(image_volume, (count_columns * 18 + 55, count_rows * 18 - 170))
 
@@ -199,8 +208,8 @@ if __name__ == "__main__":
 
     screen = pygame.display.set_mode(size)
     game = Game(level)
-
     draw(screen, game)
+    game.PlayBackgoundSound(snd_love)
 
     timer1 = threading.Timer(10, revival)
     timer2 = threading.Timer(10, revival)
@@ -219,7 +228,7 @@ if __name__ == "__main__":
         pygame.K_UP: 'up',
         pygame.K_DOWN: 'down'
     }
-    open_result_window()
+    # open_result_window()
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -231,7 +240,7 @@ if __name__ == "__main__":
                 if event.key in change_values.keys() and len(events_sequence) <= 1:
                     events_sequence.append(change_values[event.key])
                 if event.key == pygame.K_m:
-                    SOUND = (SOUND + 1) % 2
+                    SOUND = not SOUND
                     change_image_volume(SOUND)
             if event.type == pygame.MOUSEBUTTONDOWN:
                 x = event.pos[0]
@@ -243,7 +252,7 @@ if __name__ == "__main__":
                         pause = False
                 elif count_columns * 18 + 55 <= x <= count_columns * 18 + 95 and \
                         count_rows * 18 - 170 <= y <= count_rows * 18 - 130:
-                    SOUND = (SOUND + 1) % 2
+                    SOUND = not SOUND
                     change_image_volume(SOUND)
                 if exit_game.rect.collidepoint(pygame.mouse.get_pos()):
                     exit_game.image.fill((150, 0, 0))
@@ -251,7 +260,7 @@ if __name__ == "__main__":
             elif event.type == pygame.MOUSEBUTTONUP:
                 if exit_game.rect.collidepoint(pygame.mouse.get_pos()) and exit_down:
                     pass
-                #ЗДЕСЬ ЕСТЬ МЕСТО ДЛЯ ВЫХОДА
+                # ЗДЕСЬ ЕСТЬ МЕСТО ДЛЯ ВЫХОДА
                 exit_down = False
                 exit_game.image.fill((200, 0, 0))
 
@@ -275,5 +284,6 @@ if __name__ == "__main__":
         pygame.display.flip()
         clock.tick(FPS)
         if game.points == 0:
+            open_result_window()
             print('you win!!!')
     terminate()

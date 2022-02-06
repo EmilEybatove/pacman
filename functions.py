@@ -73,7 +73,7 @@ class Hunter(pygame.sprite.Sprite):
             self.rect.x, self.rect.y, *_ = get_rect(self.row, self.col)
         if color_ind == 0:  # Потому что надо вызвать только один раз
             get_available_nodes((self.row, self.col))
-            print(available_nodes)
+            # print(available_nodes)
 
     def new(self):
         self.row = self.start_pos[0]
@@ -469,6 +469,31 @@ values = {
     '0': 'point',
     '?': 'gate'
 }
+
+# Must come before pygame.init()
+pygame.mixer.pre_init(22050, -16, 1, 1024)
+pygame.mixer.init()
+pygame.mixer.set_num_channels(7)
+channel_backgound = pygame.mixer.Channel(6)
+
+
+snd_pellet = {
+    0: pygame.mixer.Sound(os.path.join(SCRIPT_PATH, "data", "sounds", "pellet1.wav")),
+    1: pygame.mixer.Sound(os.path.join(SCRIPT_PATH, "data", "sounds", "pellet2.wav"))
+}
+snd_levelintro = pygame.mixer.Sound(os.path.join(SCRIPT_PATH, "data", "sounds", "levelintro.wav"))
+snd_default = pygame.mixer.Sound(os.path.join(SCRIPT_PATH, "data", "sounds", "default.wav"))
+snd_extrapac = pygame.mixer.Sound(os.path.join(SCRIPT_PATH, "data", "sounds", "extrapac.wav"))
+snd_gh2gohome = pygame.mixer.Sound(os.path.join(SCRIPT_PATH, "data", "sounds", "gh2gohome.wav"))
+snd_death = pygame.mixer.Sound(os.path.join(SCRIPT_PATH, "data", "sounds", "death.wav"))
+snd_powerpellet = pygame.mixer.Sound(os.path.join(SCRIPT_PATH, "data", "sounds", "powerpellet.wav"))
+snd_eatgh = pygame.mixer.Sound(os.path.join(SCRIPT_PATH, "data", "sounds", "eatgh2.wav"))
+snd_fruitbounce = pygame.mixer.Sound(os.path.join(SCRIPT_PATH, "data", "sounds", "fruitbounce.wav"))
+snd_eatfruit = pygame.mixer.Sound(os.path.join(SCRIPT_PATH, "data", "sounds", "eatfruit.wav"))
+snd_extralife = pygame.mixer.Sound(os.path.join(SCRIPT_PATH, "data", "sounds", "extralife.wav"))
+snd_love = pygame.mixer.Sound(os.path.join(SCRIPT_PATH, "data", "sounds", "All You Need Is Love.wav"))
+
+
 available_nodes = []
 ghostGate = []
 ghost_color = [Color(255, 0, 0, 255),  # Red
