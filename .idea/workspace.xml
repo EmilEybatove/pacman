@@ -1,23 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="09d3b88e-24f4-4ae1-ac9a-04ab1890266e" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/data/sounds/All You Need Is Love.wav" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/sounds/death.wav" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/sounds/default.wav" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/sounds/eatfruit.wav" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/sounds/eatgh2.wav" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/sounds/extralife.wav" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/sounds/extrapac.wav" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/sounds/fruitbounce.wav" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/sounds/gh2gohome.wav" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/sounds/levelintro.wav" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/sounds/pellet1.wav" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/sounds/pellet2.wav" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/sounds/powerpellet.wav" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_06_02_2022__13_01__Default_Changelist_.xml" beforeDir="false" />
+    <list default="true" id="09d3b88e-24f4-4ae1-ac9a-04ab1890266e" name="Changes" comment="First background sound (love)!">
+      <change afterPath="$PROJECT_DIR$/data/sounds/songs/Can't Smile Without You.mp3" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/data/sounds/songs/Clouds.mp3" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/data/sounds/songs/I got you babe.mp3" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/data/sounds/songs/Pensilvania polka.mp3" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/data/sounds/songs/Phil steals the money.mp3" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/data/sounds/songs/Take me round again.mp3" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/data/sounds/songs/The ice sculpture.mp3" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/data/sounds/songs/Weatherman.mp3" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/check_this_out_guys.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/sounds/All You Need Is Love.wav" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/sounds/eatfruit.wav" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/sounds/eatgh2.wav" beforeDir="false" afterPath="$PROJECT_DIR$/data/sounds/ate_big_dot.wav" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/sounds/extralife.wav" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/sounds/extrapac.wav" beforeDir="false" afterPath="$PROJECT_DIR$/data/sounds/chase.wav" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/sounds/fruitbounce.wav" beforeDir="false" afterPath="$PROJECT_DIR$/data/sounds/ate_small_dot.wav" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/sounds/gh2gohome.wav" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/sounds/levelintro.wav" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/sounds/pellet1.wav" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/sounds/pellet2.wav" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/sounds/powerpellet.wav" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/functions.py" beforeDir="false" afterPath="$PROJECT_DIR$/functions.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/game.py" beforeDir="false" afterPath="$PROJECT_DIR$/game.py" afterDir="false" />
     </list>
@@ -42,11 +46,16 @@
   <component name="PropertiesComponent">
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/data" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/data/sounds/songs" />
   </component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/data/sounds/songs" />
+      <recent name="$PROJECT_DIR$/data/sounds" />
       <recent name="$PROJECT_DIR$/data" />
+    </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/data/sounds/songs" />
     </key>
   </component>
   <component name="RunManager">
@@ -87,6 +96,14 @@
       <option name="presentableId" value="Default" />
       <updated>1644144106670</updated>
     </task>
+    <task id="LOCAL-00001" summary="First background sound (love)!">
+      <created>1644168333461</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1644168333461</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -111,5 +128,9 @@
         </entry>
       </map>
     </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="First background sound (love)!" />
+    <option name="LAST_COMMIT_MESSAGE" value="First background sound (love)!" />
   </component>
 </project>

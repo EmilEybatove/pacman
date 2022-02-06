@@ -473,25 +473,25 @@ values = {
 # Must come before pygame.init()
 pygame.mixer.pre_init(22050, -16, 1, 1024)
 pygame.mixer.init()
-pygame.mixer.set_num_channels(7)
-channel_backgound = pygame.mixer.Channel(6)
+pygame.mixer.set_num_channels(3)
+channel_backgound = pygame.mixer.Channel(1)
+main_channel = pygame.mixer.Channel(2)
 
 
-snd_pellet = {
-    0: pygame.mixer.Sound(os.path.join(SCRIPT_PATH, "data", "sounds", "pellet1.wav")),
-    1: pygame.mixer.Sound(os.path.join(SCRIPT_PATH, "data", "sounds", "pellet2.wav"))
-}
-snd_levelintro = pygame.mixer.Sound(os.path.join(SCRIPT_PATH, "data", "sounds", "levelintro.wav"))
-snd_default = pygame.mixer.Sound(os.path.join(SCRIPT_PATH, "data", "sounds", "default.wav"))
-snd_extrapac = pygame.mixer.Sound(os.path.join(SCRIPT_PATH, "data", "sounds", "extrapac.wav"))
-snd_gh2gohome = pygame.mixer.Sound(os.path.join(SCRIPT_PATH, "data", "sounds", "gh2gohome.wav"))
+snd_big_dot = pygame.mixer.Sound(os.path.join(SCRIPT_PATH, "data", "sounds", "ate_big_dot.wav"))
+snd_small_dot = pygame.mixer.Sound(os.path.join(SCRIPT_PATH, "data", "sounds", "ate_small_dot.wav"))
+snd_chase = pygame.mixer.Sound(os.path.join(SCRIPT_PATH, "data", "sounds", "chase.wav"))
 snd_death = pygame.mixer.Sound(os.path.join(SCRIPT_PATH, "data", "sounds", "death.wav"))
-snd_powerpellet = pygame.mixer.Sound(os.path.join(SCRIPT_PATH, "data", "sounds", "powerpellet.wav"))
-snd_eatgh = pygame.mixer.Sound(os.path.join(SCRIPT_PATH, "data", "sounds", "eatgh2.wav"))
-snd_fruitbounce = pygame.mixer.Sound(os.path.join(SCRIPT_PATH, "data", "sounds", "fruitbounce.wav"))
-snd_eatfruit = pygame.mixer.Sound(os.path.join(SCRIPT_PATH, "data", "sounds", "eatfruit.wav"))
-snd_extralife = pygame.mixer.Sound(os.path.join(SCRIPT_PATH, "data", "sounds", "extralife.wav"))
-snd_love = pygame.mixer.Sound(os.path.join(SCRIPT_PATH, "data", "sounds", "All You Need Is Love.wav"))
+snd_default = pygame.mixer.Sound(os.path.join(SCRIPT_PATH, "data", "sounds", "default.wav"))
+
+songs = [pygame.mixer.Sound(os.path.join(SCRIPT_PATH, "data", "sounds", "songs", "Pensilvania polka.mp3")),
+         pygame.mixer.Sound(os.path.join(SCRIPT_PATH, "data", "sounds", "songs", "Can't Smile Without You.mp3")),
+         pygame.mixer.Sound(os.path.join(SCRIPT_PATH, "data", "sounds", "songs", "Clouds.mp3")),
+         pygame.mixer.Sound(os.path.join(SCRIPT_PATH, "data", "sounds", "songs", "I got you babe.mp3")),
+         pygame.mixer.Sound(os.path.join(SCRIPT_PATH, "data", "sounds", "songs", "Phil steals the money.mp3")),
+         pygame.mixer.Sound(os.path.join(SCRIPT_PATH, "data", "sounds", "songs", "Take me round again.mp3")),
+         pygame.mixer.Sound(os.path.join(SCRIPT_PATH, "data", "sounds", "songs", "The ice sculpture.mp3")),
+         pygame.mixer.Sound(os.path.join(SCRIPT_PATH, "data", "sounds", "songs", "Weatherman.mp3"))]
 
 
 available_nodes = []

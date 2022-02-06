@@ -6,12 +6,12 @@ i = -1
 mult = 0
 exit_down = False
 SOUND = True
-
+PLAYER_WANTS_MUSIC = False
 
 class Game:
-    def __init__(self, level, mode=1, lives=3):
+    def __init__(self, level, lives=3):
+        self.level = level
         self.lives = lives
-        self.mode = mode
         self.pacman, self.x, self.y, self.pacman_pos, self.points, self.ghostGate = generate_level(grid)
         global ghostGate
         ghostGate = self.ghostGate
@@ -28,10 +28,12 @@ class Game:
             all_sprites.add(hunter)
 
     @staticmethod
-    def PlayBackgoundSound(snd):
-        channel_backgound.stop()
-        if SOUND:
-            channel_backgound.play(snd, loops=-1)
+    def PlayBackgoundSound(snd=snd_default):
+        if not channel_backgound.get_busy() and SOUND:
+            if PLAYER_WANTS_MUSIC:
+                channel_backgound.play(choice(songs), loops=-1)
+            else:
+                channel_backgound.play(snd, loops=-1)
 
 
 def revival():
@@ -48,8 +50,12 @@ def react(game, side, timers):
         game.points -= 1
         screen.fill((0, 0, 0))
         draw(screen, game)
+        if SOUND:
+            main_channel.play(snd_small_dot)
 
     if result == 'energo':
+        if SOUND:
+            main_channel.play(snd_big_dot)
         if events_sequence[0] in ['right', 'down']:
             game.pacman.update(number, side)
         if i != -1:
@@ -57,22 +63,26 @@ def react(game, side, timers):
         for hunter in hunter_group:
             if not hunter.isDead():
                 hunter.setAttacked(True)
+        game.PlayBackgoundSound(snd_chase)
 
         pygame.time.delay(500)
         i += 1
-
         timers[i].start()
-
+        game.PlayBackgoundSound()
     for hunter in hunter_group:
         if pygame.sprite.spritecollideany(hunter, player_group):
             if not hunter.isAttacked() and not hunter.isDead():
                 for hunter in hunter_group:
                     hunter.new()
                 game.pacman.new()
+                if SOUND:
+                    main_channel.play(snd_death)
+                    game.PlayBackgoundSound()
                 events_sequence, game.pacman.counter, number = ['up'], 1, 0
                 game.lives -= 1
                 screen.fill((0, 0, 0))
                 draw(screen, game)
+                pygame.time.delay(1000)
                 break
             elif hunter.isAttacked():
                 mult += 1
@@ -138,17 +148,18 @@ def open_result_window():
                     #переход к выбору карты
                 elif 300 <= event.pos[0] <= 400 and 370 <= event.pos[1] <= 420:
                     #играем на той же карте заново
-                    game = Game(level, 1, 3)
+                    game = Game(level, 3)
                     terminate()
         pygame.display.flip()
 
 
 def change_image_volume(SOUND):
     if SOUND:
-        game.PlayBackgoundSound(snd_love)
+        game.PlayBackgoundSound(snd_default)
         image_volume = pygame.transform.scale(load_image('volume.png'), (40, 40))
     else:
-        game.PlayBackgoundSound(snd_love)
+        channel_backgound.stop()
+        game.PlayBackgoundSound(snd_default)
         image_volume = pygame.transform.scale(load_image('mute.png'), (40, 40))
     screen.blit(image_volume, (count_columns * 18 + 55, count_rows * 18 - 170))
 
@@ -192,7 +203,7 @@ def draw_exit_text():
 
 if __name__ == "__main__":
     pygame.init()
-    # вычисление размеров поля для загруженного уровня
+    # Вычисление размеров поля для загруженного уровня
     count_columns = len(load_level(level)[0])
     count_rows = len(load_level(level))
 
@@ -209,7 +220,7 @@ if __name__ == "__main__":
     screen = pygame.display.set_mode(size)
     game = Game(level)
     draw(screen, game)
-    game.PlayBackgoundSound(snd_love)
+    game.PlayBackgoundSound(snd_default)
 
     timer1 = threading.Timer(10, revival)
     timer2 = threading.Timer(10, revival)
@@ -228,7 +239,6 @@ if __name__ == "__main__":
         pygame.K_UP: 'up',
         pygame.K_DOWN: 'down'
     }
-    # open_result_window()
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -285,5 +295,5 @@ if __name__ == "__main__":
         clock.tick(FPS)
         if game.points == 0:
             open_result_window()
-            print('you win!!!')
+            print('You won!!!')
     terminate()
