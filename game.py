@@ -25,10 +25,12 @@ class Game:
             all_sprites.add(hunter)
 
     @staticmethod
-    def PlayBackgoundSound(snd, SOUND):
-        channel_backgound.stop()
-        if SOUND:
-            channel_backgound.play(snd, loops=-1)
+    def PlayBackgoundSound(SOUND=True, snd=snd_default):
+        if SOUND and not channel_backgound.get_busy():
+            if PLAYER_WANTS_MUSIC:
+                channel_backgound.play(choice(songs), loops=-1)
+            else:
+                channel_backgound.play(snd, loops=-1)
 
 
 def revival():
@@ -42,11 +44,13 @@ def react(game, side, timers, screen, count_columns, count_rows):
     global events_sequence, number, i, mult
     result = game.pacman.update(number, side)
     if result:
+        main_channel.play(snd_small_dot)
         game.points -= 1
         screen.fill((0, 0, 0))
         draw(screen, game, count_columns, count_rows)
 
     if result == 'energo':
+        main_channel.play(snd_big_dot)
         if events_sequence[0] in ['right', 'down']:
             game.pacman.update(number, side)
         if i != -1:
@@ -66,13 +70,17 @@ def react(game, side, timers, screen, count_columns, count_rows):
             if not hunter.isAttacked() and not hunter.isDead():
                 for hunter in hunter_group:
                     hunter.new()
+                main_channel.play(snd_death)
                 game.pacman.new()
                 events_sequence, game.pacman.counter, number = ['up'], 1, 0
                 game.lives -= 1
+                pygame.time.delay(1800)
                 screen.fill((0, 0, 0))
+                game.PlayBackgoundSound()
                 draw(screen, game, count_columns, count_rows)
                 break
             elif hunter.isAttacked():
+                main_channel.play(snd_chase)
                 mult += 1
                 game.pacman.score += 2 ** mult * 100
                 hunter.setAttacked(False)
@@ -83,7 +91,9 @@ def react(game, side, timers, screen, count_columns, count_rows):
 
 
 def open_result_window(result, level, grid):
-    # открываем окно
+    global game
+    main_channel.stop()
+    channel_backgound.stop()
     pygame.init()
     size = 500, 500
     screen = pygame.display.set_mode(size)
@@ -114,13 +124,13 @@ def open_result_window(result, level, grid):
     pygame.draw.rect(screen, 'yellow', (100, 370, 100, 50), 2)
     pygame.draw.rect(screen, 'yellow', (300, 370, 100, 50), 2)
     font = pygame.font.Font(None, 25)
-    string_rendered = font.render('choise map', 1, pygame.Color('yellow'))
+    string_rendered = font.render('Choose map', 1, pygame.Color('yellow'))
     intro_rect = string_rendered.get_rect()
     intro_rect.top = 395 - intro_rect.height // 2
     intro_rect.x = 150 - intro_rect.width // 2
     screen.blit(string_rendered, intro_rect)
     font = pygame.font.Font(None, 25)
-    string_rendered = font.render('play', 1, pygame.Color('yellow'))
+    string_rendered = font.render('Play', 1, pygame.Color('yellow'))
     intro_rect = string_rendered.get_rect()
     intro_rect.top = 395 - intro_rect.height // 2
     intro_rect.x = 350 - intro_rect.width // 2
@@ -132,9 +142,9 @@ def open_result_window(result, level, grid):
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if 100 <= event.pos[0] <= 200 and 370 <= event.pos[1] <= 420:
                     terminate()
-                    #переход к выбору карты
+                    # Переход к выбору карты
                 elif 300 <= event.pos[0] <= 400 and 370 <= event.pos[1] <= 420:
-                    #играем на той же карте заново
+                    # Играем на той же карте заново
                     game = Game(level, grid, 3)
                     terminate()
         pygame.display.flip()
@@ -142,10 +152,11 @@ def open_result_window(result, level, grid):
 
 def change_image_volume(game, SOUND, screen, count_columns, count_rows):
     if SOUND:
-        game.PlayBackgoundSound(choice(songs), SOUND)
+        game.PlayBackgoundSound(SOUND)
         image_volume = pygame.transform.scale(load_image('volume.png'), (40, 40))
     else:
-        game.PlayBackgoundSound(choice(songs), SOUND)
+        channel_backgound.stop()
+        game.PlayBackgoundSound(SOUND)
         image_volume = pygame.transform.scale(load_image('mute.png'), (40, 40))
     screen.blit(image_volume, (count_columns * 18 + 55, count_rows * 18 - 170))
 
@@ -217,7 +228,7 @@ def print_game(level):
     screen = pygame.display.set_mode(size)
     game = Game(level, grid)
     draw(screen, game, count_columns, count_rows)
-    game.PlayBackgoundSound(choice(songs), SOUND)
+    game.PlayBackgoundSound()
 
     timer1 = threading.Timer(10, revival)
     timer2 = threading.Timer(10, revival)
