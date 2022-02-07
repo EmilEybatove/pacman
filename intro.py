@@ -3,11 +3,13 @@ import sys
 import pygame
 import functions
 import os
+from pygame import Color
+import pygame.gfxdraw
 
 level_group = pygame.sprite.Group()
 flip_group = pygame.sprite.Group()
 exit_group = pygame.sprite.Group()
-
+delete_group = pygame.sprite.Group()
 
 exit_game = pygame.sprite.Sprite()
 exit_game.image = pygame.Surface((125, 40))
@@ -15,10 +17,32 @@ exit_game.rect = pygame.Rect(640, 430, 125, 40)
 exit_game.image.fill((200, 0, 0))
 exit_group.add(exit_game)
 
-
-
-
 load_image = functions.load_image
+
+default = ['Level_1']
+
+
+
+
+class Delete(pygame.sprite.Sprite):
+    def __init__(self, pos_x, pos_y, level):
+        super().__init__(delete_group)
+        self.image = pygame.transform.scale(load_image('delete.png'), (35, 35))
+        self.rect = pygame.Rect(pos_x, pos_y - 5, 35, 35)
+        self.level = level
+        self.pos_x = pos_x
+        self.pos_y = pos_y - 5
+        self.down = False
+
+
+    def update(self):
+        os.remove(f'levels/{self.level}')
+
+
+    def down_event(self, screen):
+        rect = pygame.Rect(self.pos_x, self.pos_y, 35, 35)
+        pygame.gfxdraw.box(screen, rect, (0, 0, 0, 100))
+
 
 
 tile_images = {
@@ -37,8 +61,7 @@ tile_images = {
     'end-left': load_image('walls/rose/end_l.png'),
     'end-right': load_image('walls/rose/end_r.png'),
     'pacman': load_image('pacman.png')
-    }
-
+}
 
 values = {
     '|': 'vertical',
@@ -58,6 +81,7 @@ values = {
     'r': 'end-right'
 }
 
+
 def draw_exit_text(screen):
     font = pygame.font.Font(None, 40)
     string_rendered = font.render('E X I T', True, (255, 255, 255))
@@ -74,7 +98,9 @@ class Level(pygame.sprite.Sprite):
         self.name = name[:-4]
         self.pos_x = pos_x
         self.pos_y = pos_y
-        self.pos = (pos_x, pos_y + 10)
+        self.pos = (pos_x + 75 - len(name) * 2, pos_y + 10)
+        if self.name not in default:
+            self.delete = Delete(pos_x + 170, pos_y, name)
 
     def down_event(self):
         if self.rect.collidepoint(pygame.mouse.get_pos()):
@@ -118,9 +144,6 @@ class Flip(pygame.sprite.Sprite):
         self.side = side
 
 
-
-
-
 def print_intro(game):
     page = 0
     exit_down = False
@@ -153,6 +176,10 @@ def print_intro(game):
                     exit_game.image.fill((150, 0, 0))
                     exit_down = True
 
+                for delete in delete_group:
+                    if delete.rect.collidepoint(pygame.mouse.get_pos()):
+                        delete.down = True
+
                 if left.rect.collidepoint(pygame.mouse.get_pos()) and page > 0:
                     screen.fill((0, 0, 0))
                     page -= 1
@@ -161,12 +188,13 @@ def print_intro(game):
                     level2 = Level(475, 50, levels[2 * page + 1])
                     level1.draw_level(screen)
                     level2.draw_level(screen)
-                elif right.rect.collidepoint(pygame.mouse.get_pos()) and page + 1 < len(levels) // 2:
+                elif right.rect.collidepoint(pygame.mouse.get_pos()) and page + 1 <= len(levels) // 2:
                     screen.fill((0, 0, 0))
                     page += 1
                     level_group.empty()
+                    delete_group.empty()
                     level1 = Level(150, 50, levels[2 * page])
-                    level2 = Level(475, 50, levels[2 * page + 1]) if len(levels) >= 2 * page + 1 else False
+                    level2 = Level(475, 50, levels[2 * page + 1]) if len(levels) > 2 * page + 1 else False
                     level1.draw_level(screen)
                     if level2:
                         level2.draw_level(screen)
@@ -177,7 +205,41 @@ def print_intro(game):
                 if exit_game.rect.collidepoint(pygame.mouse.get_pos()) and exit_down:
                     exit_down = False
                     exit_game.image.fill((200, 0, 0))
+                    delete_group.empty()
+                    level_group.empty()
                     return True
+
+                for delete in delete_group:
+                    if delete.rect.collidepoint(pygame.mouse.get_pos()) and delete.down:
+                        delete.update()
+                        screen.fill((0, 0, 0))
+                        levels = os.listdir('levels')
+                        level_group.empty()
+                        delete_group.empty()
+                        if 2 * page < len(levels):
+                            level1 = Level(150, 50, levels[2 * page])
+                        else:
+                            level1 = False
+                        if len(levels) > 2 * page + 1:
+                            level2 = Level(475, 50, levels[2 * page + 1])
+                        else:
+                            level2 = False
+                        print(level1, level2)
+                        if not level1 and not level2:
+                            page -= 1
+                            level1 = Level(150, 50, levels[2 * page])
+                            level2 = Level(475, 50, levels[2 * page + 1])
+                            level1.draw_level(screen)
+                            level2.draw_level(screen)
+                        elif not level2:
+                            level1.draw_level(screen)
+                        else:
+                            level1.draw_level(screen)
+                            level2.draw_level(screen)
+
+
+
+                    delete.down = False
 
                 for level in level_group:
                     if level.rect.collidepoint(pygame.mouse.get_pos()) and level.down:
@@ -196,6 +258,11 @@ def print_intro(game):
         for level in level_group:
             level.draw_name(screen)
         exit_group.draw(screen)
+        delete_group.draw(screen)
         draw_exit_text(screen)
+        for delete in delete_group:
+            if delete.down:
+                delete.down_event(screen)
         pygame.display.flip()
+
     return False

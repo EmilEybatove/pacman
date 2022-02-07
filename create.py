@@ -10,12 +10,12 @@ images_group = pygame.sprite.Group()
 base_group = pygame.sprite.Group()
 exit_group = pygame.sprite.Group()
 
-
 exit_game = pygame.sprite.Sprite()
 exit_game.image = pygame.Surface((125, 40))
 exit_game.rect = pygame.Rect(600, 570, 125, 40)
 exit_game.image.fill((200, 0, 0))
 exit_group.add(exit_game)
+save_text = 'Не сохранено'
 
 
 def load_image(name, colorkey=None):
@@ -43,12 +43,12 @@ tile_images = {
     'pacman': load_image('pacman.png'),
     'energo': load_image('walls/rose/energo.png'),
     'point': load_image('walls/rose/point.png'),
-    'gate': load_image('walls/rose/gate.png'),
     'end-top': load_image('walls/rose/end_t.png'),
     'end-bottom': load_image('walls/rose/end_b.png'),
     'end-left': load_image('walls/rose/end_l.png'),
-    'end-right': load_image('walls/rose/end_r.png')
-    }
+    'end-right': load_image('walls/rose/end_r.png'),
+    'gate': load_image('walls/rose/gate.png')
+}
 
 values = {
     '|': 'vertical',
@@ -61,11 +61,11 @@ values = {
     '@': 'pacman',
     '*': 'energo',
     '0': 'point',
-    '?': 'gate',
     't': 'end-top',
     'b': 'end-bottom',
     'l': 'end-left',
-    'r': 'end-right'
+    'r': 'end-right',
+    '?': 'gate'
 }
 
 dct = {v: k for k, v in values.items()}
@@ -82,12 +82,11 @@ class Tile(pygame.sprite.Sprite):
             tile_width * pos_x + 50, tile_height * pos_y + 50)
 
 
-
-
 def draw_exit_text(screen):
     font = pygame.font.Font(None, 40)
     string_rendered = font.render('E X I T', True, (255, 255, 255))
     screen.blit(string_rendered, (exit_game.rect.x + 20, exit_game.rect.y + 7))
+
 
 def generate_level(level):
     global base_group
@@ -193,7 +192,6 @@ class Board:
             Tile(values['|'], 0, i, (base_group,))
             Tile(values['|'], self.width - 1, i, (base_group,))
 
-
         for i in range(self.width):
             if i == 0:
                 Tile(values['1'], i, 0, (base_group,))
@@ -210,9 +208,8 @@ class Board:
         for i in [-1, 0, 1]:
             for j in [-1, 0, 1]:
                 a, b = pos[0] + i, pos[1] + j
-                if [a, b] not in self.way and board[a][b] not in ['1', '2', '3', '4', '|', '-']:
+                if [a, b] not in self.way and board[a][b] not in ['1', '2', '3', '4', '|', '-', 't', 'b', 'l', 'r']:
                     self.voln([a, b], board)
-
 
     def make_way(self, board):
         player_pos = None
@@ -258,11 +255,9 @@ class Board:
         self.center()
         self.wall()
 
-
-
-
     def save_file(self, filename):
-        if filename + '.txt' not in os.listdir('levels'):
+        global save_text
+        if filename + '.txt' not in os.listdir('levels') or not len(filename) == 0:
 
             board = deepcopy(self.board)
             pacman = False
@@ -304,6 +299,7 @@ class Board:
                     board[self.height - 1][i] = '-'
 
             if not self.make_way(board):
+                save_text = 'Пакмен не может дойти до всех обязательных полей'
                 return None
 
             for elem in board:
@@ -311,8 +307,8 @@ class Board:
                     pacman = True
                 energo += elem.count('*')
 
-
             if not pacman or energo < 4:
+                save_text = 'Нужен ровно один пакмен и 4 большие точки'
                 return None
 
             file = open(f'levels/{filename}.txt', mode='w', encoding='utf-8')
@@ -320,8 +316,10 @@ class Board:
             for elem in board:
                 print(''.join(list(map(lambda x: '.' if x == ' ' else x, elem))), file=file)
             file.close()
+            save_text = 'Сохранено'
             return True
         else:
+            save_text = 'Имя файла не доступно'
             return False
 
 
@@ -333,16 +331,57 @@ class Images(pygame.sprite.Sprite):
         self.rect = self.image.get_rect().move(835 if a == 0 else 895, number * 80 + 50)
 
 
-def complate(result, screen):
+def complate(result, screen, text='Не сохранено'):
     color = (0, 150, 00) if result else (150, 0, 00)
-    pygame.draw.rect(screen, color, (600, 400, 120, 40), width=0)
+    text_x = 620
+    if result or text == 'Не сохранено':
+        pygame.draw.rect(screen, color, (600, 400, 120, 40), width=0)
+    if text == 'Сохранено':
+        text_x = 620
+    elif text == 'Не сохранено':
+        text_x = 610
+    elif text == 'Имя файла не доступно':
+        pygame.draw.rect(screen, color, (550, 400, 220, 40), width=0)
+        text_x = 570
+    elif text == 'Нужен ровно один пакмен и 4 большие точки':
+        text1 = 'Нужен ровно один пакмен'
+        text2 = 'и 4 большие точки'
+        pygame.draw.rect(screen, color, (550, 400, 220, 60), width=0)
+        text_x_1 = 563
+        text_x_2 = 585
+        text_y_1 = 413
+        text_y_2 = 435
+        font = pygame.font.Font(None, 20)
+        font.bold = True
+        text_for_print_1 = font.render(text1, True, (255, 255, 255))
+        text_for_print_2 = font.render(text2, True, (255, 255, 255))
+        screen.blit(text_for_print_1, (text_x_1, text_y_1))
+        screen.blit(text_for_print_2, (text_x_2, text_y_2))
+        return None
+
+    elif text == 'Пакмен не может дойти до всех обязательных полей':
+        text1 = 'Пакмен не может дойти до'
+        text2 = 'всех обязательных полей'
+        pygame.draw.rect(screen, color, (550, 400, 220, 60), width=0)
+        text_x_1 = 563
+        text_x_2 = 563
+        text_y_1 = 413
+        text_y_2 = 435
+        font = pygame.font.Font(None, 20)
+        font.bold = True
+        text_for_print_1 = font.render(text1, True, (255, 255, 255))
+        text_for_print_2 = font.render(text2, True, (255, 255, 255))
+        screen.blit(text_for_print_1, (text_x_1, text_y_1))
+        screen.blit(text_for_print_2, (text_x_2, text_y_2))
+        return None
+
     font = pygame.font.Font(None, 20)
     font.bold = True
-    text = "Сохранено" if result else "Не сохранено"
-    text = font.render(text, True, (255, 255, 255))
-    text_x = 620 if result else 610
+    text = "Сохранено" if result else text
+    text_for_print = font.render(text, True, (255, 255, 255))
+
     text_y = 413
-    screen.blit(text, (text_x, text_y))
+    screen.blit(text_for_print, (text_x, text_y))
 
 
 def cords(mouse_pos):
@@ -420,6 +459,7 @@ def arrows(pos_x, pos_y):
 
 
 def print_create():
+    global save_text
     current = False
     saved = False
     exit_down = False
@@ -470,6 +510,7 @@ def print_create():
                     if not bool1 and not bool2 and not bool3 and not bool4:
                         board.size_event(a)
                         saved = False
+                        save_text = 'Не сохранено'
 
                         number1 = number1 + 1 if a == 0 else number1 - 1 if a == 2 else number1
                         number2 = number2 + 1 if a == 1 else number2 - 1 if a == 3 else number2
@@ -522,7 +563,7 @@ def print_create():
             b = current_image // 2 * 80 + 50 - 2
             pygame.draw.rect(screen, (255, 255, 0), (a, b, 54, 54), width=2)
         save_file(text + '|' if click else text, screen)
-        complate(saved, screen)
+        complate(saved, screen, save_text)
 
         pygame.display.flip()
     return False

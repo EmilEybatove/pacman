@@ -7,10 +7,10 @@ PLAYER_WANTS_MUSIC = True
 
 class Game:
     def __init__(self, level, grid, lives=3):
+        global ghostGate
         self.lives = lives
         self.level = level
         self.pacman, self.x, self.y, self.pacman_pos, self.points, self.ghostGate = generate_level(grid)
-        global ghostGate
         ghostGate = self.ghostGate
 
         self.start_pacman_pos = self.pacman_pos.copy()
@@ -121,33 +121,23 @@ def open_result_window(result, level, grid):
     intro_rect.x = 250 - intro_rect.width // 2
     screen.blit(string_rendered, intro_rect)
     # отрисовываем кнопки
-    pygame.draw.rect(screen, 'yellow', (100, 370, 100, 50), 2)
-    pygame.draw.rect(screen, 'yellow', (300, 370, 100, 50), 2)
+    pygame.draw.rect(screen, 'yellow', (200, 370, 100, 50), 2)
     font = pygame.font.Font(None, 25)
     string_rendered = font.render('Choose map', 1, pygame.Color('yellow'))
     intro_rect = string_rendered.get_rect()
     intro_rect.top = 395 - intro_rect.height // 2
-    intro_rect.x = 150 - intro_rect.width // 2
+    intro_rect.x = 250 - intro_rect.width // 2
     screen.blit(string_rendered, intro_rect)
-    font = pygame.font.Font(None, 25)
-    string_rendered = font.render('Play', 1, pygame.Color('yellow'))
-    intro_rect = string_rendered.get_rect()
-    intro_rect.top = 395 - intro_rect.height // 2
-    intro_rect.x = 350 - intro_rect.width // 2
-    screen.blit(string_rendered, intro_rect)
+
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
             if event.type == pygame.MOUSEBUTTONDOWN:
-                if 100 <= event.pos[0] <= 200 and 370 <= event.pos[1] <= 420:
-                    terminate()
-                    # Переход к выбору карты
-                elif 300 <= event.pos[0] <= 400 and 370 <= event.pos[1] <= 420:
-                    # Играем на той же карте заново
-                    game = Game(level, grid, 3)
-                    terminate()
+                if 200 <= event.pos[0] <= 300 and 370 <= event.pos[1] <= 420:
+                    return True
         pygame.display.flip()
+    return False
 
 
 def change_image_volume(game, SOUND, screen, count_columns, count_rows):
@@ -199,7 +189,21 @@ def draw_exit_text(screen, count_columns, count_rows):
 
 
 def print_game(level):
-    global events_sequence, number
+    global events_sequence, number, i, mult, PLAYER_WANTS_MUSIC, available_nodes, ghostGate, graph
+
+    events_sequence, number = ['up'], 0
+    i = -1
+    mult = 0
+    PLAYER_WANTS_MUSIC = True
+    available_nodes.clear()
+    ghostGate.clear()
+    graph.clear()
+    all_sprites.empty()
+    tiles_group.empty()
+    player_group.empty()
+    hunter_group.empty()
+    pause_group.empty()
+    exit_group.empty()
 
     grid = load_level(level)
 
@@ -277,7 +281,9 @@ def print_game(level):
                     exit_down = True
             elif event.type == pygame.MOUSEBUTTONUP:
                 if exit_game.rect.collidepoint(pygame.mouse.get_pos()) and exit_down:
-                    print('rthsetg')
+
+
+
                     return True
                 exit_down = False
                 exit_game.image.fill((200, 0, 0))
@@ -302,7 +308,11 @@ def print_game(level):
         pygame.display.flip()
         clock.tick(FPS)
         if game.points == 0:
-            open_result_window(True, level, grid)
+            if open_result_window(True, level, grid):
+                return True
+            return False
         if game.lives == 0:
-            open_result_window(False, level, grid)
+            if open_result_window(False, level, grid):
+                return True
+            return False
     return False
