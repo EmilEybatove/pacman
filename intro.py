@@ -1,21 +1,17 @@
-import sys
-
+import os
+from random import choice
 import pygame
 import functions
-import os
 
 level_group = pygame.sprite.Group()
 flip_group = pygame.sprite.Group()
 exit_group = pygame.sprite.Group()
-
 
 exit_game = pygame.sprite.Sprite()
 exit_game.image = pygame.Surface((125, 40))
 exit_game.rect = pygame.Rect(640, 430, 125, 40)
 exit_game.image.fill((200, 0, 0))
 exit_group.add(exit_game)
-
-
 
 
 load_image = functions.load_image
@@ -99,12 +95,20 @@ class Level(pygame.sprite.Sprite):
                 image = tile_images[values[level_data[i][j]]]
                 image = pygame.transform.scale(image, (width, height))
                 step = len(level_data[0]) - 15
+
                 screen.blit(image, (self.pos_x + j * width - width // 2 * step, self.pos_y + 40 + i * height))
 
     def start(self, game):
-        if not game.print_game(self.name + '.txt'):
+        colors = [None, pygame.Color('chartreuse2'), pygame.Color('cyan'), pygame.Color('darkcyan'),
+                  pygame.Color('darkgoldenrod1'), pygame.Color('darkorchid1'), pygame.Color('darkturquoise'),
+                  pygame.Color('gold'), pygame.Color('gray74'), pygame.Color('lightslateblue'),
+                  pygame.Color('violet'), pygame.Color("green")]
+        res = game.print_game(self.name + '.txt', choice(colors))
+        if not res:
             return False
-
+        else:
+            if res == "Next_level":
+                pass # What to do???
         return True
 
 
@@ -124,7 +128,7 @@ class Flip(pygame.sprite.Sprite):
 def print_intro(game):
     page = 0
     exit_down = False
-    levels = os.listdir('levels')
+    levels = sorted(os.listdir(os.path.join(functions.SCRIPT_PATH, 'levels')))
 
     if len(levels) > 0:
         level1 = Level(150, 50, levels[0])

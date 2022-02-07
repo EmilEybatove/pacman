@@ -1,12 +1,31 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="09d3b88e-24f4-4ae1-ac9a-04ab1890266e" name="Changes" comment="Black background color.">
+    <list default="true" id="09d3b88e-24f4-4ae1-ac9a-04ab1890266e" name="Changes" comment="Background music is now okay">
+      <change afterPath="$PROJECT_DIR$/levels/test_map.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/pacman.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/pacman.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_06_02_2022__13_45__Changes_.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_06_02_2022__13_45__Changes_.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/create.py" beforeDir="false" afterPath="$PROJECT_DIR$/create.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/ballons.jpg" beforeDir="false" afterPath="$PROJECT_DIR$/data/balloons.jpg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/functions.py" beforeDir="false" afterPath="$PROJECT_DIR$/functions.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/game.py" beforeDir="false" afterPath="$PROJECT_DIR$/game.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/intro.py" beforeDir="false" afterPath="$PROJECT_DIR$/intro.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/levels/.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/levels/aaaa.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/levels/at.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/levels/drhydhy.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/levels/h.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/levels/iytiyiyf.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/levels/yt.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/levels/ytttt.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/levels/карта.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/levels/тест1.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/levels/тест2.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/levels/тест3.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/levels/тест4.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/levels/тест5.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/levels/тест6.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/levels/тест7.txt" beforeDir="false" />
     </list>
     <list id="a7fd88fd-893e-4a87-be09-4ab5bc0a1143" name="Music files" comment="" />
     <list id="81bdd9f3-3cec-4578-b631-669b846a4209" name="You crashed my design!!" comment="You crashed my design!!" />
@@ -114,11 +133,6 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <list>
-      <item itemvalue="Python.create" />
-      <item itemvalue="Python.game" />
-      <item itemvalue="Python.main" />
-    </list>
     <recent_temporary>
       <list>
         <item itemvalue="Python.main" />
@@ -168,7 +182,14 @@
       <option name="project" value="LOCAL" />
       <updated>1644241855339</updated>
     </task>
-    <option name="localTasksCounter" value="5" />
+    <task id="LOCAL-00005" summary="Background music is now okay">
+      <created>1644244416549</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1644244416549</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -193,7 +214,6 @@
         </entry>
       </map>
     </option>
-    <option name="oldMeFiltersMigrated" value="true" />
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
@@ -201,6 +221,33 @@
     <MESSAGE value="Sounds complete!&#10;(Добавил фичу чисто для Константина Сергеевича, поменяте значение переменной в 9-й строке game.py)" />
     <MESSAGE value="New design." />
     <MESSAGE value="Black background color." />
-    <option name="LAST_COMMIT_MESSAGE" value="Black background color." />
+    <MESSAGE value="Background music is now okay" />
+    <option name="LAST_COMMIT_MESSAGE" value="Background music is now okay" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/intro.py</url>
+          <line>100</line>
+          <option name="timeStamp" value="1" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/game.py</url>
+          <line>314</line>
+          <option name="timeStamp" value="2" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/intro.py</url>
+          <line>187</line>
+          <option name="timeStamp" value="3" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/game.py</url>
+          <line>153</line>
+          <option name="timeStamp" value="4" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
 </project>
