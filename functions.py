@@ -353,7 +353,9 @@ def find_path(start_point, end_point):
     return None
 
 
-
+levels = ['Level_1.txt', 'Level_2.txt', 'Level_3.txt']
+level = levels[0]
+grid = load_level(level)
 
 restricted = ["|", "-", "1", "2", "3", "4", 1, 2, 3, 4, "b", "l", "r", "t"]
 allowed = ["0", 0, ".", "*", "?"]
