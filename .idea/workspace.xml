@@ -1,29 +1,51 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="09d3b88e-24f4-4ae1-ac9a-04ab1890266e" name="Changes" comment="First background sound (love)!">
-      <change afterPath="$PROJECT_DIR$/data/sounds/songs/Can't Smile Without You.mp3" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/sounds/songs/Clouds.mp3" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/sounds/songs/I got you babe.mp3" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/sounds/songs/Pensilvania polka.mp3" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/sounds/songs/Phil steals the money.mp3" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/sounds/songs/Take me round again.mp3" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/sounds/songs/The ice sculpture.mp3" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/sounds/songs/Weatherman.mp3" afterDir="false" />
+    <list default="true" id="09d3b88e-24f4-4ae1-ac9a-04ab1890266e" name="Changes" comment="Sounds complete!&#10;(Добавил фичу чисто для Константина Сергеевича, поменяте значение переменной в 9-й строке game.py)">
+      <change afterPath="$PROJECT_DIR$/data/wall-straight-horiz.gif" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/data/wall-straight-vert.gif" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/data/walls/common/1.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/data/walls/common/2.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/data/walls/common/3.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/data/walls/common/4.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/data/walls/common/empty.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/data/walls/common/energo.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/data/walls/common/gate.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/data/walls/common/horizontal.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/data/walls/common/left.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/data/walls/common/point.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/data/walls/common/right.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/data/walls/common/vertical.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/data/walls/rose/1.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/data/walls/rose/2.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/data/walls/rose/3.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/data/walls/rose/4.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/data/walls/rose/empty.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/data/walls/rose/end_b.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/data/walls/rose/end_l.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/data/walls/rose/end_r.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/data/walls/rose/end_t.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/data/walls/rose/energo.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/data/walls/rose/gate.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/data/walls/rose/horizontal.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/data/walls/rose/point.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/data/walls/rose/vertical.png" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/sounds/All You Need Is Love.wav" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/sounds/eatfruit.wav" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/sounds/eatgh2.wav" beforeDir="false" afterPath="$PROJECT_DIR$/data/sounds/ate_big_dot.wav" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/sounds/extralife.wav" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/sounds/extrapac.wav" beforeDir="false" afterPath="$PROJECT_DIR$/data/sounds/chase.wav" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/sounds/fruitbounce.wav" beforeDir="false" afterPath="$PROJECT_DIR$/data/sounds/ate_small_dot.wav" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/sounds/gh2gohome.wav" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/sounds/levelintro.wav" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/sounds/pellet1.wav" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/sounds/pellet2.wav" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/sounds/powerpellet.wav" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/1.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/2.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/3.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/4.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/empty.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/energo.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/gate.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/horizontal.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/left.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/point.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/right.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/vertical.png" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/functions.py" beforeDir="false" afterPath="$PROJECT_DIR$/functions.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/game.py" beforeDir="false" afterPath="$PROJECT_DIR$/game.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/levels/default_level.txt" beforeDir="false" afterPath="$PROJECT_DIR$/levels/Level_1.txt" afterDir="false" />
     </list>
     <list id="a7fd88fd-893e-4a87-be09-4ab5bc0a1143" name="Music files" comment="" />
     <option name="SHOW_DIALOG" value="false" />
@@ -38,27 +60,51 @@
     <option name="stateVersion" value="1" />
   </component>
   <component name="ProjectId" id="24jVhkmUnmC2BZh9nbN3wUj82E1" />
-  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true">
+    <ConfirmationsSetting value="2" id="Add" />
+  </component>
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
   <component name="PropertiesComponent">
+    <property name="ASKED_ADD_EXTERNAL_FILES" value="true" />
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/data/sounds/songs" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/data" />
   </component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/data" />
       <recent name="$PROJECT_DIR$/data/sounds/songs" />
       <recent name="$PROJECT_DIR$/data/sounds" />
-      <recent name="$PROJECT_DIR$/data" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/data/sounds/songs" />
     </key>
   </component>
-  <component name="RunManager">
+  <component name="RunManager" selected="Python.game">
+    <configuration name="create" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="/opt/anaconda3/bin/python3.8" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/create.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
     <configuration name="game" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -82,6 +128,7 @@
     </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Python.create" />
         <item itemvalue="Python.game" />
       </list>
     </recent_temporary>
@@ -103,7 +150,14 @@
       <option name="project" value="LOCAL" />
       <updated>1644168333461</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="Sounds complete!&#10;(Добавил фичу чисто для Константина Сергеевича, поменяте значение переменной в 9-й строке game.py)">
+      <created>1644177195879</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1644177195879</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -130,7 +184,9 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
+    <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
     <MESSAGE value="First background sound (love)!" />
-    <option name="LAST_COMMIT_MESSAGE" value="First background sound (love)!" />
+    <MESSAGE value="Sounds complete!&#10;(Добавил фичу чисто для Константина Сергеевича, поменяте значение переменной в 9-й строке game.py)" />
+    <option name="LAST_COMMIT_MESSAGE" value="Sounds complete!&#10;(Добавил фичу чисто для Константина Сергеевича, поменяте значение переменной в 9-й строке game.py)" />
   </component>
 </project>

@@ -295,5 +295,7 @@ if __name__ == "__main__":
         clock.tick(FPS)
         if game.points == 0:
             open_result_window()
+            channel_backgound.stop()
+            main_channel.stop()
             print('You won!!!')
     terminate()

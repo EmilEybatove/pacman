@@ -351,9 +351,9 @@ class Player(pygame.sprite.Sprite):
 
     # проверяет все столкновения
     def collides(self):
-        lst = ['vertical', 'horizontal', '1', '2', '3', '4', 'gate']
+        restricted = ['vertical', 'horizontal', '1', '2', '3', '4', 'gate', 'end-top', 'end-left', 'end-right', 'end-bottom']
         collide_list = pygame.sprite.spritecollideany(self, tiles_group)
-        if collide_list is None or collide_list.image in [tile_images[_] for _ in lst]:
+        if collide_list is None or collide_list.image in [tile_images[_] for _ in restricted]:
             return False
         else:
             if collide_list.image is tile_images['point']:
@@ -421,10 +421,11 @@ def find_path(start_point, end_point):
     return None
 
 
-level = 'default_level.txt'
+levels = ['Level_1.txt', 'Level_2.txt', 'Level_3.txt']
+level = levels[0]
 grid = load_level(level)
 
-restricted = ["|", "-", "1", "2", "3", "4", 1, 2, 3, 4]
+restricted = ["|", "-", "1", "2", "3", "4", 1, 2, 3, 4, "b", "l", "r", "t"]
 allowed = ["0", 0, ".", "*", "?"]
 
 graph = {}
@@ -445,16 +446,20 @@ else:
     SCRIPT_PATH = sys.path[0]
 
 tile_images = {
-    'vertical': load_image('vertical.png'),
-    'horizontal': load_image('horizontal.png'),
-    '1': load_image('1.png'),
-    '2': load_image('2.png'),
-    '3': load_image('4.png'),
-    '4': load_image('3.png'),
-    'empty': load_image('empty.png'),
-    'point': load_image('point.png'),
-    'energo': load_image('energo.png'),
-    'gate': load_image('gate.png')}
+    'vertical': load_image('walls/rose/vertical.png'),
+    'horizontal': load_image('walls/rose/horizontal.png'),
+    '1': load_image('walls/rose/1.png'),
+    '2': load_image('walls/rose/2.png'),
+    '3': load_image('walls/rose/4.png'),
+    '4': load_image('walls/rose/3.png'),
+    'empty': load_image('walls/rose/empty.png'),
+    'point': load_image('walls/rose/point.png'),
+    'energo': load_image('walls/rose/energo.png'),
+    'gate': load_image('walls/rose/gate.png'),
+    'end-top': load_image('walls/rose/end_t.png'),
+    'end-bottom': load_image('walls/rose/end_b.png'),
+    'end-left': load_image('walls/rose/end_l.png'),
+    'end-right': load_image('walls/rose/end_r.png')}
 
 values = {
     '|': 'vertical',
@@ -467,7 +472,11 @@ values = {
     '@': 'pacman',
     '*': 'energo',
     '0': 'point',
-    '?': 'gate'
+    '?': 'gate',
+    't': 'end-top',
+    'b': 'end-bottom',
+    'l': 'end-left',
+    'r': 'end-right'
 }
 
 # Must come before pygame.init()
