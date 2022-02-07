@@ -13,7 +13,7 @@ exit_group = pygame.sprite.Group()
 
 exit_game = pygame.sprite.Sprite()
 exit_game.image = pygame.Surface((125, 40))
-exit_game.rect = pygame.Rect(830, 570, 125, 40)
+exit_game.rect = pygame.Rect(600, 570, 125, 40)
 exit_game.image.fill((200, 0, 0))
 exit_group.add(exit_game)
 
@@ -40,15 +40,16 @@ tile_images = {
     '3': load_image('walls/rose/4.png'),
     '4': load_image('walls/rose/3.png'),
     'empty': load_image('walls/rose/empty.png'),
-    'point': load_image('walls/rose/point.png'),
+    'pacman': load_image('pacman.png'),
     'energo': load_image('walls/rose/energo.png'),
+    'point': load_image('walls/rose/point.png'),
     'gate': load_image('walls/rose/gate.png'),
     'end-top': load_image('walls/rose/end_t.png'),
     'end-bottom': load_image('walls/rose/end_b.png'),
     'end-left': load_image('walls/rose/end_l.png'),
-    'end-right': load_image('walls/rose/end_r.png'),
-    'pacman': load_image('pacman.png')
+    'end-right': load_image('walls/rose/end_r.png')
     }
+
 values = {
     '|': 'vertical',
     '-': 'horizontal',
@@ -351,7 +352,7 @@ def cords(mouse_pos):
     elif mouse_pos[0] in range(895, 945):
         a = 1
 
-    for i in range(5):
+    for i in range(7):
         if mouse_pos[1] in range(50 + i * 80, 100 + i * 80):
             b = i
             break
@@ -445,7 +446,6 @@ def print_create():
             if event.type == pygame.QUIT:
                 running = False
             if event.type == pygame.MOUSEBUTTONDOWN:
-                print('zdfzdf')
                 if exit_game.rect.collidepoint(pygame.mouse.get_pos()):
                     exit_game.image.fill((150, 0, 0))
                     exit_down = True

@@ -63,6 +63,7 @@ def draw_exit_text(screen):
     string_rendered = font.render('E X I T', True, (255, 255, 255))
     screen.blit(string_rendered, (exit_game.rect.x + 20, exit_game.rect.y + 7))
 
+
 class Level(pygame.sprite.Sprite):
     def __init__(self, pos_x, pos_y, name):
         super().__init__(level_group)
