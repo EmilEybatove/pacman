@@ -1,15 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="09d3b88e-24f4-4ae1-ac9a-04ab1890266e" name="Changes" comment="New design.">
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/pacman.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/pacman.iml" afterDir="false" />
+    <list default="true" id="09d3b88e-24f4-4ae1-ac9a-04ab1890266e" name="Changes" comment="Black background color.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client.py" beforeDir="false" afterPath="$PROJECT_DIR$/client.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/walls/rose/gate.png" beforeDir="false" afterPath="$PROJECT_DIR$/data/walls/rose/gate.png" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/game.py" beforeDir="false" afterPath="$PROJECT_DIR$/game.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/hunter.py" beforeDir="false" afterPath="$PROJECT_DIR$/hunter.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/second_player.py" beforeDir="false" afterPath="$PROJECT_DIR$/second_player.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/testy.py" beforeDir="false" afterPath="$PROJECT_DIR$/testy.py" afterDir="false" />
     </list>
     <list id="a7fd88fd-893e-4a87-be09-4ab5bc0a1143" name="Music files" comment="" />
     <list id="81bdd9f3-3cec-4578-b631-669b846a4209" name="You crashed my design!!" comment="You crashed my design!!" />
@@ -159,7 +154,14 @@
       <option name="project" value="LOCAL" />
       <updated>1644235295250</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="Black background color.">
+      <created>1644241855339</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1644241855339</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -190,6 +192,7 @@
     <MESSAGE value="First background sound (love)!" />
     <MESSAGE value="Sounds complete!&#10;(Добавил фичу чисто для Константина Сергеевича, поменяте значение переменной в 9-й строке game.py)" />
     <MESSAGE value="New design." />
-    <option name="LAST_COMMIT_MESSAGE" value="New design." />
+    <MESSAGE value="Black background color." />
+    <option name="LAST_COMMIT_MESSAGE" value="Black background color." />
   </component>
 </project>
