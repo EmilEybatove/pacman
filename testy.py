@@ -122,7 +122,7 @@ def show_level(level, count1, count2):
     try:
         player, level_x, level_y = generate_level(load_level(level))
     except FileNotFoundError:
-        player, level_x, level_y = generate_level(load_level('default_level.txt'))
+        player, level_x, level_y = generate_level(load_level('Level_1.txt'))
     all_sprites.draw(screen)
     pygame.display.flip()
     return player, level_x, level_y
@@ -231,7 +231,7 @@ if __name__ == '__main__':
     try:
         load_level(level)
     except FileNotFoundError:
-        level = 'default_level.txt'
+        level = 'Level_1.txt'
     count2 = len(load_level(level))
     count1 = len(load_level(level)[0])
     player, level_x, level_y = show_level(level, count1, count2)

@@ -3,11 +3,12 @@ from functions import *
 events_sequence, number = ['up'], 0
 i = -1
 mult = 0
-
+PLAYER_WANTS_MUSIC = True
 
 class Game:
     def __init__(self, level, grid, lives=3):
         self.lives = lives
+        self.level = level
         self.pacman, self.x, self.y, self.pacman_pos, self.points, self.ghostGate = generate_level(grid)
         global ghostGate
         ghostGate = self.ghostGate

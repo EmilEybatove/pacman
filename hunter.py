@@ -202,7 +202,7 @@ if __name__ == '__main__':
         SCRIPT_PATH = sys.path[0]
     all_sprites = pygame.sprite.Group()
 
-    with open("levels/default_level.txt", 'r') as mapFile:
+    with open("levels/Level_1.txt", 'r') as mapFile:
         level_map = [line.strip() for line in mapFile]
     max_width = max(map(len, level_map))
     grid = list(map(lambda x: x.ljust(max_width, '.'), level_map))

@@ -101,7 +101,7 @@ def draw(screen, game):
 sio = socketio.AsyncClient()
 
 pygame.init()
-level = 'default_level.txt'
+level = 'Level_1.txt'
 # вычисление размеров поля для загруженного уровня
 count_columns = len(load_level(level)[0])
 count_rows = len(load_level(level))
