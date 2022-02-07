@@ -16,12 +16,24 @@ pause_group = pygame.sprite.Group()
 exit_group = pygame.sprite.Group()
 
 class Tile(pygame.sprite.Sprite):
-    def __init__(self, tile_type, pos_x, pos_y, groups=(tiles_group, all_sprites)):
+    def __init__(self, tile_type, pos_x, pos_y, color=None, groups=(tiles_group, all_sprites)):
         super().__init__(*groups)
         self.cords = [pos_x, pos_y]
         self.image = tile_images[tile_type]
+        self.color = color
+        if self.color:
+            self.coloring()
         self.rect = self.image.get_rect().move(
             tile_width * pos_x, tile_height * pos_y)
+
+    def coloring(self):
+        for x in range(18):
+            for y in range(18):
+                real_color = self.image.get_at((x, y))
+                if  real_color == pygame.Color((132, 0, 132, 255)):
+                    self.image.set_at((x, y), self.color)
+                elif real_color == pygame.Color((255, 0, 255, 255)):
+                    self.image.set_at((x, y), pygame.Color((255, 206, 255, 255)))
 
 
 def get_rect(x, y):
@@ -181,7 +193,7 @@ def load_level(filename):
     return list(map(lambda x: x.ljust(max_width, '.'), level_map))
 
 
-def generate_level(level):
+def generate_level(level, color):
     global cols, rows, ghostGate
     points = 0
     rows = len(level)
@@ -190,13 +202,13 @@ def generate_level(level):
     for y in range(len(level)):
         for x in range(len(level[y])):
             if level[y][x] == '@':
-                Tile('empty', x, y)
+                Tile('empty', x, y, color)
                 new_player = Player(x, y)
                 pacman_pos = [x, y]
             elif level[y][x] in list(values.keys()):
                 if level[y][x] in ['0', '*']:
                     points += 1
-                Tile(values[level[y][x]], x, y)
+                Tile(values[level[y][x]], x, y, color)
     for i in [-3, -2, -1, 0, 1, 2]:
         for j in [-1, 0]:
             ghostGate.append((cols // 2 + i, rows // 2 + j))

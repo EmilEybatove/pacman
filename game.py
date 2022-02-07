@@ -31,6 +31,9 @@ class Game:
                 channel_backgound.play(choice(songs), loops=-1)
             else:
                 channel_backgound.play(snd, loops=-1)
+        else:
+            channel_backgound.stop()
+            main_channel.stop()
 
 
 def revival():
@@ -40,17 +43,19 @@ def revival():
     mult = 0
 
 
-def react(game, side, timers, screen, count_columns, count_rows):
+def react(game, side, timers, screen, count_columns, count_rows, SOUND):
     global events_sequence, number, i, mult
     result = game.pacman.update(number, side)
     if result:
-        main_channel.play(snd_small_dot)
+        if SOUND:
+            main_channel.play(snd_small_dot)
         game.points -= 1
         screen.fill((0, 0, 0))
         draw(screen, game, count_columns, count_rows)
 
     if result == 'energo':
-        main_channel.play(snd_big_dot)
+        if SOUND:
+            main_channel.play(snd_big_dot)
         if events_sequence[0] in ['right', 'down']:
             game.pacman.update(number, side)
         if i != -1:
@@ -70,7 +75,8 @@ def react(game, side, timers, screen, count_columns, count_rows):
             if not hunter.isAttacked() and not hunter.isDead():
                 for hunter in hunter_group:
                     hunter.new()
-                main_channel.play(snd_death)
+                if SOUND:
+                    main_channel.play(snd_death)
                 game.pacman.new()
                 events_sequence, game.pacman.counter, number = ['up'], 1, 0
                 game.lives -= 1
@@ -80,7 +86,8 @@ def react(game, side, timers, screen, count_columns, count_rows):
                 draw(screen, game, count_columns, count_rows)
                 break
             elif hunter.isAttacked():
-                main_channel.play(snd_chase)
+                if SOUND:
+                    main_channel.play(snd_chase)
                 mult += 1
                 game.pacman.score += 2 ** mult * 100
                 hunter.setAttacked(False)
@@ -90,14 +97,15 @@ def react(game, side, timers, screen, count_columns, count_rows):
                 draw(screen, game, count_columns, count_rows)
 
 
-def open_result_window(result, level, grid):
+def open_result_window(result, level, grid, color):
     global game
     main_channel.stop()
     channel_backgound.stop()
     pygame.init()
     size = 500, 500
     screen = pygame.display.set_mode(size)
-    pygame.display.set_caption('result')
+    caption = "Good job" if result else "You tried your best!"
+    pygame.display.set_caption(caption)
     screen.fill('black')
     running = True
     # выбор надписи и картинки в зависимости от результата
@@ -105,17 +113,17 @@ def open_result_window(result, level, grid):
         intro_text = ["GAME OVER", "Try again!!"]
     else:
         intro_text = ["YOU WIN", "Congratulations!!"]
-        picture = pygame.transform.scale(load_image('ballons.jpg'), (400, 220))
+        picture = pygame.transform.scale(load_image('balloons.jpg'), (400, 220))
         screen.blit(picture, (50, 0))
     # отрисовываем надписи
     font = pygame.font.Font(None, 80)
-    string_rendered = font.render(intro_text[0], 3, pygame.Color('yellow'))
+    string_rendered = font.render(intro_text[0], True, pygame.Color('yellow'))
     intro_rect = string_rendered.get_rect()
     intro_rect.top = 220
     intro_rect.x = 250 - intro_rect.width // 2
     screen.blit(string_rendered, intro_rect)
     font = pygame.font.Font(None, 40)
-    string_rendered = font.render(intro_text[1], 1, pygame.Color('yellow'))
+    string_rendered = font.render(intro_text[1], True, pygame.Color('yellow'))
     intro_rect = string_rendered.get_rect()
     intro_rect.top = 300
     intro_rect.x = 250 - intro_rect.width // 2
@@ -230,9 +238,10 @@ def print_game(level):
     size = width, height
 
     screen = pygame.display.set_mode(size)
-    game = Game(level, grid)
+    game = Game(level, grid, color)
     draw(screen, game, count_columns, count_rows)
-    game.PlayBackgoundSound()
+    if SOUND:
+        game.PlayBackgoundSound()
 
     timer1 = threading.Timer(10, revival)
     timer2 = threading.Timer(10, revival)
@@ -292,7 +301,7 @@ def print_game(level):
             game.pacman_pos = [int(game.pacman.x / 18), int(game.pacman.y / 18)]
             events_sequence = [events_sequence[1]] if len(events_sequence) > 1 else events_sequence
         if not pause:
-            react(game, events_sequence[0], timers, screen, count_columns, count_rows)
+            react(game, events_sequence[0], timers, screen, count_columns, count_rows, SOUND)
             game.pacman.counter = (game.pacman.counter + 1) % 18
             number = (number + 1) % 9
             num = 0
