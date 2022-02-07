@@ -43,11 +43,11 @@ tile_images = {
     'pacman': load_image('pacman.png'),
     'energo': load_image('walls/rose/energo.png'),
     'point': load_image('walls/rose/point.png'),
-    'gate': load_image('walls/rose/gate.png'),
     'end-top': load_image('walls/rose/end_t.png'),
     'end-bottom': load_image('walls/rose/end_b.png'),
     'end-left': load_image('walls/rose/end_l.png'),
-    'end-right': load_image('walls/rose/end_r.png')
+    'end-right': load_image('walls/rose/end_r.png'),
+    'gate': load_image('walls/rose/gate.png')
     }
 
 values = {
@@ -61,11 +61,11 @@ values = {
     '@': 'pacman',
     '*': 'energo',
     '0': 'point',
-    '?': 'gate',
     't': 'end-top',
     'b': 'end-bottom',
     'l': 'end-left',
-    'r': 'end-right'
+    'r': 'end-right',
+    '?': 'gate'
 }
 
 dct = {v: k for k, v in values.items()}
