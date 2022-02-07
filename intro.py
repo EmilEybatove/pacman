@@ -1,3 +1,5 @@
+import sys
+
 import pygame
 import functions
 import os
@@ -18,18 +20,25 @@ exit_group.add(exit_game)
 
 load_image = functions.load_image
 
+
 tile_images = {
-    'vertical': load_image('vertical.png'),
-    'horizontal': load_image('horizontal.png'),
-    '1': load_image('1.png'),
-    '2': load_image('2.png'),
-    '3': load_image('4.png'),
-    '4': load_image('3.png'),
-    'empty': load_image('empty.png'),
-    'point': load_image('point.png'),
-    'energo': load_image('energo.png'),
-    'pacman': load_image('pacman.png'),
-    'gate': load_image('gate.png')}
+    'vertical': load_image('walls/rose/vertical.png'),
+    'horizontal': load_image('walls/rose/horizontal.png'),
+    '1': load_image('walls/rose/1.png'),
+    '2': load_image('walls/rose/2.png'),
+    '3': load_image('walls/rose/4.png'),
+    '4': load_image('walls/rose/3.png'),
+    'empty': load_image('walls/rose/empty.png'),
+    'point': load_image('walls/rose/point.png'),
+    'energo': load_image('walls/rose/energo.png'),
+    'gate': load_image('walls/rose/gate.png'),
+    'end-top': load_image('walls/rose/end_t.png'),
+    'end-bottom': load_image('walls/rose/end_b.png'),
+    'end-left': load_image('walls/rose/end_l.png'),
+    'end-right': load_image('walls/rose/end_r.png'),
+    'pacman': load_image('pacman.png')
+    }
+
 
 values = {
     '|': 'vertical',
@@ -39,10 +48,14 @@ values = {
     '3': '3',
     '4': '4',
     '.': 'empty',
-    '0': 'point',
-    '*': 'energo',
     '@': 'pacman',
-    '?': 'gate'
+    '*': 'energo',
+    '0': 'point',
+    '?': 'gate',
+    't': 'end-top',
+    'b': 'end-bottom',
+    'l': 'end-left',
+    'r': 'end-right'
 }
 
 def draw_exit_text(screen):
@@ -168,13 +181,13 @@ def print_intro(game):
                 for level in level_group:
                     if level.rect.collidepoint(pygame.mouse.get_pos()) and level.down:
                         if not level.start(game):
-                            level.up_event()
                             return False
                         else:
                             screen = pygame.display.set_mode((800, 500))
                             level1.draw_level(screen)
                             if level2:
                                 level2.draw_level(screen)
+                        level.up_event()
 
 
         level_group.draw(screen)

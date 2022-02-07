@@ -353,9 +353,6 @@ def find_path(start_point, end_point):
     return None
 
 
-levels = ['Level_1.txt', 'Level_2.txt', 'Level_3.txt']
-level = levels[0]
-grid = load_level(level)
 
 restricted = ["|", "-", "1", "2", "3", "4", 1, 2, 3, 4, "b", "l", "r", "t"]
 allowed = ["0", 0, ".", "*", "?"]
@@ -395,8 +392,9 @@ tile_images = {
     'end-top': load_image('walls/rose/end_t.png'),
     'end-bottom': load_image('walls/rose/end_b.png'),
     'end-left': load_image('walls/rose/end_l.png'),
-    'end-right': load_image('walls/rose/end_r.png')}
-
+    'end-right': load_image('walls/rose/end_r.png'),
+    'pacman': load_image('pacman.png')
+    }
 values = {
     '|': 'vertical',
     '-': 'horizontal',

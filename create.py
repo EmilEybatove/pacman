@@ -33,31 +33,41 @@ def load_image(name, colorkey=None):
 
 
 tile_images = {
-    'vertical': load_image('vertical.png'),
-    'horizontal': load_image('horizontal.png'),
-    '1': load_image('1.png'),
-    '2': load_image('2.png'),
-    '3': load_image('4.png'),
-    '4': load_image('3.png'),
-    'empty': load_image('empty.png'),
-    'point': load_image('point.png'),
-    'energo': load_image('energo.png'),
-    'pacman': load_image('pacman.png'),
-    'gate': load_image('gate.png')}
-
-dct = {
-    'vertical': '|',
-    'horizontal': '-',
+    'vertical': load_image('walls/rose/vertical.png'),
+    'horizontal': load_image('walls/rose/horizontal.png'),
+    '1': load_image('walls/rose/1.png'),
+    '2': load_image('walls/rose/2.png'),
+    '3': load_image('walls/rose/4.png'),
+    '4': load_image('walls/rose/3.png'),
+    'empty': load_image('walls/rose/empty.png'),
+    'point': load_image('walls/rose/point.png'),
+    'energo': load_image('walls/rose/energo.png'),
+    'gate': load_image('walls/rose/gate.png'),
+    'end-top': load_image('walls/rose/end_t.png'),
+    'end-bottom': load_image('walls/rose/end_b.png'),
+    'end-left': load_image('walls/rose/end_l.png'),
+    'end-right': load_image('walls/rose/end_r.png'),
+    'pacman': load_image('pacman.png')
+    }
+values = {
+    '|': 'vertical',
+    '-': 'horizontal',
     '1': '1',
     '2': '2',
     '3': '3',
     '4': '4',
-    'empty': '.',
-    'pacman': '@',
-    'energo': '*',
-    '?': '?',
-    'point': '0'
+    '.': 'empty',
+    '@': 'pacman',
+    '*': 'energo',
+    '0': 'point',
+    '?': 'gate',
+    't': 'end-top',
+    'b': 'end-bottom',
+    'l': 'end-left',
+    'r': 'end-right'
 }
+
+dct = {v: k for k, v in values.items()}
 
 tile_width = tile_height = 18
 
@@ -71,19 +81,6 @@ class Tile(pygame.sprite.Sprite):
             tile_width * pos_x + 50, tile_height * pos_y + 50)
 
 
-values = {
-    '|': 'vertical',
-    '-': 'horizontal',
-    '1': '1',
-    '2': '2',
-    '3': '3',
-    '4': '4',
-    '.': 'empty',
-    '0': 'point',
-    '*': 'energo',
-    '@': 'pacman',
-    '?': 'gate'
-}
 
 
 def draw_exit_text(screen):

@@ -141,10 +141,10 @@ def open_result_window(result, level, grid):
 
 def change_image_volume(game, SOUND, screen, count_columns, count_rows):
     if SOUND:
-        game.PlayBackgoundSound(snd_love, SOUND)
+        game.PlayBackgoundSound(choice(songs), SOUND)
         image_volume = pygame.transform.scale(load_image('volume.png'), (40, 40))
     else:
-        game.PlayBackgoundSound(snd_love, SOUND)
+        game.PlayBackgoundSound(choice(songs), SOUND)
         image_volume = pygame.transform.scale(load_image('mute.png'), (40, 40))
     screen.blit(image_volume, (count_columns * 18 + 55, count_rows * 18 - 170))
 
@@ -216,7 +216,7 @@ def print_game(level):
     screen = pygame.display.set_mode(size)
     game = Game(level, grid)
     draw(screen, game, count_columns, count_rows)
-    game.PlayBackgoundSound(snd_love, SOUND)
+    game.PlayBackgoundSound(choice(songs), SOUND)
 
     timer1 = threading.Timer(10, revival)
     timer2 = threading.Timer(10, revival)
