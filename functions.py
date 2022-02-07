@@ -92,13 +92,13 @@ class Hunter(pygame.sprite.Sprite):
                     palette[j] = to_color
             self.anim[i].set_palette(palette)
 
-    def move(self, goal):
+    def move(self, goal, grid):
         real_goal = ""
         if goal and graph[goal]:
             if self.attacked:
                 self.color_frames(ghost_color[self.color], ghost_color[4])
                 distances = {}
-                for node in self.get_next_nodes(self.row, self.col):
+                for node in self.get_next_nodes(self.row, self.col, grid):
                     distances[node] = sqrt((node[0] - goal[0]) ** 2 + (node[1] - goal[1]) ** 2)
                 for el in distances.keys():
                     if distances[el] == max(distances.values()):
@@ -131,7 +131,7 @@ class Hunter(pygame.sprite.Sprite):
                 elif self.col > final_goal[1]:
                     self.rect.y -= 1
 
-    def get_next_nodes(self, x, y):
+    def get_next_nodes(self, x, y, grid):
         check_node = lambda x, y: True if (0 <= x < cols) and (0 <= y < rows) and \
                                           (grid[y][x] in allowed) else False
         ways = [0, -1], [0, 1], [1, 0], [-1, 0]
@@ -206,74 +206,6 @@ def generate_level(level):
 def terminate():
     pygame.quit()
     sys.exit()
-
-
-def print_intro():
-    screen.fill('black')
-    pygame.display.set_caption('Play Pacman')
-    pygame.draw.rect(screen, 'yellow', (100, 300, 300, 50), 1)
-    pygame.display.flip()
-    intro_text = ["Welcome to", "PACMAN",
-                  "Введите название своего уровня", "или", "сразу нажмите Enter для начала игры"]
-    font = pygame.font.Font(None, 40)
-    string_rendered = font.render(intro_text[0], 1, pygame.Color('yellow'))
-    intro_rect = string_rendered.get_rect()
-    intro_rect.top = 50
-    intro_rect.x = 250 - intro_rect.width // 2
-    screen.blit(string_rendered, intro_rect)
-    font = pygame.font.Font(None, 80)
-    string_rendered = font.render(intro_text[1], 3, pygame.Color('yellow'))
-    intro_rect = string_rendered.get_rect()
-    intro_rect.top = 80
-    intro_rect.x = 250 - intro_rect.width // 2
-    screen.blit(string_rendered, intro_rect)
-    font = pygame.font.Font(None, 20)
-    for i in range(2, 5):
-        string_rendered = font.render(intro_text[i], 1, pygame.Color('yellow'))
-        intro_rect = string_rendered.get_rect()
-        intro_rect.top = 250 + 15 * (i - 2)
-        intro_rect.x = 250 - intro_rect.width // 2
-        screen.blit(string_rendered, intro_rect)
-    picture = pygame.transform.scale(load_image('intro_picture.jpg'), (300, 70))
-    screen.blit(picture, (100, 400))
-
-
-def print_text(text):
-    font = pygame.font.Font(None, 40)
-    text_coord = 310
-    pygame.draw.rect(screen, 'black', (105, 305, 290, 40), 0)
-    string_rendered = font.render(text, 20, pygame.Color('yellow'))
-    intro_rect = string_rendered.get_rect()
-    intro_rect.top = text_coord
-    intro_rect.x = 110
-    screen.blit(string_rendered, intro_rect)
-    pygame.display.flip()
-
-
-def start_screen():
-    need_input = False
-    input_text = ''
-    while True:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                terminate()
-            elif need_input is False and event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_RETURN:
-                    return 'default_level'
-            elif need_input and event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_RETURN:
-                    return input_text
-                elif event.key == pygame.K_BACKSPACE:
-                    if len(input_text) > 0:
-                        input_text = input_text[:-1]
-                else:
-                    if len(input_text) <= 20:
-                        input_text += event.unicode
-            elif event.type == pygame.MOUSEBUTTONDOWN:
-                if 100 < event.pos[0] < 400 and 300 < event.pos[1] < 350:
-                    need_input = True
-        print_text(input_text)
-        pygame.display.flip()
 
 
 def return_path(game, num, event, hunter):
@@ -391,7 +323,7 @@ def get_available_nodes(start_node):
                 get_available_nodes(node)
 
 
-def get_next_nodes(x, y):
+def get_next_nodes(x, y, grid):
     check_node = lambda x, y: True if (0 <= x < len(grid[0])) and (0 <= y < len(grid)) and \
                                       (grid[y][x] in allowed) else False
     ways = [0, -1], [0, 1], [1, 0], [-1, 0]
@@ -421,20 +353,23 @@ def find_path(start_point, end_point):
     return None
 
 
-level = 'default_level.txt'
-grid = load_level(level)
+
 
 restricted = ["|", "-", "1", "2", "3", "4", 1, 2, 3, 4]
 allowed = ["0", 0, ".", "*", "?"]
 
 graph = {}
-for y, row in enumerate(grid):
-    for x, col in enumerate(row):
-        if col in allowed:
-            graph[(x, y)] = graph.get((x, y), []) + get_next_nodes(x, y)
-        else:
-            # graph[(x, y)] = graph.get((x, y), ["unavailable"]) + get_next_nodes(x, y)
-            graph[(x, y)] = []
+
+
+def make_graph(grid):
+    for y, row in enumerate(grid):
+        for x, col in enumerate(row):
+            if col in allowed:
+                graph[(x, y)] = graph.get((x, y), []) + get_next_nodes(x, y, grid)
+            else:
+                # graph[(x, y)] = graph.get((x, y), ["unavailable"]) + get_next_nodes(x, y)
+                graph[(x, y)] = []
+
 
 TILE = tile_width = tile_height = 18
 

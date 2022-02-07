@@ -8,8 +8,14 @@ all_sprites = pygame.sprite.Group()
 tiles_group = pygame.sprite.Group()
 images_group = pygame.sprite.Group()
 base_group = pygame.sprite.Group()
-current = False
-saved = False
+exit_group = pygame.sprite.Group()
+
+
+exit_game = pygame.sprite.Sprite()
+exit_game.image = pygame.Surface((125, 40))
+exit_game.rect = pygame.Rect(830, 570, 125, 40)
+exit_game.image.fill((200, 0, 0))
+exit_group.add(exit_game)
 
 
 def load_image(name, colorkey=None):
@@ -79,6 +85,11 @@ values = {
     '?': 'gate'
 }
 
+
+def draw_exit_text(screen):
+    font = pygame.font.Font(None, 40)
+    string_rendered = font.render('E X I T', True, (255, 255, 255))
+    screen.blit(string_rendered, (exit_game.rect.x + 20, exit_game.rect.y + 7))
 
 def generate_level(level):
     global base_group
@@ -324,7 +335,7 @@ class Images(pygame.sprite.Sprite):
         self.rect = self.image.get_rect().move(835 if a == 0 else 895, number * 80 + 50)
 
 
-def complate(result):
+def complate(result, screen):
     color = (0, 150, 00) if result else (150, 0, 00)
     pygame.draw.rect(screen, color, (600, 400, 120, 40), width=0)
     font = pygame.font.Font(None, 20)
@@ -381,7 +392,7 @@ input_box = pygame.Rect(560, 250, 200, 50)
 button = pygame.Rect(600, 330, 120, 40)
 
 
-def save_file(text):
+def save_file(text, screen):
     pygame.draw.rect(screen, (50, 50, 50), input_box, width=0)
     pygame.draw.rect(screen, (25, 25, 25), button, width=0)
 
@@ -410,7 +421,11 @@ def arrows(pos_x, pos_y):
     return b * 2 + a if a >= 0 and b >= 0 else None
 
 
-if __name__ == '__main__':
+def print_create():
+    current = False
+    saved = False
+    exit_down = False
+
     pygame.init()
     pygame.display.set_caption('Создание поля')
     size = width, height = 1000, 650
@@ -433,6 +448,10 @@ if __name__ == '__main__':
             if event.type == pygame.QUIT:
                 running = False
             if event.type == pygame.MOUSEBUTTONDOWN:
+                print('zdfzdf')
+                if exit_game.rect.collidepoint(pygame.mouse.get_pos()):
+                    exit_game.image.fill((150, 0, 0))
+                    exit_down = True
                 if current and board.get_click(event.pos, current):
                     down = 1
                 click = input_box.collidepoint(event.pos)
@@ -464,6 +483,15 @@ if __name__ == '__main__':
                     if elem != 'gate':
                         Images(elem, a // 2, a % 2)
                         a += 1
+
+            elif event.type == pygame.MOUSEBUTTONUP:
+                if exit_game.rect.collidepoint(pygame.mouse.get_pos()) and exit_down:
+                    exit_down = False
+                    exit_game.image.fill((200, 0, 0))
+                    return True
+
+                exit_game.image.fill((200, 0, 0))
+
             if event.type == pygame.KEYDOWN:
                 if click:
                     if event.key == pygame.K_RETURN:
@@ -489,12 +517,15 @@ if __name__ == '__main__':
         draw(screen, number1, number2)
         arrows_group.draw(screen)
         base_group.draw(screen)
+        exit_group.draw(screen)
+        draw_exit_text(screen)
         current_image = list(values.keys()).index(current) if current else -1
         if current_image >= 0:
             a = 833 if current_image % 2 == 0 else 893
             b = current_image // 2 * 80 + 50 - 2
             pygame.draw.rect(screen, (255, 255, 0), (a, b, 54, 54), width=2)
-        save_file(text + '|' if click else text)
-        complate(saved)
+        save_file(text + '|' if click else text, screen)
+        complate(saved, screen)
+
         pygame.display.flip()
-    pygame.quit()
+    return False

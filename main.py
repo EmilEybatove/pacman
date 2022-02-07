@@ -1,5 +1,9 @@
 import pygame
 import functions
+import intro
+import create
+import game
+
 
 button_group = pygame.sprite.Group()
 
@@ -29,7 +33,7 @@ class Button(pygame.sprite.Sprite):
         screen.blit(text, self.pos)
 
 def play():
-    pass
+    return intro.print_intro(game)
 
 
 def multiplayer():
@@ -37,15 +41,15 @@ def multiplayer():
 
 
 def create_level():
-    pass
+    return create.print_create()
 
 
 def exit():
-    pass
+    return False
 
 
 commands = [play, multiplayer, create_level, exit]
-texts = ['play', 'multiplayer', 'create level', 'exit']
+texts = ['Play', 'Multiplayer', 'Create level', 'Exit']
 
 if __name__ == "__main__":
     pygame.init()
@@ -62,15 +66,22 @@ if __name__ == "__main__":
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
+
             elif event.type == pygame.MOUSEBUTTONDOWN:
-                for button in button_group:
-                    if button.rect.collidepoint(pygame.mouse.get_pos()):
-                        button.down_event()
+                if event.button == 1:
+                    for button in button_group:
+                        if button.rect.collidepoint(pygame.mouse.get_pos()):
+                            button.down_event()
+
             elif event.type == pygame.MOUSEBUTTONUP:
-                for button in button_group:
-                    if button.rect.collidepoint(pygame.mouse.get_pos()) and button.down:
-                        button.func()
-                    button.up_event()
+                if event.button == 1:
+                    for button in button_group:
+                        if button.rect.collidepoint(pygame.mouse.get_pos()) and button.down:
+                            if not button.func():
+                                running = False
+                            screen = pygame.display.set_mode((700, 650))
+                            screen.blit(picture, (150, 100))
+                        button.up_event()
         button_group.draw(screen)
         for button in button_group:
             button.draw_text()

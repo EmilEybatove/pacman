@@ -1,17 +1,13 @@
 from functions import *
 
 events_sequence, number = ['up'], 0
-pause, stop = False, False
 i = -1
 mult = 0
-exit_down = False
-SOUND = True
 
 
 class Game:
-    def __init__(self, level, mode=1, lives=3):
+    def __init__(self, level, grid, lives=3):
         self.lives = lives
-        self.mode = mode
         self.pacman, self.x, self.y, self.pacman_pos, self.points, self.ghostGate = generate_level(grid)
         global ghostGate
         ghostGate = self.ghostGate
@@ -28,7 +24,7 @@ class Game:
             all_sprites.add(hunter)
 
     @staticmethod
-    def PlayBackgoundSound(snd):
+    def PlayBackgoundSound(snd, SOUND):
         channel_backgound.stop()
         if SOUND:
             channel_backgound.play(snd, loops=-1)
@@ -41,13 +37,13 @@ def revival():
     mult = 0
 
 
-def react(game, side, timers):
+def react(game, side, timers, screen, count_columns, count_rows):
     global events_sequence, number, i, mult
     result = game.pacman.update(number, side)
     if result:
         game.points -= 1
         screen.fill((0, 0, 0))
-        draw(screen, game)
+        draw(screen, game, count_columns, count_rows)
 
     if result == 'energo':
         if events_sequence[0] in ['right', 'down']:
@@ -61,6 +57,7 @@ def react(game, side, timers):
         pygame.time.delay(500)
         i += 1
 
+        mult = 0
         timers[i].start()
 
     for hunter in hunter_group:
@@ -72,7 +69,7 @@ def react(game, side, timers):
                 events_sequence, game.pacman.counter, number = ['up'], 1, 0
                 game.lives -= 1
                 screen.fill((0, 0, 0))
-                draw(screen, game)
+                draw(screen, game, count_columns, count_rows)
                 break
             elif hunter.isAttacked():
                 mult += 1
@@ -81,11 +78,10 @@ def react(game, side, timers):
                 hunter.setDead(True)
                 pygame.time.delay(500)
                 screen.fill((0, 0, 0))
-                draw(screen, game)
+                draw(screen, game, count_columns, count_rows)
 
 
-def open_result_window():
-    global game
+def open_result_window(result, level, grid):
     # открываем окно
     pygame.init()
     size = 500, 500
@@ -94,7 +90,7 @@ def open_result_window():
     screen.fill('black')
     running = True
     # выбор надписи и картинки в зависимости от результата
-    if game.lives == 0:
+    if not result:
         intro_text = ["GAME OVER", "Try again!!"]
     else:
         intro_text = ["YOU WIN", "Congratulations!!"]
@@ -138,22 +134,22 @@ def open_result_window():
                     #переход к выбору карты
                 elif 300 <= event.pos[0] <= 400 and 370 <= event.pos[1] <= 420:
                     #играем на той же карте заново
-                    game = Game(level, 1, 3)
+                    game = Game(level, grid, 3)
                     terminate()
         pygame.display.flip()
 
 
-def change_image_volume(SOUND):
+def change_image_volume(game, SOUND, screen, count_columns, count_rows):
     if SOUND:
-        game.PlayBackgoundSound(snd_love)
+        game.PlayBackgoundSound(snd_love, SOUND)
         image_volume = pygame.transform.scale(load_image('volume.png'), (40, 40))
     else:
-        game.PlayBackgoundSound(snd_love)
+        game.PlayBackgoundSound(snd_love, SOUND)
         image_volume = pygame.transform.scale(load_image('mute.png'), (40, 40))
     screen.blit(image_volume, (count_columns * 18 + 55, count_rows * 18 - 170))
 
 
-def draw(screen, game):
+def draw(screen, game, count_columns, count_rows):
     # отрисовка кнопок плей/пауза
     image_pause = pygame.transform.scale(load_image('pause.png'), (30, 30))
     image_play = pygame.transform.scale(load_image('on.png'), (30, 30))
@@ -184,13 +180,24 @@ def draw(screen, game):
     screen.blit(string_rendered, intro_rect)
 
 
-def draw_exit_text():
+def draw_exit_text(screen, count_columns, count_rows):
     font = pygame.font.Font(None, 40)
     string_rendered = font.render('E X I T', True, (255, 255, 255))
     screen.blit(string_rendered, (count_columns * 18 + 28, count_rows * 18 - 43))
 
 
-if __name__ == "__main__":
+def print_game(level):
+    global events_sequence, number
+
+    grid = load_level(level)
+
+    make_graph(grid)
+
+    pause, stop = False, False
+
+    exit_down = False
+    SOUND = True
+
     pygame.init()
     # вычисление размеров поля для загруженного уровня
     count_columns = len(load_level(level)[0])
@@ -207,9 +214,9 @@ if __name__ == "__main__":
     size = width, height
 
     screen = pygame.display.set_mode(size)
-    game = Game(level)
-    draw(screen, game)
-    game.PlayBackgoundSound(snd_love)
+    game = Game(level, grid)
+    draw(screen, game, count_columns, count_rows)
+    game.PlayBackgoundSound(snd_love, SOUND)
 
     timer1 = threading.Timer(10, revival)
     timer2 = threading.Timer(10, revival)
@@ -228,7 +235,6 @@ if __name__ == "__main__":
         pygame.K_UP: 'up',
         pygame.K_DOWN: 'down'
     }
-    # open_result_window()
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -241,7 +247,7 @@ if __name__ == "__main__":
                     events_sequence.append(change_values[event.key])
                 if event.key == pygame.K_m:
                     SOUND = not SOUND
-                    change_image_volume(SOUND)
+                    change_image_volume(game, SOUND, screen, count_columns, count_rows)
             if event.type == pygame.MOUSEBUTTONDOWN:
                 x = event.pos[0]
                 y = event.pos[1]
@@ -253,14 +259,14 @@ if __name__ == "__main__":
                 elif count_columns * 18 + 55 <= x <= count_columns * 18 + 95 and \
                         count_rows * 18 - 170 <= y <= count_rows * 18 - 130:
                     SOUND = not SOUND
-                    change_image_volume(SOUND)
+                    change_image_volume(game, SOUND, screen, count_columns, count_rows)
                 if exit_game.rect.collidepoint(pygame.mouse.get_pos()):
                     exit_game.image.fill((150, 0, 0))
                     exit_down = True
             elif event.type == pygame.MOUSEBUTTONUP:
                 if exit_game.rect.collidepoint(pygame.mouse.get_pos()) and exit_down:
-                    pass
-                # ЗДЕСЬ ЕСТЬ МЕСТО ДЛЯ ВЫХОДА
+                    print('rthsetg')
+                    return True
                 exit_down = False
                 exit_game.image.fill((200, 0, 0))
 
@@ -268,22 +274,23 @@ if __name__ == "__main__":
             game.pacman_pos = [int(game.pacman.x / 18), int(game.pacman.y / 18)]
             events_sequence = [events_sequence[1]] if len(events_sequence) > 1 else events_sequence
         if not pause:
-            react(game, events_sequence[0], timers)
+            react(game, events_sequence[0], timers, screen, count_columns, count_rows)
             game.pacman.counter = (game.pacman.counter + 1) % 18
             number = (number + 1) % 9
             num = 0
             for hunter in hunter_group:
-                hunter.move(return_path(game, num, events_sequence[0], hunter))
+                hunter.move(return_path(game, num, events_sequence[0], hunter), grid)
                 num += 1
         all_sprites.draw(screen)
         tiles_group.draw(screen)
         player_group.draw(screen)
         hunter_group.draw(screen)
         exit_group.draw(screen)
-        draw_exit_text()
+        draw_exit_text(screen, count_columns, count_rows)
         pygame.display.flip()
         clock.tick(FPS)
         if game.points == 0:
-            open_result_window()
-            print('you win!!!')
-    terminate()
+            open_result_window(True, level, grid)
+        if game.lives == 0:
+            open_result_window(False, level, grid)
+    return False
