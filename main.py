@@ -36,10 +36,6 @@ def play():
     return intro.print_intro(game)
 
 
-def multiplayer():
-    pass
-
-
 def create_level():
     return create.print_create()
 
@@ -48,8 +44,8 @@ def exit():
     return False
 
 
-commands = [play, multiplayer, create_level, exit]
-texts = ['Play', 'Multiplayer', 'Create level', 'Exit']
+commands = [play, create_level, exit]
+texts = ['Play', 'Create level', 'Exit']
 
 if __name__ == "__main__":
     pygame.init()
@@ -58,7 +54,7 @@ if __name__ == "__main__":
     picture = pygame.transform.scale(functions.load_image('intro_picture.jpg'), (450, 100))
     screen.blit(picture, (150, 100))
 
-    for i in range(4):
+    for i in range(3):
         button = Button(225, 250 + i * 80, texts[i], commands[i])
 
     running = True

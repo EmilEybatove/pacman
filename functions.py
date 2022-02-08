@@ -1,7 +1,6 @@
 import os
 import sys
 from collections import deque
-from pprint import pprint
 from random import sample, choice, random
 import pygame
 from pygame import Color
@@ -85,7 +84,6 @@ class Hunter(pygame.sprite.Sprite):
             self.rect.x, self.rect.y, *_ = get_rect(self.row, self.col)
         if color_ind == 0:  # Потому что надо вызвать только один раз
             get_available_nodes((self.row, self.col))
-            # print(available_nodes)
 
     def new(self):
         self.row = self.start_pos[0]
@@ -130,8 +128,6 @@ class Hunter(pygame.sprite.Sprite):
             self.counter = (self.counter + 1) % 18
             self.frame = (self.frame + 1) % 6
             self.image = self.anim[self.frame]
-            # print(f"We are now at position {self.row, self.col} and gonna go to {real_goal}")
-            # print(f"Our path is {self.path}")
             if self.path and len(self.path) > 1:
                 final_goal = self.path[1]
                 if self.row < final_goal[0]:
@@ -415,6 +411,7 @@ def get_available_nodes(start_node):
         for node in graph.get(start_node):
             if node not in available_nodes:
                 available_nodes.append(node)
+
                 get_available_nodes(node)
 
 
@@ -450,7 +447,7 @@ def find_path(start_point, end_point):
 
 
 restricted = ["|", "-", "1", "2", "3", "4", 1, 2, 3, 4, "b", "l", "r", "t"]
-allowed = ["0", 0, ".", "*", "?"]
+allowed = ["0", 0, ".", "*", "?", '@']
 
 graph = {}
 

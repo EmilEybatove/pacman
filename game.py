@@ -4,10 +4,11 @@ events_sequence, number = ['up'], 0
 i = -1
 mult = 0
 PLAYER_WANTS_MUSIC = True
+first_time = True
 
 class Game:
     def __init__(self, level, grid, color, lives=3):
-        global ghostGate
+        global ghostGate, available_nodes
         self.lives = lives
         self.level = level
         self.pacman, self.x, self.y, self.pacman_pos, self.points, self.ghostGate = generate_level(grid, color)
@@ -25,7 +26,7 @@ class Game:
             all_sprites.add(hunter)
 
     @staticmethod
-    def PlayBackgoundSound(SOUND=True, snd=snd_default):
+    def PlayBackgoundSound(SOUND, snd=snd_default):
         if SOUND and not channel_backgound.get_busy():
             if PLAYER_WANTS_MUSIC:
                 channel_backgound.play(choice(songs), loops=-1)
@@ -45,6 +46,7 @@ def revival():
 
 def react(game, side, timers, screen, count_columns, count_rows, SOUND):
     global events_sequence, number, i, mult
+    global first_time
     result = game.pacman.update(number, side)
     if result:
         if SOUND:
@@ -66,7 +68,6 @@ def react(game, side, timers, screen, count_columns, count_rows, SOUND):
 
         pygame.time.delay(500)
         i += 1
-
         mult = 0
         timers[i].start()
 
@@ -82,7 +83,8 @@ def react(game, side, timers, screen, count_columns, count_rows, SOUND):
                 game.lives -= 1
                 pygame.time.delay(1800)
                 screen.fill((0, 0, 0))
-                game.PlayBackgoundSound()
+                if first_time:
+                    game.PlayBackgoundSound(SOUND)
                 draw(screen, game, count_columns, count_rows)
                 break
             elif hunter.isAttacked():
@@ -95,6 +97,7 @@ def react(game, side, timers, screen, count_columns, count_rows, SOUND):
                 pygame.time.delay(500)
                 screen.fill((0, 0, 0))
                 draw(screen, game, count_columns, count_rows)
+    first_time = False
 
 
 def open_result_window(result, level, grid, color):
@@ -197,8 +200,9 @@ def draw_exit_text(screen, count_columns, count_rows):
 
 
 def print_game(level, color):
-    global events_sequence, number, i, mult, PLAYER_WANTS_MUSIC, available_nodes, ghostGate, graph
-
+    global events_sequence, number, i, mult, PLAYER_WANTS_MUSIC
+    global available_nodes, ghostGate, graph, first_time
+    first_time = True
     events_sequence, number = ['up'], 0
     i = -1
     mult = 0
@@ -240,8 +244,8 @@ def print_game(level, color):
     screen = pygame.display.set_mode(size)
     game = Game(level, grid, color)
     draw(screen, game, count_columns, count_rows)
-    if SOUND:
-        game.PlayBackgoundSound()
+
+    game.PlayBackgoundSound(SOUND)
 
     timer1 = threading.Timer(10, revival)
     timer2 = threading.Timer(10, revival)
@@ -290,9 +294,8 @@ def print_game(level, color):
                     exit_down = True
             elif event.type == pygame.MOUSEBUTTONUP:
                 if exit_game.rect.collidepoint(pygame.mouse.get_pos()) and exit_down:
-
-
-
+                    main_channel.stop()
+                    channel_backgound.stop()
                     return True
                 exit_down = False
                 exit_game.image.fill((200, 0, 0))
