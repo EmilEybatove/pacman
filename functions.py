@@ -326,6 +326,89 @@ class Player(pygame.sprite.Sprite):
         if fl in ['point', 'energo']:
             return fl
 
+class Player_hunter(pygame.sprite.Sprite):
+    def __init__(self, sprite_group, row, col, color):
+        """Color must be in pygame.Color() format!"""
+        super().__init__(sprite_group)
+        self.row = row
+        self.col = col
+        self.color = color
+        self.attacked = False
+        self.dead = False
+        self.start_pos = [row, col]
+        self.check_tuple = {
+            'left': (-1, 0),
+            'right': (18, 0),
+            'up': (0, -1),
+            'down': (0, 18)
+        }
+        self.side_tuples = {
+            'left': (-1, 0),
+            'right': (1, 0),
+            'up': (0, -1),
+            'down': (0, 1)
+        }
+        self.frame = 0
+        self.anim = {}
+        for i in range(6):
+            self.anim[i] = load_image(os.path.join("ghost_sprites", "ghost_" + str(i) + ".gif"))
+        self.color_frames(ghost_color[0], self.color)
+        self.image = self.anim[0]
+        self.rect = self.image.get_rect()
+        self.rect.x, self.rect.y, *_ = get_rect(self.row, self.col)
+        # Usual code
+        self.restricted = ["|", "-", "1", "2", "3", "4", 1, 2, 3, 4]
+        self.allowed = ["0", 0, ".", "*", "?"]
+
+    def new(self):
+        self.row = self.start_pos[0]
+        self.col = self.start_pos[1]
+        self.rect.x = self.start_pos[0] * TILE
+        self.rect.y = self.start_pos[1] * TILE
+        self.setDead(False)
+        self.setAttacked(False)
+
+    def color_frames(self, from_color: Color, to_color: Color):
+        for i in range(6):
+            palette = list(self.anim[i].get_palette())
+            for j, c in enumerate(palette):
+                if c == from_color:
+                    palette[j] = to_color
+            self.anim[i].set_palette(palette)
+
+    def move(self, side):
+        if self.attacked:
+            self.color_frames(self.color, ghost_color[4])
+        elif self.dead:
+            self.color_frames(self.color, Color(0, 0, 0, 255))
+
+        self.rect = self.rect.move(self.check_tuple[side][0], self.check_tuple[side][1])
+        if self.collides():
+            self.rect = self.rect.move(-self.check_tuple[side][0], -self.check_tuple[side][1])
+        self.row += self.side_tuples[side][0] // TILE
+        self.col += self.side_tuples[side][1] // TILE
+
+        # Update self.image
+        self.frame = (self.frame + 1) % 6
+        self.image = self.anim[self.frame]
+
+
+    def collides(self):
+        if pygame.sprite.spritecollideany(self, tiles_group) is not None:
+            return True
+        return False
+
+    def setAttacked(self, isAttacked):
+        self.attacked = isAttacked
+
+    def isAttacked(self):
+        return self.attacked
+
+    def setDead(self, isDead):
+        self.dead = isDead
+
+    def isDead(self):
+        return self.dead
 
 def get_available_nodes(start_node):
     if graph.get(start_node):

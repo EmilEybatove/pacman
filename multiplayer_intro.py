@@ -197,6 +197,24 @@ async def on_server(data):
     await sio.emit('on_server', '')
 
 
+@sio.event
+async def start_game(data):
+
+    events_sequence, number = ['up'], 0
+    i = -1
+    mult = 0
+
+
+    width = 550
+    height = 300
+    size = width, height
+
+    server_group.empty()
+    level_group.empty()
+    flip_group.empty()
+
+    screen.fill((0, 0, 0))
+
 
 # @sio.on('*')
 # async def catch_all(event, data):

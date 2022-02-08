@@ -25,6 +25,8 @@ async def now_on_server(sid, data):
     players_num[sid] = len(servers[players[sid]].keys())
     await sio.emit('on_server', [servers[players[sid]], players_num[sid], maps[players[sid]]])
 
+
+
 # @sio.on('*')
 # async def catch_all(event, sid, data):
 #     global players_counter
