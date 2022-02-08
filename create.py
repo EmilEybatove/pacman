@@ -459,7 +459,21 @@ def arrows(pos_x, pos_y):
 
 
 def print_create():
-    global save_text
+    global save_text, exit_game
+
+    all_sprites.empty()
+    tiles_group.empty()
+    images_group.empty()
+    base_group.empty()
+    exit_group.empty()
+
+    exit_game = pygame.sprite.Sprite()
+    exit_game.image = pygame.Surface((125, 40))
+    exit_game.rect = pygame.Rect(600, 570, 125, 40)
+    exit_game.image.fill((200, 0, 0))
+    exit_group.add(exit_game)
+    save_text = 'Не сохранено'
+
     current = False
     saved = False
     exit_down = False
@@ -526,6 +540,7 @@ def print_create():
                 if exit_game.rect.collidepoint(pygame.mouse.get_pos()) and exit_down:
                     exit_down = False
                     exit_game.image.fill((200, 0, 0))
+
                     return True
 
                 exit_game.image.fill((200, 0, 0))

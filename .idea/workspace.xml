@@ -20,27 +20,14 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="678a6345-37e8-4640-b453-82f41e318001" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/pacman.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/pacman.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/create.py" beforeDir="false" afterPath="$PROJECT_DIR$/create.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/functions.py" beforeDir="false" afterPath="$PROJECT_DIR$/functions.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/game.py" beforeDir="false" afterPath="$PROJECT_DIR$/game.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/intro.py" beforeDir="false" afterPath="$PROJECT_DIR$/intro.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/levels/.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/levels/aaaa.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/levels/at.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/levels/drhydhy.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/levels/h.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/levels/iytiyiyf.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/levels/yt.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/levels/ytttt.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/levels/карта.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/levels/тест1.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/levels/тест2.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/levels/тест3.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/levels/тест4.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/levels/тест5.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/levels/тест6.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/levels/тест7.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/levels/Level_2.txt" beforeDir="false" afterPath="$PROJECT_DIR$/levels/Level_2.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/levels/test_map.txt" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -224,7 +211,14 @@
       <option name="project" value="LOCAL" />
       <updated>1644249818812</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="all excluding server">
+      <created>1644277798475</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1644277798475</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -244,58 +238,59 @@
     <MESSAGE value="game unification" />
     <MESSAGE value="problems resolving" />
     <MESSAGE value="new create" />
-    <option name="LAST_COMMIT_MESSAGE" value="new create" />
+    <MESSAGE value="all excluding server" />
+    <option name="LAST_COMMIT_MESSAGE" value="all excluding server" />
   </component>
   <component name="WindowStateProjectService">
     <state x="402" y="166" key="#com.intellij.fileTypes.FileTypeChooser" timestamp="1644168938700">
       <screen x="0" y="0" width="1366" height="728" />
     </state>
     <state x="402" y="166" key="#com.intellij.fileTypes.FileTypeChooser/0.0.1366.728@0.0.1366.728" timestamp="1644168938700" />
-    <state x="248" y="0" key="CommitChangelistDialog2" timestamp="1644249816800">
+    <state x="248" y="0" key="CommitChangelistDialog2" timestamp="1644277797572">
       <screen x="0" y="0" width="1366" height="728" />
     </state>
-    <state x="248" y="0" key="CommitChangelistDialog2/0.0.1366.728@0.0.1366.728" timestamp="1644249816800" />
-    <state width="1323" height="186" key="GridCell.Tab.0.bottom" timestamp="1644277547064">
+    <state x="248" y="0" key="CommitChangelistDialog2/0.0.1366.728@0.0.1366.728" timestamp="1644277797572" />
+    <state width="1323" height="186" key="GridCell.Tab.0.bottom" timestamp="1644278736450">
       <screen x="0" y="0" width="1366" height="728" />
     </state>
-    <state width="1323" height="186" key="GridCell.Tab.0.bottom/0.0.1366.728@0.0.1366.728" timestamp="1644277547064" />
-    <state width="1323" height="186" key="GridCell.Tab.0.center" timestamp="1644277547063">
+    <state width="1323" height="186" key="GridCell.Tab.0.bottom/0.0.1366.728@0.0.1366.728" timestamp="1644278736450" />
+    <state width="1323" height="186" key="GridCell.Tab.0.center" timestamp="1644278736450">
       <screen x="0" y="0" width="1366" height="728" />
     </state>
-    <state width="1323" height="186" key="GridCell.Tab.0.center/0.0.1366.728@0.0.1366.728" timestamp="1644277547063" />
-    <state width="1323" height="186" key="GridCell.Tab.0.left" timestamp="1644277547063">
+    <state width="1323" height="186" key="GridCell.Tab.0.center/0.0.1366.728@0.0.1366.728" timestamp="1644278736450" />
+    <state width="1323" height="186" key="GridCell.Tab.0.left" timestamp="1644278736450">
       <screen x="0" y="0" width="1366" height="728" />
     </state>
-    <state width="1323" height="186" key="GridCell.Tab.0.left/0.0.1366.728@0.0.1366.728" timestamp="1644277547063" />
-    <state width="1323" height="186" key="GridCell.Tab.0.right" timestamp="1644277547064">
+    <state width="1323" height="186" key="GridCell.Tab.0.left/0.0.1366.728@0.0.1366.728" timestamp="1644278736450" />
+    <state width="1323" height="186" key="GridCell.Tab.0.right" timestamp="1644278736450">
       <screen x="0" y="0" width="1366" height="728" />
     </state>
-    <state width="1323" height="186" key="GridCell.Tab.0.right/0.0.1366.728@0.0.1366.728" timestamp="1644277547064" />
-    <state x="203" y="55" width="1122" height="618" key="MergeDialog" timestamp="1644241890051">
+    <state width="1323" height="186" key="GridCell.Tab.0.right/0.0.1366.728@0.0.1366.728" timestamp="1644278736450" />
+    <state x="203" y="55" width="1122" height="618" key="MergeDialog" timestamp="1644278105115">
       <screen x="0" y="0" width="1366" height="728" />
     </state>
-    <state x="203" y="55" width="1122" height="618" key="MergeDialog/0.0.1366.728@0.0.1366.728" timestamp="1644241890051" />
-    <state x="571" y="232" width="389" height="264" key="MultipleFileMergeDialog" timestamp="1644249836413">
+    <state x="203" y="55" width="1122" height="618" key="MergeDialog/0.0.1366.728@0.0.1366.728" timestamp="1644278105115" />
+    <state x="571" y="232" width="389" height="264" key="MultipleFileMergeDialog" timestamp="1644278108330">
       <screen x="0" y="0" width="1366" height="728" />
     </state>
-    <state x="571" y="232" width="389" height="264" key="MultipleFileMergeDialog/0.0.1366.728@0.0.1366.728" timestamp="1644249836413" />
-    <state x="184" y="9" key="SettingsEditor" timestamp="1644241918425">
+    <state x="571" y="232" width="389" height="264" key="MultipleFileMergeDialog/0.0.1366.728@0.0.1366.728" timestamp="1644278108330" />
+    <state x="184" y="9" key="SettingsEditor" timestamp="1644278125245">
       <screen x="0" y="0" width="1366" height="728" />
     </state>
-    <state x="184" y="9" key="SettingsEditor/0.0.1366.728@0.0.1366.728" timestamp="1644241918425" />
+    <state x="184" y="9" key="SettingsEditor/0.0.1366.728@0.0.1366.728" timestamp="1644278125245" />
     <state x="275" y="97" key="Vcs.Push.Dialog.v2" timestamp="1644249860499">
       <screen x="0" y="0" width="1366" height="728" />
     </state>
     <state x="275" y="97" key="Vcs.Push.Dialog.v2/0.0.1366.728@0.0.1366.728" timestamp="1644249860499" />
-    <state x="492" y="278" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2" timestamp="1644241879364">
+    <state x="492" y="278" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2" timestamp="1644277807550">
       <screen x="0" y="0" width="1366" height="728" />
     </state>
-    <state x="492" y="278" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2/0.0.1366.728@0.0.1366.728" timestamp="1644241879364" />
+    <state x="492" y="278" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2/0.0.1366.728@0.0.1366.728" timestamp="1644277807550" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/pacman$functions.coverage" NAME="functions Coverage Results" MODIFIED="1644229294046" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/pacman$game.coverage" NAME="game Coverage Results" MODIFIED="1644175473089" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/pacman$main.coverage" NAME="main Coverage Results" MODIFIED="1644277649368" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/pacman$main.coverage" NAME="main Coverage Results" MODIFIED="1644278841864" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/pacman$intro.coverage" NAME="intro Coverage Results" MODIFIED="1644274258970" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/pacman$create.coverage" NAME="create Coverage Results" MODIFIED="1644256505064" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/pacman$file.coverage" NAME="file Coverage Results" MODIFIED="1644228565591" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />

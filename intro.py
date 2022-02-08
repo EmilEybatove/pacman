@@ -22,7 +22,7 @@ exit_group.add(exit_game)
 
 load_image = functions.load_image
 
-default = ['Level_1']
+default = ['Level_1', 'Level_2', 'Level_3']
 
 
 
@@ -203,7 +203,7 @@ def print_intro(game):
                     level2 = Level(475, 50, levels[2 * page + 1])
                     level1.draw_level(screen)
                     level2.draw_level(screen)
-                elif right.rect.collidepoint(pygame.mouse.get_pos()) and page + 1 <= len(levels) // 2:
+                elif right.rect.collidepoint(pygame.mouse.get_pos()) and (page + 1) * 2 < len(levels):
                     screen.fill((0, 0, 0))
                     page += 1
                     level_group.empty()

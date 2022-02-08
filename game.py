@@ -6,11 +6,11 @@ mult = 0
 PLAYER_WANTS_MUSIC = True
 
 class Game:
-    def __init__(self, level, grid, lives=3):
+    def __init__(self, level, grid, color, lives=3):
         global ghostGate
         self.lives = lives
         self.level = level
-        self.pacman, self.x, self.y, self.pacman_pos, self.points, self.ghostGate = generate_level(grid)
+        self.pacman, self.x, self.y, self.pacman_pos, self.points, self.ghostGate = generate_level(grid, color)
         ghostGate = self.ghostGate
 
         self.start_pacman_pos = self.pacman_pos.copy()
@@ -196,7 +196,7 @@ def draw_exit_text(screen, count_columns, count_rows):
     screen.blit(string_rendered, (count_columns * 18 + 28, count_rows * 18 - 43))
 
 
-def print_game(level):
+def print_game(level, color):
     global events_sequence, number, i, mult, PLAYER_WANTS_MUSIC, available_nodes, ghostGate, graph
 
     events_sequence, number = ['up'], 0
