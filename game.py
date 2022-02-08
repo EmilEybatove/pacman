@@ -132,7 +132,7 @@ def open_result_window(result, level, grid, color):
     intro_rect.x = 250 - intro_rect.width // 2
     screen.blit(string_rendered, intro_rect)
     # отрисовываем кнопки
-    pygame.draw.rect(screen, 'yellow', (200, 370, 100, 50), 2)
+    pygame.draw.rect(screen, 'yellow', (190, 370, 120, 50), 2)
     font = pygame.font.Font(None, 25)
     string_rendered = font.render('Choose map', 1, pygame.Color('yellow'))
     intro_rect = string_rendered.get_rect()
@@ -145,7 +145,7 @@ def open_result_window(result, level, grid, color):
             if event.type == pygame.QUIT:
                 running = False
             if event.type == pygame.MOUSEBUTTONDOWN:
-                if 200 <= event.pos[0] <= 300 and 370 <= event.pos[1] <= 420:
+                if 190 <= event.pos[0] <= 310 and 370 <= event.pos[1] <= 420:
                     return True
         pygame.display.flip()
     return False

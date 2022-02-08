@@ -1,27 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="09d3b88e-24f4-4ae1-ac9a-04ab1890266e" name="Changes" comment="Walls are now colored">
-      <change afterPath="$PROJECT_DIR$/levels/hdh.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/levels/xjkm.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/pacman.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/pacman.iml" afterDir="false" />
+    <list default="true" id="09d3b88e-24f4-4ae1-ac9a-04ab1890266e" name="Changes" comment="HOOOORAAAYYY!!!!">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/walls/common/1.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/walls/common/2.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/walls/common/3.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/walls/common/4.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/walls/common/empty.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/walls/common/energo.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/walls/common/gate.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/walls/common/horizontal.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/walls/common/left.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/walls/common/point.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/walls/common/right.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/walls/common/vertical.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/functions.py" beforeDir="false" afterPath="$PROJECT_DIR$/functions.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/game.py" beforeDir="false" afterPath="$PROJECT_DIR$/game.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
     </list>
     <list id="a7fd88fd-893e-4a87-be09-4ab5bc0a1143" name="Music files" comment="" />
     <list id="81bdd9f3-3cec-4578-b631-669b846a4209" name="You crashed my design!!" comment="You crashed my design!!" />
@@ -192,7 +174,14 @@
       <option name="project" value="LOCAL" />
       <updated>1644262534985</updated>
     </task>
-    <option name="localTasksCounter" value="7" />
+    <task id="LOCAL-00007" summary="HOOOORAAAYYY!!!!">
+      <created>1644334612317</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1644334612317</updated>
+    </task>
+    <option name="localTasksCounter" value="8" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -226,7 +215,8 @@
     <MESSAGE value="Black background color." />
     <MESSAGE value="Background music is now okay" />
     <MESSAGE value="Walls are now colored" />
-    <option name="LAST_COMMIT_MESSAGE" value="Walls are now colored" />
+    <MESSAGE value="HOOOORAAAYYY!!!!" />
+    <option name="LAST_COMMIT_MESSAGE" value="HOOOORAAAYYY!!!!" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -238,18 +228,13 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/game.py</url>
-          <line>324</line>
+          <line>322</line>
           <option name="timeStamp" value="2" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/intro.py</url>
           <line>260</line>
           <option name="timeStamp" value="3" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/game.py</url>
-          <line>151</line>
-          <option name="timeStamp" value="4" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/intro.py</url>
