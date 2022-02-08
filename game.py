@@ -317,11 +317,11 @@ def print_game(level, color):
         pygame.display.flip()
         clock.tick(FPS)
         if game.points == 0:
-            if open_result_window(True, level, grid):
+            if open_result_window(True, level, grid, color):
                 return True
             return False
         if game.lives == 0:
-            if open_result_window(False, level, grid):
+            if open_result_window(False, level, grid, color):
                 return True
             return False
     return False
