@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="09d3b88e-24f4-4ae1-ac9a-04ab1890266e" name="Changes" comment="HOOOORAAAYYY!!!!">
+    <list default="true" id="09d3b88e-24f4-4ae1-ac9a-04ab1890266e" name="Changes" comment="HOOOORAAAYYY!! Part_2.0">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/game.py" beforeDir="false" afterPath="$PROJECT_DIR$/game.py" afterDir="false" />
     </list>
     <list id="a7fd88fd-893e-4a87-be09-4ab5bc0a1143" name="Music files" comment="" />
     <list id="81bdd9f3-3cec-4578-b631-669b846a4209" name="You crashed my design!!" comment="You crashed my design!!" />
@@ -181,7 +180,14 @@
       <option name="project" value="LOCAL" />
       <updated>1644334612317</updated>
     </task>
-    <option name="localTasksCounter" value="8" />
+    <task id="LOCAL-00008" summary="HOOOORAAAYYY!! Part_2">
+      <created>1644334865794</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1644334865794</updated>
+    </task>
+    <option name="localTasksCounter" value="9" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -216,7 +222,8 @@
     <MESSAGE value="Background music is now okay" />
     <MESSAGE value="Walls are now colored" />
     <MESSAGE value="HOOOORAAAYYY!!!!" />
-    <option name="LAST_COMMIT_MESSAGE" value="HOOOORAAAYYY!!!!" />
+    <MESSAGE value="HOOOORAAAYYY!! Part_2" />
+    <option name="LAST_COMMIT_MESSAGE" value="HOOOORAAAYYY!! Part_2" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
